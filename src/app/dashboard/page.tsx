@@ -99,7 +99,7 @@ export default function Dashboard() {
   const handleDelete = async (id: string) => {
     try {
       await analyticsService.delete(id);
-      setAnalyticsRecords(prev => prev.filter(r => (r._id || r.id) !== id));
+      fetchAll();
       toast.success("Record deleted.");
     } catch {
       toast.error("Failed to delete.");
@@ -334,7 +334,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {recentApps.map((activity, i) => {
+                  {recentApps.map((activity: Application, i: number) => {
                     const status = activity.status?.toLowerCase();
                     const statusStyles =
                       status === "interview" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
@@ -351,7 +351,7 @@ export default function Dashboard() {
                             <p className="text-sm font-semibold truncate">{activity.company?.name || "Unknown"}</p>
                             <p className="text-xs text-muted-foreground truncate">{activity.roleTitle}</p>
                             <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
-                              <span>{activity.location || "Remote"}</span>
+                              <span>Remote</span>
                               <span className="h-1 w-1 rounded-full bg-border" />
                               <span>{activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : ""}</span>
                             </div>
@@ -394,7 +394,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {analyticsRecords.map((record, i) => {
+          {analyticsRecords.map((record: Analytics, i: number) => {
             const recordId = record._id || record.id || "";
             return (
               <motion.div

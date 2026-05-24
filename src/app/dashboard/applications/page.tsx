@@ -267,13 +267,13 @@ export default function ApplicationsPage() {
                           </div>
                           <div>
                             <div className="text-sm font-semibold">{app.company?.name || "Unknown Company"}</div>
-                            <div className="text-xs text-muted-foreground">{app.company?.industry || "Company"}</div>
+                            <div className="text-xs text-muted-foreground">Company</div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm font-medium">{app.roleTitle}</div>
-                        <div className="text-xs text-muted-foreground">{app.location || "Remote"}</div>
+                        <div className="text-xs text-muted-foreground">Role</div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`text-[10px] border ${statusClass}`}>

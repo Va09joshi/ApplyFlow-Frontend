@@ -114,10 +114,6 @@ export default function EmailAutomationsPage() {
             if (statusRes?.success && statusRes?.data) {
               setGmailStatus(statusRes.data);
               
-              // --> STORE THE ID HERE <--
-              const gmailAccountId = statusRes.data.id || statusRes.data._id;
-              console.log("Connected Gmail ID (on close):", gmailAccountId);
-              
               setSendForm(prev => ({ ...prev, fromEmail: statusRes.data!.email }));
               toast.success(`Gmail connected as ${statusRes.data.email}`);
             }
@@ -132,10 +128,6 @@ export default function EmailAutomationsPage() {
               resolved = true;
               clearInterval(pollInterval);
               setGmailStatus(statusRes.data);
-              
-              // --> STORE THE ID HERE <--
-              const gmailAccountId = statusRes.data.id || statusRes.data._id;
-              console.log("Connected Gmail ID:", gmailAccountId);
               
               setSendForm(prev => ({ ...prev, fromEmail: statusRes.data!.email }));
               toast.success(`Gmail connected as ${statusRes.data.email}`);
