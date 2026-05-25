@@ -6,7 +6,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { 
   ArrowRight, Bot, Sparkles, ChevronRight, CheckCircle2, Briefcase,
   Send, MessageSquare, Terminal, FileText, Check, Search, User, RefreshCw, Star, X,
-  Play, Pause, Paperclip, SendHorizontal, Mail, UploadCloud, Layers, Database, Code, Copy, Layout
+  Play, Pause, Paperclip, SendHorizontal, Mail, UploadCloud, Layers, Database, Code, Copy, Layout,
+  ChevronDown, ChevronUp
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -89,6 +90,7 @@ export default function Home() {
   // --- STATE 1: Automation Command Center Tab switcher ---
   const [activeCmdTab, setActiveCmdTab] = useState<string>("single");
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
+  const [showUpcoming, setShowUpcoming] = useState<boolean>(false);
 
   const handleCopyCode = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -114,6 +116,38 @@ export default function Home() {
       if (flowIntervalRef.current) clearInterval(flowIntervalRef.current);
     };
   }, [isFlowAutoPlay]);
+
+  const flowSteps = [
+    {
+      step: 1,
+      label: "Profile Scan",
+      desc: "Extracting parameters",
+      icon: FileText,
+      status: "Parsing identity"
+    },
+    {
+      step: 2,
+      label: "ATS Match",
+      desc: "Checking keywords",
+      icon: Search,
+      status: "Scoring fit"
+    },
+    {
+      step: 3,
+      label: "Smart Draft",
+      desc: "Writing outreach",
+      icon: Sparkles,
+      status: "Generating copy"
+    },
+    {
+      step: 4,
+      label: "Dispatch",
+      desc: "Sending email",
+      icon: Send,
+      status: "Delivering"
+    }
+  ];
+  const activeFlow = flowSteps.find(step => step.step === flowStep) ?? flowSteps[0];
 
   // --- STATE 4: Interactive Chatbot ---
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -609,53 +643,93 @@ export default function Home() {
           <div className="absolute -top-40 right-10 -z-10 w-[450px] h-[450px] bg-primary/5 rounded-full blur-[120px]"></div>
           
           <div className="container mx-auto px-4 max-w-5xl relative z-10">
-            <div className="text-center mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">System Workflow</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-3">How ApplyFlow Automates Your Search</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
-                Watch our background AI engine handle the entire pipeline from candidate profiling to final outbox delivery.
-              </p>
+            <div className="text-center mb-24">
+              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-3 block">Workflow</span>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4">How It Works</h2>
             </div>
 
-            {/* Stepper progress headers */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-              {[
-                { step: 1, label: "1. Profile Scan", desc: "Extracting resume parameters" },
-                { step: 2, label: "2. ATS Keyword Match", desc: "Analyzing compatibility index" },
-                { step: 3, label: "3. Smart Outreach Write", desc: "Generating bespoke drafts" },
-                { step: 4, label: "4. Outbox Dispatch", desc: "Autopilot email delivery" }
-              ].map(item => (
-                <button
-                  key={item.step}
-                  onClick={() => {
-                    setFlowStep(item.step);
-                    setIsFlowAutoPlay(false);
-                  }}
-                  className={`p-4 rounded-xl text-left border transition-all ${
-                    flowStep === item.step
-                      ? "bg-card border-primary/50 shadow-md ring-1 ring-primary/20"
-                      : "bg-muted/10 border-border/40 hover:bg-muted/30"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className={`text-xs font-bold ${flowStep === item.step ? "text-primary" : "text-muted-foreground"}`}>
-                      {item.label}
-                    </span>
-                    {flowStep === item.step && (
-                      <span className="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></span>
-                    )}
+            <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-background via-background to-primary/5 p-8 md:p-12 shadow-2xl backdrop-blur-xl">
+              <div className="mb-8">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">Console</span>
+                <h3 className="text-3xl font-extrabold mt-2">Live Simulation</h3>
+              </div>
+
+              <div className="grid gap-10 lg:grid-cols-[300px_1fr]">
+                <div className="rounded-2xl border border-border/60 bg-card/50 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Steps</span>
+                    <span className="text-[10px] font-mono text-muted-foreground">{flowStep} / 4</span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground leading-tight hidden sm:block">{item.desc}</p>
-                </button>
-              ))}
-            </div>
+                  <div className="relative flex flex-col">
+                    {flowSteps.map((item, index) => {
+                      const Icon = item.icon;
+                      return (
+                        <React.Fragment key={item.step}>
+                          {index > 0 && (
+                            <div className="w-px h-4 bg-border/60 ml-[30px] shrink-0"></div>
+                          )}
+                          <button
+                            onClick={() => {
+                            setFlowStep(item.step);
+                            setIsFlowAutoPlay(false);
+                          }}
+                          className={`relative w-full rounded-2xl border px-4 py-4 text-left transition-all ${
+                            flowStep === item.step
+                              ? "border-primary/50 bg-primary/10 shadow-md"
+                              : "border-border/50 bg-background/40 hover:bg-muted/30"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border ${
+                                flowStep === item.step
+                                  ? "border-primary/50 bg-primary/20 text-primary"
+                                  : "border-border/60 bg-muted/40 text-muted-foreground"
+                              }`}
+                            >
+                              <Icon className="h-3.5 w-3.5" />
+                            </div>
+                            <div>
+                              <p className={`text-xs font-bold ${flowStep === item.step ? "text-primary" : "text-foreground"}`}>
+                                {item.label}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                            </div>
+                          </div>
+                          {flowStep === item.step && (
+                            <div className="mt-2 text-[10px] font-semibold text-emerald-500">{item.status}</div>
+                          )}
+                        </button>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
 
-            {/* Explainer Interactive Screen Container */}
-            <div className="relative bg-card/40 border border-border/50 rounded-3xl p-6 md:p-10 h-[380px] shadow-xl flex flex-col justify-between overflow-hidden backdrop-blur-xl">
-              <div className="absolute inset-0 bg-grid-white/[0.02] -z-10"></div>
-              
-              <div className="flex-1 flex items-center justify-center relative">
-                <AnimatePresence mode="wait">
+                <div className="relative bg-card/40 border border-border/50 rounded-3xl p-8 md:p-12 min-h-[480px] shadow-xl flex flex-col justify-between overflow-hidden backdrop-blur-xl">
+                  <div className="absolute inset-0 bg-grid-white/[0.02] -z-10"></div>
+                  <div className="flex items-start justify-between gap-4 mb-8">
+                    <div>
+                      <h4 className="text-xl font-bold">Stage {activeFlow.step}: {activeFlow.label}</h4>
+                    </div>
+                    <button
+                      onClick={() => setIsFlowAutoPlay(prev => !prev)}
+                      className="px-3 py-1.5 rounded-full bg-muted/65 hover:bg-muted/100 border border-border/50 text-[10px] font-bold flex items-center gap-1.5 transition-all text-foreground"
+                    >
+                      {isFlowAutoPlay ? (
+                        <>
+                          <Pause className="w-3 h-3 text-primary shrink-0" /> Pause Simulation
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3 h-3 text-primary shrink-0 animate-pulse" /> Play Simulation
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  
+                  <div className="flex-1 flex items-center justify-center relative">
+                    <AnimatePresence mode="wait">
                   
                   {/* Step 1 Content: Parsing Resume */}
                   {flowStep === 1 && (
@@ -665,39 +739,34 @@ export default function Home() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.4 }}
-                      className="w-full max-w-md bg-background/80 border border-border/60 rounded-2xl p-5 shadow-lg relative overflow-hidden flex flex-col gap-3"
+                      className="w-full max-w-lg flex flex-col md:flex-row items-center justify-center gap-8"
                     >
-                      <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-indigo-500 animate-pulse"></div>
-                      
-                      <motion.div 
-                        className="absolute inset-x-0 h-6 bg-gradient-to-b from-primary/20 to-transparent border-t border-primary/40 -z-10 shadow-[0_0_15px_rgba(var(--primary),0.3)]"
-                        animate={{ top: ["0%", "90%", "0%"] }}
-                        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                      />
-
-                      <div className="flex justify-between items-center border-b border-border/40 pb-2.5">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-primary" />
-                          <span className="text-xs font-bold font-mono">vaibhav_joshi_resume.pdf</span>
-                        </div>
-                        <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded font-mono font-bold animate-pulse">
-                          PARSING...
-                        </span>
+                      <div className="bg-background/80 border border-border/60 rounded-full p-8 shadow-lg flex flex-col items-center justify-center relative w-48 h-48 shrink-0">
+                        <div className="absolute inset-0 rounded-full border-4 border-dashed border-primary/20 animate-[spin_10s_linear_infinite]"></div>
+                        <div className="absolute inset-2 rounded-full border border-primary/30 animate-[spin_4s_linear_infinite_reverse]"></div>
+                        
+                        <FileText className="w-8 h-8 text-primary mb-2" />
+                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase animate-pulse">Scanning</span>
+                        <span className="text-xs font-mono mt-1 text-muted-foreground">profile.pdf</span>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="h-2 w-3/4 bg-muted rounded-full"></div>
-                        <div className="h-2 w-1/2 bg-muted rounded-full"></div>
-                        <div className="grid grid-cols-3 gap-2 mt-4 pt-2 border-t border-border/20">
+                      <div className="space-y-4 max-w-xs text-center md:text-left">
+                        <div>
+                          <h4 className="text-lg font-bold">Extracting Data</h4>
+                          <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                            Pulling structured parameters from your resume document.
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2">
                           {["React", "TypeScript", "Tailwind"].map((tech, idx) => (
                             <motion.div
                               key={tech}
-                              initial={{ opacity: 0, y: 5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.15 }}
-                              className="bg-primary/5 border border-primary/10 rounded px-1.5 py-1 text-[10px] text-center font-mono text-primary font-semibold flex items-center justify-center gap-1"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: idx * 0.2, duration: 0.3 }}
+                              className="bg-primary/10 border border-primary/20 rounded-full px-3 py-1 text-[10px] text-primary font-bold flex items-center gap-1.5"
                             >
-                              <Check className="w-2.5 h-2.5 stroke-[3]" /> {tech}
+                              <Check className="w-3 h-3 stroke-[3]" /> {tech}
                             </motion.div>
                           ))}
                         </div>
@@ -713,54 +782,43 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
                       transition={{ duration: 0.4 }}
-                      className="w-full max-w-lg flex flex-col md:flex-row items-center gap-6"
+                      className="w-full max-w-xl flex flex-col md:flex-row items-center gap-10"
                     >
-                      <div className="bg-background/80 border border-border/60 rounded-2xl p-6 shadow-lg flex flex-col items-center shrink-0 w-44">
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-3">ATS Compatibility</span>
-                        <div className="relative w-24 h-24 flex items-center justify-center mb-1">
-                          <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                            <circle cx="18" cy="18" r="16" fill="none" stroke="hsl(var(--muted))" strokeWidth="2.5" className="opacity-20" />
-                            <motion.circle
-                              cx="18"
-                              cy="18"
-                              r="16"
-                              fill="none"
-                              stroke="hsl(var(--primary))"
-                              strokeWidth="2.5"
-                              strokeDasharray="100"
-                              initial={{ strokeDashoffset: 100 }}
-                              animate={{ strokeDashoffset: 6 }}
-                              transition={{ duration: 1.2, ease: "easeOut" }}
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                          <span className="absolute text-2xl font-black text-foreground">94%</span>
-                        </div>
-                        <span className="text-[10px] text-green-500 font-bold bg-green-500/10 px-2 py-0.5 rounded-full mt-2">
+                      <div className="bg-card/40 border border-border/50 rounded-3xl p-8 flex flex-col items-center justify-center shrink-0 w-52 h-64 shadow-inner relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none"></div>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">ATS Compatibility</span>
+                        
+                        <span className="text-5xl font-black text-foreground mb-8">94%</span>
+                        
+                        <span className="text-xs text-green-500 font-bold bg-green-500/10 border border-green-500/20 px-4 py-1.5 rounded-full">
                           Highly Qualified
                         </span>
                       </div>
 
-                      <div className="flex-1 space-y-4">
+                      <div className="flex-1 space-y-8">
                         <div>
-                          <h4 className="text-sm font-bold mb-2">Auditing: Vercel Frontend Engineer</h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            ApplyFlow parses the job description in real-time, auditing structural keywords against your verified resume assets.
+                          <h4 className="text-lg font-bold mb-3">Auditing Profile</h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            Comparing resume keywords against job requirements.
                           </p>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-2 bg-background/50 border border-border/40 p-3 rounded-xl">
-                          <div className="flex items-center gap-1.5 text-xs text-green-500 font-semibold">
-                            <Check className="w-3.5 h-3.5 stroke-[3]" /> React, NextJS
+                        <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                          <div className="flex items-center gap-2 text-sm text-green-500 font-bold">
+                            <Check className="w-4 h-4 stroke-[3]" /> React, NextJS
                           </div>
-                          <div className="flex items-center gap-1.5 text-xs text-green-500 font-semibold">
-                            <Check className="w-3.5 h-3.5 stroke-[3]" /> Tailwind, REST
+                          <div className="flex items-center gap-2 text-sm text-green-500 font-bold">
+                            <Check className="w-4 h-4 stroke-[3]" /> Tailwind, REST
                           </div>
-                          <div className="flex items-center gap-1.5 text-amber-500 font-semibold">
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" /> GraphQL (Autofixed)
+                          <div className="flex items-start gap-2 text-amber-500 font-bold">
+                            <RefreshCw className="w-4 h-4 mt-0.5 animate-spin-slow shrink-0" />
+                            <div className="flex flex-col text-sm leading-tight gap-1">
+                              <span>GraphQL</span>
+                              <span className="text-amber-500/80">(Autofixed)</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5 text-green-500 font-semibold">
-                            <Check className="w-3.5 h-3.5 stroke-[3]" /> TypeScript
+                          <div className="flex items-center gap-2 text-sm text-green-500 font-bold">
+                            <Check className="w-4 h-4 stroke-[3]" /> TypeScript
                           </div>
                         </div>
                       </div>
@@ -793,18 +851,18 @@ export default function Home() {
                         
                         <p className="mt-2 text-foreground font-semibold">Hi hiring team,</p>
                         
-                        <motion.p 
+                        <motion.div 
                           className="mt-1 leading-normal"
-                          initial={{ width: 0 }}
-                          animate={{ width: "100%" }}
-                          transition={{ duration: 2 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 1 }}
                         >
-                          I noticed the opening for a Frontend Developer. My experience aligns closely with your tech-stack:
-                        </motion.p>
-                        <ul className="list-disc list-inside mt-1 pl-1 text-primary">
-                          <li>Engineered interactive dashboards rendering 500+ elements per node.</li>
-                          <li>Leveraged Next.js Server Components to trim response speeds by 30%.</li>
-                        </ul>
+                          <p>I noticed the opening for a Frontend Developer. My experience aligns closely with your tech-stack:</p>
+                          <ul className="list-disc list-inside mt-1 pl-1 text-primary">
+                            <li>Engineered interactive dashboards.</li>
+                            <li>Leveraged Next.js Server Components.</li>
+                          </ul>
+                        </motion.div>
                         
                         <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background/90 to-transparent"></div>
                       </div>
@@ -829,9 +887,9 @@ export default function Home() {
 
                         <div className="absolute inset-x-12 h-0.5 border-t-2 border-dashed border-border flex items-center justify-center z-0">
                           <motion.div
-                            initial={{ left: 0, opacity: 0 }}
+                            initial={{ left: "0%", opacity: 0 }}
                             animate={{ left: "100%", opacity: [0, 1, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
                             className="absolute"
                           >
                             <SendHorizontal className="w-5 h-5 text-indigo-400 rotate-0 translate-y-[-10px] transform drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
@@ -845,13 +903,13 @@ export default function Home() {
                       </div>
 
                       <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.5 }}
+                        transition={{ delay: 0.4 }}
                         className="bg-green-500/10 border border-green-500/25 rounded-2xl px-5 py-3 flex items-center gap-2.5 text-green-500 text-xs font-bold shadow-sm"
                       >
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        <span>Recruiter Outreach Sent Automatically! (100% Organic Delivery Rate)</span>
+                        <span>Outreach Sent Successfully!</span>
                       </motion.div>
                     </motion.div>
                   )}
@@ -859,275 +917,16 @@ export default function Home() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-4 shrink-0">
-                <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
-                  Currently viewing Step {flowStep} of 4
-                </span>
-                
-                <button
-                  onClick={() => setIsFlowAutoPlay(prev => !prev)}
-                  className="px-3.5 py-1.5 rounded-full bg-muted/65 hover:bg-muted/100 border border-border/50 text-[10px] font-bold flex items-center gap-1.5 transition-all text-foreground"
-                >
-                  {isFlowAutoPlay ? (
-                    <>
-                      <Pause className="w-3 h-3 text-primary shrink-0" /> Pause Simulation
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-3 h-3 text-primary shrink-0 animate-pulse" /> Play Simulation
-                    </>
-                  )}
-                </button>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
-
-        {/* SECTION 4: INTERACTIVE AI CHATBOT ASSISTANT */}
-        <section className="py-20 bg-muted/20 border-t border-border/40 relative">
-          <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[350px] h-[350px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
-
-          <div className="container mx-auto px-4 max-w-4xl relative z-10">
-            <div className="text-center mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">Conversational AI</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-3">Ask Your Career Copilot</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto text-sm">
-                Interact directly with ApplyFlow's conversational assistant to audit files, generate tailored outreaches, or query metrics.
-              </p>
-            </div>
-
-            {/* Chatbot Interface Container */}
-            <div className="bg-card border border-border/60 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[520px] max-w-3xl mx-auto backdrop-blur-xl">
-              
-              {/* Header */}
-              <div className="bg-muted/40 border-b border-border/50 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center shadow-inner relative shrink-0">
-                    <Bot className="w-5 h-5 text-primary-foreground" />
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border border-card"></span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm leading-none flex items-center gap-1.5">
-                      ApplyFlow Copilot <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-                    </h3>
-                    <p className="text-[10px] text-green-500 font-semibold mt-0.5">Online Career Assistant</p>
+                  <div className="flex items-center justify-center border-t border-border/20 pt-6 mt-8 shrink-0">
+                    <span className="text-xs text-muted-foreground flex items-center gap-2 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                      Step {flowStep} of 4
+                    </span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono bg-background border border-border/50 px-2 py-0.5 rounded text-muted-foreground">
-                    Model: applyflow-ultra-v2
-                  </span>
-                </div>
               </div>
-
-              {/* Chat Messages Frame */}
-              <div className="flex-1 p-5 md:p-6 overflow-y-auto space-y-4 bg-background/30 flex flex-col">
-                {messages.map((msg, i) => (
-                  <div 
-                    key={i}
-                    className={`flex gap-3 max-w-[85%] ${msg.sender === "user" ? "self-end flex-row-reverse" : "self-start"}`}
-                  >
-                    {msg.sender === "bot" && (
-                      <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
-                        <Bot className="w-4 h-4 text-primary" />
-                      </div>
-                    )}
-                    
-                    <div className="space-y-3">
-                      <div className={`p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm ${
-                        msg.sender === "user" 
-                          ? "bg-primary text-primary-foreground rounded-tr-none font-medium" 
-                          : "bg-card border border-border/50 text-foreground rounded-tl-none font-medium"
-                      }`}>
-                        {msg.text.split("\n\n").map((para, idx) => (
-                          <p key={idx} className={idx > 0 ? "mt-2" : ""}>
-                            {para.split("**").map((part, pIdx) => pIdx % 2 === 1 ? <strong key={pIdx} className="font-bold">{part}</strong> : part)}
-                          </p>
-                        ))}
-                      </div>
-
-                      {/* Render Widget Attachments */}
-                      {msg.widget && (
-                        <div className="bg-background/80 border border-border/50 rounded-xl p-3.5 shadow-sm space-y-3 max-w-full">
-                          
-                          {/* Widget A: Suggested Jobs */}
-                          {msg.widget === "jobs" && (
-                            <div className="space-y-2.5">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-border/30 pb-1">
-                                Integrated Search Results
-                              </span>
-                              {[
-                                { title: "Vercel Lead Dev", fit: 96, salary: "$160k - $200k" },
-                                { title: "Stripe UI Architect", fit: 92, salary: "$150k - $185k" }
-                              ].map(job => (
-                                <div key={job.title} className="flex justify-between items-center gap-2 border border-border/40 rounded-lg p-2 bg-card/50">
-                                  <div>
-                                    <h4 className="text-xs font-bold text-foreground leading-none mb-1">{job.title}</h4>
-                                    <p className="text-[10px] text-muted-foreground font-medium">{job.salary} &bull; {job.fit}% ATS Fit</p>
-                                  </div>
-                                  <Link 
-                                    href="/signup"
-                                    className="px-2.5 py-1 bg-primary hover:bg-primary/95 text-primary-foreground text-[10px] font-bold rounded shadow-sm"
-                                  >
-                                    Apply
-                                  </Link>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Widget B: ATS Audit Review */}
-                          {msg.widget === "ats" && (
-                            <div className="space-y-3">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-border/30 pb-1">
-                                ATS Compatibility Dashboard
-                              </span>
-                              
-                              <div className="flex items-center gap-3">
-                                <div className="text-lg font-black text-amber-500">82% Score</div>
-                                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div className="h-full bg-amber-500" style={{ width: "82%" }}></div>
-                                </div>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                                <div className="text-green-500 font-semibold bg-green-500/5 border border-green-500/10 px-2 py-1 rounded">✅ 4 Matches</div>
-                                <div className="text-amber-500 font-semibold bg-amber-500/5 border border-amber-500/10 px-2 py-1 rounded">⚠️ 2 Missing</div>
-                              </div>
-
-                              <button 
-                                onClick={() => {
-                                  setMessages(prev => [...prev, {
-                                    sender: "bot",
-                                    text: "🔧 **Keywords injected successfully!** I updated your resume profile data for the Stripe UI Developer description. Your updated compatibility score is now **98%**! 🚀"
-                                  }]);
-                                }}
-                                className="w-full bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-bold rounded py-1.5 transition-colors flex items-center justify-center gap-1 shadow-sm"
-                              >
-                                <Sparkles className="w-3.5 h-3.5" /> Fix Keywords with AI
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Widget C: Outreach Code Mock */}
-                          {msg.widget === "email" && (
-                            <div className="space-y-2">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-border/30 pb-1">
-                                Outbox Email Draft Preview
-                              </span>
-                              <div className="bg-card border border-border/60 rounded-lg p-2.5 font-mono text-[10px] text-muted-foreground leading-relaxed h-28 overflow-y-auto">
-                                <div className="text-foreground font-semibold">To: hiring@vercel.com</div>
-                                <div className="text-foreground font-semibold border-b border-border/40 pb-1 mb-1">Subject: Frontend Stack Optimizations</div>
-                                <p>Hi Vercel team,</p>
-                                <p className="mt-1">I recently engineered a highly animated dashboard and wanted to offer my React skills...</p>
-                              </div>
-                              <Link 
-                                href="/signup"
-                                className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-[10px] font-bold rounded py-1.5 text-center block shadow-sm"
-                              >
-                                Deliver Instantly via Outbox
-                              </Link>
-                            </div>
-                          )}
-
-                          {/* Widget D: Bullet Points Comparisons */}
-                          {msg.widget === "bullets" && (
-                            <div className="space-y-2.5">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-border/30 pb-1">
-                                Resume Refactoring
-                              </span>
-                              <div className="space-y-2 text-[10px]">
-                                <div className="border border-red-500/10 bg-red-500/5 p-2 rounded leading-tight">
-                                  <div className="text-red-500 font-bold uppercase text-[8px] mb-0.5">Original generic bullet</div>
-                                  <p className="text-muted-foreground">"I worked as a frontend developer writing React dashboard pages and optimizing components."</p>
-                                </div>
-                                <div className="border border-green-500/15 bg-green-500/5 p-2 rounded leading-tight">
-                                  <div className="text-green-500 font-bold uppercase text-[8px] mb-0.5">ApplyFlow AI Refactored Bullet</div>
-                                  <p className="text-foreground font-medium">"Architected modular React core pages; trimmed payload speeds by **34%** and cut bundle overhead through Server Components."</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {isBotTyping && (
-                  <div className="flex gap-3 self-start">
-                    <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="bg-card border border-border/50 rounded-2xl rounded-tl-none p-3.5 text-xs text-muted-foreground flex items-center gap-1.5 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce"></span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.2s]"></span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.4s]"></span>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={chatBottomRef} />
-              </div>
-
-              {/* Quick Suggestions Pills */}
-              <div className="bg-muted/20 border-t border-border/40 p-3 flex flex-wrap gap-1.5 shrink-0 justify-center">
-                {[
-                  { text: "Suggest high-paying React roles 🔍", key: "react" },
-                  { text: "Audit my resume for Stripe UI position 📊", key: "stripe" },
-                  { text: "Draft outreach email to Vercel ✉️", key: "vercel" },
-                  { text: "Enhance my resume summary ✨", key: "bullets" }
-                ].map(pill => (
-                  <button
-                    key={pill.key}
-                    onClick={() => handleQuickAction(pill.text)}
-                    className="px-3 py-1.5 rounded-full bg-card hover:bg-muted border border-border/40 hover:border-primary/30 text-[10px] font-bold text-muted-foreground hover:text-foreground shadow-sm transition-all"
-                  >
-                    {pill.text}
-                  </button>
-                ))}
-              </div>
-
-              {/* Chat Input Bar */}
-              <div className="p-3 bg-muted/40 border-t border-border/50 shrink-0">
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }}
-                  className="flex gap-2"
-                >
-                  <div className="relative flex-1 flex items-center">
-                    <input
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Ask the AI recruiter anything..."
-                      className="w-full bg-background border border-border/60 rounded-xl pl-3.5 pr-10 py-3 text-xs focus:outline-none focus:border-primary font-medium"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 text-muted-foreground hover:text-foreground"
-                    >
-                      <Paperclip className="w-4 h-4 shrink-0" />
-                    </button>
-                  </div>
-                  
-                  <Button 
-                    type="submit"
-                    className="rounded-xl px-4 bg-primary hover:bg-primary/95 shadow-md flex items-center justify-center shrink-0"
-                  >
-                    <SendHorizontal className="w-4 h-4" />
-                  </Button>
-                </form>
-              </div>
-
             </div>
+
           </div>
         </section>
 
@@ -1168,6 +967,125 @@ export default function Home() {
                   <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TESTIMONIALS SECTION */}
+        <section className="py-24 bg-muted/10 border-y border-border/40 relative">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-black mb-4">Loved by Candidates</h2>
+              <p className="text-muted-foreground">See how ApplyFlow is accelerating careers.</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { 
+                  name: "Sarah J.", 
+                  role: "Frontend Engineer", 
+                  image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+                  text: "ApplyFlow got me 3 interviews at top tech companies in my first week. The automated outreach is incredible." 
+                },
+                { 
+                  name: "David M.", 
+                  role: "Product Manager", 
+                  image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop&crop=face",
+                  text: "The ATS optimization alone is worth it. It spotted 5 missing keywords that I completely overlooked in my resume." 
+                },
+                { 
+                  name: "Emily R.", 
+                  role: "UX Designer", 
+                  image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+                  text: "Finally, a tool that takes the busywork out of job hunting. I just load my profile and let the AI do the heavy lifting." 
+                }
+              ].map((t, i) => (
+                <div key={i} className="bg-gradient-to-b from-card/80 to-card border border-border/50 rounded-3xl p-8 shadow-xl flex flex-col gap-6 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-6 opacity-5 text-primary pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12 group-hover:opacity-10">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M14.017 18L14.017 10.609C14.017 4.905 17.748 1.039 23 0L23.995 2.151C21.563 3.068 20 5.789 20 8H24V18H14.017ZM0 18V10.609C0 4.905 3.748 1.038 9 0L9.996 2.151C7.563 3.068 6 5.789 6 8H9.983L9.983 18L0 18Z" />
+                    </svg>
+                  </div>
+                  <div className="flex text-amber-500 gap-1 mb-2 z-10">
+                    <Star className="fill-current w-4 h-4" /><Star className="fill-current w-4 h-4" /><Star className="fill-current w-4 h-4" /><Star className="fill-current w-4 h-4" /><Star className="fill-current w-4 h-4" />
+                  </div>
+                  <p className="text-base text-foreground/90 font-medium leading-relaxed flex-1 z-10">"{t.text}"</p>
+                  <div className="flex items-center gap-4 mt-2 z-10">
+                    <img src={t.image} alt={t.name} className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 shadow-sm" />
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{t.name}</p>
+                      <p className="text-xs font-semibold text-muted-foreground">{t.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PRICING SECTION */}
+        <section className="py-32 relative">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-black mb-4">Simple Pricing</h2>
+              <p className="text-muted-foreground">Start for free, upgrade when you need more power.</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Basic Plan */}
+              <div className="bg-card/50 border border-border/60 rounded-3xl p-8 flex flex-col">
+                <h3 className="text-2xl font-bold mb-2">Basic</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  <span className="text-4xl font-black">$0</span>
+                  <span className="text-muted-foreground text-sm mb-1">/ forever</span>
+                </div>
+                <ul className="space-y-4 mb-8 flex-1">
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> 1 Resume parsing limit</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Basic ATS keyword checks</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> 5 AI email drafts / month</li>
+                </ul>
+                <Link href="/signup" className={buttonVariants({ variant: "outline", className: "w-full rounded-xl" })}>Get Started</Link>
+              </div>
+              
+              {/* Pro Plan */}
+              <div className="bg-gradient-to-b from-primary/10 to-card border border-primary/30 rounded-3xl p-8 flex flex-col relative shadow-2xl">
+                <div className="absolute top-0 right-8 -translate-y-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">Most Popular</div>
+                <h3 className="text-2xl font-bold mb-2 text-primary">Pro</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  <span className="text-4xl font-black">$19</span>
+                  <span className="text-muted-foreground text-sm mb-1">/ month</span>
+                </div>
+                <ul className="space-y-4 mb-8 flex-1">
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Unlimited resume versions</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Advanced ATS optimization</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Unlimited automated outreach</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Priority support</li>
+                  
+                  <li className="pt-2">
+                    <button 
+                      onClick={() => setShowUpcoming(!showUpcoming)}
+                      className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                    >
+                      {showUpcoming ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      {showUpcoming ? "Hide upcoming features" : "Show upcoming features"}
+                    </button>
+                    
+                    <AnimatePresence>
+                      {showUpcoming && (
+                        <motion.ul 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="space-y-3 mt-4 overflow-hidden"
+                        >
+                          <li className="flex items-center gap-3 text-sm text-muted-foreground"><Sparkles className="w-4 h-4 text-indigo-400" /> LinkedIn Auto-Apply Bot</li>
+                          <li className="flex items-center gap-3 text-sm text-muted-foreground"><Sparkles className="w-4 h-4 text-indigo-400" /> Custom Domain Email Sending</li>
+                          <li className="flex items-center gap-3 text-sm text-muted-foreground"><Sparkles className="w-4 h-4 text-indigo-400" /> Interview Voice Coach AI</li>
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </li>
+                </ul>
+                <Link href="/signup" className={buttonVariants({ className: "w-full rounded-xl" })}>Upgrade to Pro</Link>
+              </div>
             </div>
           </div>
         </section>
