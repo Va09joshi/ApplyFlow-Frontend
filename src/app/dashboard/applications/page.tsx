@@ -91,6 +91,21 @@ export default function ApplicationsPage() {
     fetchApplications();
   }, []);
 
+  const getFullImageUrl = (url?: string) => {
+    if (!url) return "";
+    if (url.startsWith("http") || url.startsWith("data:")) return url;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    if (baseUrl.includes("applyflow-backend")) {
+      return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+    }
+    return `http://localhost:5000/${url.replace(/^\//, "")}`;
+  };
+
+  const getCompanyForApp = (app: Application) => {
+    if (app.company) return app.company;
+    return companies.find(c => (c._id || c.id) === app.companyId);
+  };
+
   const handleCreateApplication = async () => {
     if (!newApp.companyId || !newApp.resumeId || !newApp.roleTitle) {
       toast.error("All fields are required");
@@ -132,7 +147,7 @@ export default function ApplicationsPage() {
   };
 
   const filteredApps = applications.filter(app => {
-    const companyName = app.company?.name || "";
+    const companyName = getCompanyForApp(app)?.name || "";
     return companyName.toLowerCase().includes(search.toLowerCase()) || 
            app.roleTitle.toLowerCase().includes(search.toLowerCase());
   });
@@ -258,15 +273,22 @@ export default function ApplicationsPage() {
                   filteredApps.map((app) => {
                     const appId = app._id || app.id || "";
                     const statusClass = getStatusStyle(app.status);
+                    const company = getCompanyForApp(app);
+                    const companyName = company?.name || "Unknown Company";
+                    const companyLogo = company?.logoUrl;
                     return (
                     <TableRow key={appId} className="hover:bg-muted/30">
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-500/10 flex items-center justify-center border border-border">
-                            <Building2 className="w-4 h-4 text-sky-600" />
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-500/10 flex items-center justify-center border border-border overflow-hidden">
+                            {companyLogo ? (
+                              <img src={getFullImageUrl(companyLogo)} alt={companyName} className="w-full h-full object-cover bg-white" />
+                            ) : (
+                              <Building2 className="w-4 h-4 text-sky-600" />
+                            )}
                           </div>
                           <div>
-                            <div className="text-sm font-semibold">{app.company?.name || "Unknown Company"}</div>
+                            <div className="text-sm font-semibold">{companyName}</div>
                             <div className="text-xs text-muted-foreground">Company</div>
                           </div>
                         </div>

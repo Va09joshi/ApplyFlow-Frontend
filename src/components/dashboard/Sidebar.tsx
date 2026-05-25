@@ -39,7 +39,29 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const logoutState = useAuthStore(state => state.logout);
-  const [userProfile, setUserProfile] = useState<{name?: string, email?: string} | null>(null);
+  const [userProfile, setUserProfile] = useState<{
+    name?: string;
+    email?: string;
+    avatarUrl?: string;
+    avatar?: string;
+    profile?: { avatarUrl?: string; avatar?: string };
+  } | null>(null);
+
+  const getFullImageUrl = (url?: string) => {
+    if (!url) return "";
+    if (url.startsWith("http") || url.startsWith("data:")) return url;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    if (baseUrl.includes("applyflow-backend")) {
+      return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+    }
+    return `http://localhost:5000/${url.replace(/^\//, "")}`;
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "US";
+    const parts = name.trim().split(/\s+/).slice(0, 2);
+    return parts.map(part => part[0]).join("").toUpperCase();
+  };
 
   useEffect(() => {
     api.get('/api/v1/users/me')
@@ -108,8 +130,16 @@ export function Sidebar() {
         
         <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
           <Avatar className="h-9 w-9 border border-primary/20">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>US</AvatarFallback>
+            <AvatarImage
+              src={getFullImageUrl(
+                userProfile?.profile?.avatarUrl ||
+                  userProfile?.avatarUrl ||
+                  userProfile?.avatar ||
+                  userProfile?.profile?.avatar
+              )}
+              alt={userProfile?.name || "User avatar"}
+            />
+            <AvatarFallback>{getInitials(userProfile?.name)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-medium truncate">{userProfile?.name || "User"}</span>
