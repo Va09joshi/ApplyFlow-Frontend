@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Briefcase, Mail, MessageSquare, TrendingUp, CalendarDays, 
-  Loader2, Plus, Edit2, Trash2, Send, ArrowUpRight
+  Loader2, Plus, Edit2, Trash2, Send, ArrowUpRight, Building2
 } from "lucide-react";
 import { 
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -185,12 +185,14 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         {[
           { title: "Total Apps", value: applicationCounts.total || 0, icon: Briefcase, color: "text-sky-600", bg: "bg-sky-500/15", accent: "from-sky-500/20 via-cyan-500/10 to-transparent" },
+          { title: "Jobs Tracked", value: payload.jobsCount || 0, icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-500/15", accent: "from-indigo-500/20 via-violet-500/10 to-transparent" },
+          { title: "Companies", value: payload.companiesCount || 0, icon: Building2, color: "text-fuchsia-600", bg: "bg-fuchsia-500/15", accent: "from-fuchsia-500/20 via-pink-500/10 to-transparent" },
           { title: "Avg ATS Score", value: `${averageAtsScore}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-500/15", accent: "from-emerald-500/20 via-lime-500/10 to-transparent" },
-          { title: "Emails Sent", value: emailAnalytics.totalSent || 0, icon: Send, color: "text-blue-600", bg: "bg-blue-500/15", accent: "from-blue-500/20 via-indigo-500/10 to-transparent" },
-          { title: "Response Rate", value: `${emailAnalytics.responseRate || 0}%`, icon: MessageSquare, color: "text-rose-600", bg: "bg-rose-500/15", accent: "from-rose-500/20 via-orange-500/10 to-transparent" },
+          { title: "Total Emails", value: emailAnalytics.totalSent || 0, icon: Send, color: "text-blue-600", bg: "bg-blue-500/15", accent: "from-blue-500/20 via-indigo-500/10 to-transparent" },
+          { title: "Sent Today", value: emailAnalytics.sentToday || 0, icon: Mail, color: "text-rose-600", bg: "bg-rose-500/15", accent: "from-rose-500/20 via-orange-500/10 to-transparent" },
         ].map((stat, i) => (
           <motion.div
             key={i}

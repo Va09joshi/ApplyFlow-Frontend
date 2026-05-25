@@ -5,7 +5,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, UploadCloud, Building2, MapPin, Users, Globe, Mail, Loader2 } from "lucide-react";
+import { Search, Plus, UploadCloud, Building2, MapPin, Users, Globe, Mail, Loader2, Sparkles } from "lucide-react";
 import * as motion from "framer-motion/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,12 @@ export default function CompaniesPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [newCompany, setNewCompany] = useState({ name: "", website: "", tags: "" });
+  const [newCompany, setNewCompany] = useState({ name: "", website: "", tags: "", logoUrl: "", linkedinUrl: "", topSkills: "", hiringRoles: "" });
+
+  const [filterRole, setFilterRole] = useState("");
+  const [filterSkill, setFilterSkill] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [topSkillsList, setTopSkillsList] = useState<any[]>([]);
 
   const fetchCompanies = async () => {
     try {
@@ -42,8 +47,17 @@ export default function CompaniesPage() {
     }
   };
 
+  const fetchSkills = async () => {
+    try {
+      const response = await companyService.getTopSkills();
+      const list = Array.isArray(response) ? response : response?.data || response?.skills || [];
+      setTopSkillsList(list);
+    } catch {}
+  };
+
   useEffect(() => {
     fetchCompanies();
+    fetchSkills();
   }, []);
 
   const handleCreateCompany = async () => {
@@ -58,11 +72,15 @@ export default function CompaniesPage() {
         name: newCompany.name,
         website: newCompany.website,
         tags: newCompany.tags ? newCompany.tags.split(',').map(t => t.trim()) : [],
+        logoUrl: newCompany.logoUrl,
+        linkedinUrl: newCompany.linkedinUrl,
+        topSkills: newCompany.topSkills ? newCompany.topSkills.split(',').map(t => t.trim()) : [],
+        hiringRoles: newCompany.hiringRoles ? newCompany.hiringRoles.split(',').map(t => t.trim()) : [],
         hrEmails: []
       });
       toast.success("Company created!");
       setIsDialogOpen(false);
-      setNewCompany({ name: "", website: "", tags: "" });
+      setNewCompany({ name: "", website: "", tags: "", logoUrl: "", linkedinUrl: "", topSkills: "", hiringRoles: "" });
       fetchCompanies();
     } catch (error) {
       toast.error("Failed to create company");
@@ -116,29 +134,35 @@ export default function CompaniesPage() {
                 <DialogTitle>Add Target Company</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Company Name *</Label>
-                  <Input 
-                    value={newCompany.name} 
-                    onChange={e => setNewCompany({...newCompany, name: e.target.value})} 
-                    placeholder="e.g. Vercel" 
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Company Name *</Label>
+                    <Input value={newCompany.name} onChange={e => setNewCompany({...newCompany, name: e.target.value})} placeholder="e.g. Vercel" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Website</Label>
+                    <Input value={newCompany.website} onChange={e => setNewCompany({...newCompany, website: e.target.value})} placeholder="e.g. https://vercel.com" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Logo URL</Label>
+                    <Input value={newCompany.logoUrl} onChange={e => setNewCompany({...newCompany, logoUrl: e.target.value})} placeholder="e.g. https://logo.com/logo.png" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>LinkedIn URL</Label>
+                    <Input value={newCompany.linkedinUrl} onChange={e => setNewCompany({...newCompany, linkedinUrl: e.target.value})} placeholder="e.g. https://linkedin.com/company/..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Top Skills (CSV)</Label>
+                    <Input value={newCompany.topSkills} onChange={e => setNewCompany({...newCompany, topSkills: e.target.value})} placeholder="e.g. React, Node.js" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Hiring Roles (CSV)</Label>
+                    <Input value={newCompany.hiringRoles} onChange={e => setNewCompany({...newCompany, hiringRoles: e.target.value})} placeholder="e.g. Frontend, Backend" />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Website</Label>
-                  <Input 
-                    value={newCompany.website} 
-                    onChange={e => setNewCompany({...newCompany, website: e.target.value})} 
-                    placeholder="e.g. https://vercel.com" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Tags (Comma separated)</Label>
-                  <Input 
-                    value={newCompany.tags} 
-                    onChange={e => setNewCompany({...newCompany, tags: e.target.value})} 
-                    placeholder="e.g. saas, remote, series-b" 
-                  />
+                  <Label>Tags (CSV)</Label>
+                  <Input value={newCompany.tags} onChange={e => setNewCompany({...newCompany, tags: e.target.value})} placeholder="e.g. saas, remote, series-b" />
                 </div>
                 <Button className="w-full" onClick={handleCreateCompany} disabled={isCreating}>
                   {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
@@ -150,12 +174,50 @@ export default function CompaniesPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 bg-card/50 backdrop-blur-sm p-2 rounded-xl border border-border/50">
-        <Search className="w-5 h-5 text-muted-foreground ml-2" />
-        <Input 
-          placeholder="Search by name, industry, or location..." 
-          className="border-none bg-transparent shadow-none focus-visible:ring-0"
-        />
+      {topSkillsList.length > 0 && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center gap-4 overflow-x-auto whitespace-nowrap">
+          <div className="flex items-center gap-2 text-primary font-semibold text-sm shrink-0">
+            <Sparkles className="w-4 h-4" /> Market Insights
+          </div>
+          <div className="h-4 w-px bg-primary/20 shrink-0" />
+          <div className="flex gap-2">
+            {topSkillsList.map((s, i) => (
+              <Badge key={i} variant="secondary" className="bg-background text-xs font-normal border border-border/50">
+                {s.skill || s._id || s.name} ({s.count || 0})
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="flex-1 flex items-center gap-2 bg-card/50 backdrop-blur-sm p-2 rounded-xl border border-border/50">
+          <Search className="w-5 h-5 text-muted-foreground ml-2" />
+          <Input 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name, industry, or location..." 
+            className="border-none bg-transparent shadow-none focus-visible:ring-0"
+          />
+        </div>
+        <div className="md:w-48 flex items-center gap-2 bg-card/50 backdrop-blur-sm p-2 rounded-xl border border-border/50">
+          <Users className="w-4 h-4 text-muted-foreground ml-2" />
+          <Input 
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            placeholder="Filter Role..." 
+            className="border-none bg-transparent shadow-none focus-visible:ring-0 text-sm"
+          />
+        </div>
+        <div className="md:w-48 flex items-center gap-2 bg-card/50 backdrop-blur-sm p-2 rounded-xl border border-border/50">
+          <Sparkles className="w-4 h-4 text-muted-foreground ml-2" />
+          <Input 
+            value={filterSkill}
+            onChange={(e) => setFilterSkill(e.target.value)}
+            placeholder="Filter Skill..." 
+            className="border-none bg-transparent shadow-none focus-visible:ring-0 text-sm"
+          />
+        </div>
       </div>
 
       {isLoading ? (
@@ -170,7 +232,12 @@ export default function CompaniesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {companies.map((company, i) => {
+          {companies.filter(c => {
+             const matchesSearch = !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase());
+             const matchesRole = !filterRole || (c.hiringRoles && c.hiringRoles.some(r => r.toLowerCase().includes(filterRole.toLowerCase())));
+             const matchesSkill = !filterSkill || (c.topSkills && c.topSkills.some(s => s.toLowerCase().includes(filterSkill.toLowerCase())));
+             return matchesSearch && matchesRole && matchesSkill;
+          }).map((company, i) => {
             const companyId = company.id || company._id;
             return (
             <motion.div
@@ -183,8 +250,12 @@ export default function CompaniesPage() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 transition-opacity group-hover:bg-primary/10"></div>
                 <CardHeader className="pb-3 relative z-10">
                   <div className="flex justify-between items-start">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/15 transition-all shadow-sm">
-                      <Building2 className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/15 transition-all shadow-sm overflow-hidden">
+                      {company.logoUrl ? (
+                        <img src={company.logoUrl} alt={company.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Building2 className="w-6 h-6 text-primary" />
+                      )}
                     </div>
                     <Badge variant={company.status === "Priority" || company.status === "active" ? "default" : company.status === "Contacted" ? "secondary" : "outline"} className="capitalize font-medium shadow-sm">
                       {company.status || "Saved"}

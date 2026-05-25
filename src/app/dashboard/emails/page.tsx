@@ -14,6 +14,9 @@ import { emailService, GmailStatus } from "@/services/email.service";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { resumeService, Resume } from "@/services/resume.service";
 
 export default function EmailAutomationsPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -31,15 +34,38 @@ export default function EmailAutomationsPage() {
   const [newTemplate, setNewTemplate] = useState({ name: "", subject: "", body: "" });
   const [isCreating, setIsCreating] = useState(false);
 
+  // Resumes list state
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [showSendSettings, setShowSendSettings] = useState(false);
+
   // Send Email Form
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
-  const [sendForm, setSendForm] = useState({ to: "", subject: "", html: "", fromEmail: "" });
+  const [sendForm, setSendForm] = useState({
+    to: "",
+    subject: "",
+    html: "",
+    fromEmail: "",
+    useTemplate: true,
+    attachResume: true,
+    insertResumeLink: false,
+    resumeLinkLabel: "View My Resume",
+    resumeId: "",
+    contentType: "html"
+  });
   const [isSending, setIsSending] = useState(false);
 
   // Bulk CSV Form
   const [isCsvDialogOpen, setIsCsvDialogOpen] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isUploadingCsv, setIsUploadingCsv] = useState(false);
+  const [csvOptions, setCsvOptions] = useState({
+    useTemplate: true,
+    attachResume: true,
+    insertResumeLink: false,
+    resumeLinkLabel: "View My Resume",
+    resumeId: "",
+    contentType: "html"
+  });
 
   // Check Gmail connection status
   const checkGmailStatus = useCallback(async () => {
@@ -187,9 +213,64 @@ export default function EmailAutomationsPage() {
     }
   };
 
+  const fetchResumes = async () => {
+    try {
+      const responseBody = await resumeService.getAll(1, 100);
+      let resumesArray: Resume[] = [];
+      if (Array.isArray(responseBody)) {
+        resumesArray = responseBody;
+      } else if (responseBody?.data?.docs && Array.isArray(responseBody.data.docs)) {
+        resumesArray = responseBody.data.docs;
+      } else if (responseBody?.data && Array.isArray(responseBody.data)) {
+        resumesArray = responseBody.data;
+      } else if (responseBody?.docs && Array.isArray(responseBody.docs)) {
+        resumesArray = responseBody.docs;
+      }
+      setResumes(resumesArray);
+      if (resumesArray.length > 0) {
+        const defaultResume = resumesArray.find(r => r.isDefault) || resumesArray[0];
+        const defaultId = defaultResume._id || defaultResume.id || "";
+        setSendForm(prev => ({ ...prev, resumeId: defaultId }));
+        setCsvOptions(prev => ({ ...prev, resumeId: defaultId }));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     fetchTemplates();
+    fetchResumes();
   }, []);
+
+  useEffect(() => {
+    // Check for pending email draft from AI generator
+    try {
+      const pendingStr = sessionStorage.getItem("pending_outbox_email");
+      if (pendingStr) {
+        const pending = JSON.parse(pendingStr);
+        if (pending?.html) {
+          const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
+          setSendForm(prev => ({
+            ...prev,
+            subject: pending.subject || "",
+            html: pending.html || "",
+            useTemplate: true,
+            attachResume: true,
+            insertResumeLink: false,
+            resumeLinkLabel: "View My Resume",
+            resumeId: defaultResumeId,
+            contentType: pending.contentType || "html"
+          }));
+          setIsSendDialogOpen(true);
+          sessionStorage.removeItem("pending_outbox_email");
+          toast.success("AI draft loaded into Outbox!");
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [resumes]);
 
   const openEditTemplateDialog = (template: Template) => {
     const id = template._id || template.id;
@@ -227,10 +308,14 @@ export default function EmailAutomationsPage() {
   };
 
   const handleDeleteTemplate = async (id: string) => {
+    if (!id) {
+      toast.error("Template ID is missing. Cannot delete.");
+      return;
+    }
     try {
       await templateService.delete(id);
       setTemplates(prev => prev.filter(t => (t._id || t.id) !== id));
-      toast.success("Template deleted.");
+      toast.success("Template deleted successfully.");
     } catch (error) {
       toast.error("Failed to delete template.");
     }
@@ -246,7 +331,20 @@ export default function EmailAutomationsPage() {
       await emailService.queue(emailData);
       toast.success("Email queued for sending!");
       setIsSendDialogOpen(false);
-      setSendForm({ to: "", subject: "", html: "", fromEmail: gmailStatus?.email || "" });
+      
+      const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
+      setSendForm({
+        to: "",
+        subject: "",
+        html: "",
+        fromEmail: gmailStatus?.email || "",
+        useTemplate: true,
+        attachResume: true,
+        insertResumeLink: false,
+        resumeLinkLabel: "View My Resume",
+        resumeId: defaultResumeId,
+        contentType: "html"
+      });
     } catch (error) {
       toast.error("Failed to queue email. Please ensure you have connected Gmail.");
     } finally {
@@ -258,10 +356,20 @@ export default function EmailAutomationsPage() {
     if (!csvFile) return toast.error("Please select a CSV file first.");
     try {
       setIsUploadingCsv(true);
-      await emailService.bulkCsv(csvFile);
+      await emailService.bulkCsv(csvFile, csvOptions);
       toast.success("Bulk emails queued successfully!");
       setIsCsvDialogOpen(false);
       setCsvFile(null);
+      
+      const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
+      setCsvOptions({
+        useTemplate: true,
+        attachResume: true,
+        insertResumeLink: false,
+        resumeLinkLabel: "View My Resume",
+        resumeId: defaultResumeId,
+        contentType: "html"
+      });
     } catch (error) {
       toast.error("Failed to upload CSV.");
     } finally {
@@ -270,12 +378,32 @@ export default function EmailAutomationsPage() {
   };
 
   const openSendDialog = (template?: Template) => {
+    const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
     if (template) {
       setSendForm({
-        ...sendForm,
+        to: "",
         subject: template.subject,
         html: template.body,
-        fromEmail: gmailStatus?.email || sendForm.fromEmail,
+        fromEmail: gmailStatus?.email || "",
+        useTemplate: true,
+        attachResume: true,
+        insertResumeLink: false,
+        resumeLinkLabel: "View My Resume",
+        resumeId: defaultResumeId,
+        contentType: "html"
+      });
+    } else {
+      setSendForm({
+        to: "",
+        subject: "",
+        html: "",
+        fromEmail: gmailStatus?.email || "",
+        useTemplate: true,
+        attachResume: true,
+        insertResumeLink: false,
+        resumeLinkLabel: "View My Resume",
+        resumeId: defaultResumeId,
+        contentType: "html"
       });
     }
     setIsSendDialogOpen(true);
@@ -301,6 +429,20 @@ export default function EmailAutomationsPage() {
     } catch {
       return dateStr;
     }
+  };
+
+  // Strip HTML utility for card preview snippets
+  const stripHtml = (html: string) => {
+    if (!html) return "";
+    let text = html.replace(/<[^>]*>/g, ' ');
+    text = text
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return text;
   };
 
   return (
@@ -383,12 +525,12 @@ export default function EmailAutomationsPage() {
               <Send className="w-4 h-4 mr-2" />
               Send Email
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden gap-0">
-              <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10">
+            <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0 overflow-hidden gap-0 flex flex-col border border-border/60 shadow-2xl rounded-2xl bg-background">
+              <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10 shrink-0">
                 <DialogTitle className="text-lg">New Message</DialogTitle>
               </DialogHeader>
-              <div className="flex flex-col">
-                <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors">
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
                   <span className="text-muted-foreground text-sm w-14 shrink-0">To</span>
                   <input 
                     className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70" 
@@ -397,10 +539,10 @@ export default function EmailAutomationsPage() {
                     placeholder="hr@company.com" 
                   />
                 </div>
-                <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors">
+                <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
                   <span className="text-muted-foreground text-sm w-14 shrink-0">From</span>
                   {gmailStatus ? (
-                    <div className="flex items-center gap-2 px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/5">
+                    <div className="flex items-center gap-2 px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/5 shrink-0">
                       <Avatar className="h-4 w-4">
                         <AvatarImage src={gmailStatus.avatar} />
                         <AvatarFallback className="text-[8px]">{getInitials(gmailStatus.name)}</AvatarFallback>
@@ -409,32 +551,152 @@ export default function EmailAutomationsPage() {
                     </div>
                   ) : (
                     <input 
-                      className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70" 
+                      className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70 shrink-0" 
                       value={sendForm.fromEmail} 
                       onChange={e => setSendForm({...sendForm, fromEmail: e.target.value})} 
                       placeholder="you@gmail.com" 
                     />
                   )}
                 </div>
-                <div className="px-6 py-3 border-b border-border/50 flex items-center focus-within:bg-muted/5 transition-colors">
+                <div className="px-6 py-3 border-b border-border/50 flex items-center focus-within:bg-muted/5 transition-colors shrink-0">
                   <input 
-                    className="flex-1 bg-transparent outline-none text-sm font-medium placeholder:font-normal placeholder:text-muted-foreground/70" 
+                    className="flex-1 bg-transparent outline-none text-sm font-semibold placeholder:font-normal placeholder:text-muted-foreground/70" 
                     value={sendForm.subject} 
                     onChange={e => setSendForm({...sendForm, subject: e.target.value})} 
                     placeholder="Subject" 
                   />
                 </div>
-                <div className="px-6 py-4 flex-1">
-                  <div 
-                    contentEditable
-                    suppressContentEditableWarning
-                    className="w-full min-h-[250px] bg-transparent outline-none resize-none text-sm text-foreground/90 leading-relaxed empty:before:content-['Write_your_email_here...'] empty:before:text-muted-foreground/70"
-                    onBlur={e => setSendForm({...sendForm, html: e.currentTarget.innerHTML})} 
-                    dangerouslySetInnerHTML={{ __html: sendForm.html }}
-                  />
+                
+                {/* Scrollable Settings & Editor Body */}
+                <div className="flex-1 overflow-y-auto bg-background flex flex-col min-h-0">
+                  {/* Delivery & Resume Settings Collapsible */}
+                  <div className="border-b border-border/40 bg-muted/5 transition-all shrink-0">
+                    <button 
+                      type="button"
+                      onClick={() => setShowSendSettings(!showSendSettings)}
+                      className="w-full px-6 py-2.5 flex items-center justify-between text-[11px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors tracking-wide"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Settings2 className="w-3.5 h-3.5 text-primary animate-pulse" />
+                        <span>DELIVERY &amp; RESUME SETTINGS</span>
+                      </div>
+                      <span className="text-[10px] bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold">
+                        {showSendSettings ? "HIDE" : "CONFIGURE"}
+                      </span>
+                    </button>
+
+                    {showSendSettings && (
+                      <div className="px-6 pb-4 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border/30 bg-muted/20 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-2 rounded-lg border border-border/40 bg-background/50 hover:bg-background/80 transition-colors">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-semibold text-foreground">Wrap in Premium Card</span>
+                              <span className="text-[9px] text-muted-foreground">Standard outreach card container</span>
+                            </div>
+                            <Switch 
+                              checked={sendForm.useTemplate} 
+                              onCheckedChange={(checked) => setSendForm({ ...sendForm, useTemplate: checked })} 
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between p-2 rounded-lg border border-border/40 bg-background/50 hover:bg-background/80 transition-colors">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-semibold text-foreground">Attach Resume PDF</span>
+                              <span className="text-[9px] text-muted-foreground">Attach physical PDF file</span>
+                            </div>
+                            <Switch 
+                              checked={sendForm.attachResume} 
+                              onCheckedChange={(checked) => setSendForm({ ...sendForm, attachResume: checked })} 
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Content Type</label>
+                            <Select 
+                              value={sendForm.contentType} 
+                              onValueChange={(val) => setSendForm({ ...sendForm, contentType: val || "html", ...(val === "plain" ? { useTemplate: false } : {}) })}
+                            >
+                              <SelectTrigger className="h-8 bg-background/50 text-xs border-border/40 focus:ring-0">
+                                <SelectValue placeholder="HTML Formatted" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="html">HTML Formatted</SelectItem>
+                                <SelectItem value="plain">Plain Text</SelectItem>
+                                <SelectItem value="auto">Auto Detect</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-2 rounded-lg border border-border/40 bg-background/50 hover:bg-background/80 transition-colors">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-semibold text-foreground">Insert Resume Link</span>
+                              <span className="text-[9px] text-muted-foreground">Embed a clickable preview button</span>
+                            </div>
+                            <Switch 
+                              checked={sendForm.insertResumeLink} 
+                              onCheckedChange={(checked) => setSendForm({ ...sendForm, insertResumeLink: checked })} 
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
+                            <Select 
+                              value={sendForm.resumeId} 
+                              onValueChange={(val) => setSendForm({ ...sendForm, resumeId: val || "" })}
+                            >
+                              <SelectTrigger className="h-8 bg-background/50 text-xs border-border/40 focus:ring-0">
+                                <SelectValue placeholder="Default Resume (Fallback)" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Default Resume (Fallback)</SelectItem>
+                                {resumes.map((r, i) => (
+                                  <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
+                                    {r.name} {r.isDefault ? "(Default)" : ""}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {sendForm.insertResumeLink && (
+                          <div className="md:col-span-2 space-y-1 animate-in fade-in duration-200">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
+                            <Input 
+                              value={sendForm.resumeLinkLabel} 
+                              onChange={(e) => setSendForm({ ...sendForm, resumeLinkLabel: e.target.value })}
+                              placeholder="View My Resume"
+                              className="h-8 bg-background/50 text-xs border-border/40"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="px-6 py-4 flex-1 min-h-[300px] bg-background">
+                    {sendForm.contentType === "plain" ? (
+                      <textarea
+                        className="w-full h-full min-h-[280px] bg-transparent outline-none resize-none text-sm text-foreground/90 leading-relaxed placeholder:text-muted-foreground/70 whitespace-pre-wrap"
+                        value={sendForm.html}
+                        onChange={e => setSendForm({ ...sendForm, html: e.target.value })}
+                        placeholder="Write your plain text email here..."
+                      />
+                    ) : (
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        className="w-full h-full min-h-[280px] bg-transparent outline-none resize-none text-sm text-foreground/90 leading-relaxed empty:before:content-['Write_your_email_here...'] empty:before:text-muted-foreground/70"
+                        onBlur={e => setSendForm({...sendForm, html: e.currentTarget.innerHTML})} 
+                        dangerouslySetInnerHTML={{ __html: sendForm.html }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="px-6 py-3 bg-muted/10 flex items-center justify-between border-t border-border/50">
+              <div className="px-6 py-3 bg-muted/10 flex items-center justify-between border-t border-border/50 shrink-0">
                 <Button className="px-6 rounded-full font-medium shadow-sm" onClick={handleSendEmail} disabled={isSending || (!gmailStatus && !sendForm.fromEmail)}>
                   {isSending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-3.5 h-3.5 mr-2" />} Send
                 </Button>
@@ -465,7 +727,103 @@ export default function EmailAutomationsPage() {
                     onChange={e => setCsvFile(e.target.files?.[0] || null)} 
                   />
                   <p className="text-xs text-muted-foreground mt-1">Upload a CSV file containing email data.</p>
+                  <div className="mt-2.5 p-2.5 rounded-lg border border-primary/20 bg-primary/5 text-[11px] text-muted-foreground leading-relaxed animate-in fade-in duration-200">
+                    💡 <strong>Pro Tip</strong>: You can personalize content types per recipient! Include a column named <code>contentType</code> with the value <code>plain</code> inside your CSV file to send lightweight plain-text emails for individual rows.
+                  </div>
                 </div>
+
+                {/* Global CSV Options */}
+                <div className="space-y-3 p-3 rounded-lg border border-border/40 bg-muted/10">
+                  <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <Settings2 className="w-3.5 h-3.5 text-primary animate-pulse" />
+                    Global CSV Delivery Settings
+                  </span>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-semibold text-foreground">Wrap in Premium Card</span>
+                        <span className="text-[9px] text-muted-foreground">Apply template wrapper</span>
+                      </div>
+                      <Switch 
+                        checked={csvOptions.useTemplate} 
+                        onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, useTemplate: checked })} 
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-semibold text-foreground">Attach Resume PDF</span>
+                        <span className="text-[9px] text-muted-foreground">Attach physical PDF file</span>
+                      </div>
+                      <Switch 
+                        checked={csvOptions.attachResume} 
+                        onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, attachResume: checked })} 
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-semibold text-foreground">Insert Resume Link</span>
+                        <span className="text-[9px] text-muted-foreground">Embed a clickable preview button</span>
+                      </div>
+                      <Switch 
+                        checked={csvOptions.insertResumeLink} 
+                        onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, insertResumeLink: checked })} 
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-0.5 justify-center">
+                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
+                      <Select 
+                        value={csvOptions.resumeId} 
+                        onValueChange={(val) => setCsvOptions({ ...csvOptions, resumeId: val || "" })}
+                      >
+                        <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
+                          <SelectValue placeholder="Default Resume (Fallback)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Default Resume (Fallback)</SelectItem>
+                          {resumes.map((r, i) => (
+                            <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
+                              {r.name} {r.isDefault ? "(Default)" : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-0.5 justify-center">
+                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Content Type</label>
+                      <Select 
+                        value={csvOptions.contentType} 
+                        onValueChange={(val) => setCsvOptions({ ...csvOptions, contentType: val || "html", ...(val === "plain" ? { useTemplate: false } : {}) })}
+                      >
+                        <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
+                          <SelectValue placeholder="HTML Formatted" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="html">HTML Formatted</SelectItem>
+                          <SelectItem value="plain">Plain Text</SelectItem>
+                          <SelectItem value="auto">Auto Detect</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {csvOptions.insertResumeLink && (
+                    <div className="space-y-1 pt-1 animate-in fade-in duration-200">
+                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
+                      <Input 
+                        value={csvOptions.resumeLinkLabel} 
+                        onChange={(e) => setCsvOptions({ ...csvOptions, resumeLinkLabel: e.target.value })}
+                        placeholder="View My Resume"
+                        className="h-8 bg-background/50 text-xs border-border/40"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <Button className="w-full" onClick={handleBulkCsvUpload} disabled={isUploadingCsv || !csvFile}>
                   {isUploadingCsv ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />} 
                   {isUploadingCsv ? "Uploading..." : "Upload & Send"}
@@ -494,33 +852,53 @@ export default function EmailAutomationsPage() {
               <Plus className="w-4 h-4 mr-2" /> New Template
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingTemplateId ? "Edit Template" : "Create Template"}</DialogTitle>
+          <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0 overflow-hidden gap-0 flex flex-col border border-border/60 shadow-2xl rounded-2xl bg-background">
+            <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10 shrink-0">
+              <DialogTitle className="text-lg">{editingTemplateId ? "Edit Template" : "Create Template"}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label>Template Name</Label>
-                <Input value={newTemplate.name} onChange={e => setNewTemplate({...newTemplate, name: e.target.value})} placeholder="e.g. Standard Developer Follow-up" />
-              </div>
-              <div className="space-y-2">
-                <Label>Subject</Label>
-                <Input value={newTemplate.subject} onChange={e => setNewTemplate({...newTemplate, subject: e.target.value})} placeholder="Application for {{role}}" />
-              </div>
-              <div className="space-y-2">
-                <Label>Body</Label>
-                <div 
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="min-h-[150px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring empty:before:content-['Hi_{{name}},_...'] empty:before:text-muted-foreground/50"
-                  onBlur={e => setNewTemplate({...newTemplate, body: e.currentTarget.innerHTML})} 
-                  dangerouslySetInnerHTML={{ __html: newTemplate.body }}
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
+                <span className="text-muted-foreground text-sm w-28 shrink-0">Template Name</span>
+                <input 
+                  className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70" 
+                  value={newTemplate.name} 
+                  onChange={e => setNewTemplate({...newTemplate, name: e.target.value})} 
+                  placeholder="e.g. Standard Developer Follow-up" 
                 />
               </div>
-              <Button className="w-full" onClick={handleSaveTemplate} disabled={isCreating}>
-                {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              <div className="px-6 py-3 border-b border-border/50 flex items-center focus-within:bg-muted/5 transition-colors shrink-0">
+                <span className="text-muted-foreground text-sm w-28 shrink-0">Subject</span>
+                <input 
+                  className="flex-1 bg-transparent outline-none text-sm font-semibold placeholder:font-normal placeholder:text-muted-foreground/70" 
+                  value={newTemplate.subject} 
+                  onChange={e => setNewTemplate({...newTemplate, subject: e.target.value})} 
+                  placeholder="Application for {{role}}" 
+                />
+              </div>
+              
+              {/* Scrollable Template Body Editor */}
+              <div className="flex-1 overflow-y-auto bg-background flex flex-col min-h-0">
+                <div className="px-6 py-4 flex-1 min-h-[300px]">
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    className="w-full h-full min-h-[280px] bg-transparent outline-none resize-none text-sm text-foreground/90 leading-relaxed empty:before:content-['Hi_{{name}},_write_your_template_body_here..._You_can_use_placeholders_like_{{name}},_{{company}},_and_{{role}}.'] empty:before:text-muted-foreground/70"
+                    onBlur={e => setNewTemplate({...newTemplate, body: e.currentTarget.innerHTML})} 
+                    dangerouslySetInnerHTML={{ __html: newTemplate.body }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-3 bg-muted/10 flex items-center justify-between border-t border-border/50 shrink-0">
+              <Button className="px-6 rounded-full font-medium shadow-sm" onClick={handleSaveTemplate} disabled={isCreating}>
+                {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-3.5 h-3.5 mr-2" />} 
                 {editingTemplateId ? "Update Template" : "Save Template"}
               </Button>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-foreground" onClick={() => setIsTemplateDialogOpen(false)}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -540,7 +918,7 @@ export default function EmailAutomationsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {templates.map((template, i) => (
             <motion.div
-              key={template.id}
+              key={template._id || template.id || i}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, delay: i * 0.1 }}
@@ -557,26 +935,37 @@ export default function EmailAutomationsPage() {
                         {template.subject || "(No Subject)"}
                       </CardTitle>
                     </div>
-                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-background rounded-md shadow-sm border border-border/50 p-0.5 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => openEditTemplateDialog(template)}>
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteTemplate(template._id || template.id || "")}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 pt-4 pb-2 px-5">
-                  <div 
-                    className="text-sm text-foreground/80 leading-relaxed line-clamp-4 font-sans prose prose-sm dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: template.body }}
-                  />
+                  <div className="text-sm text-foreground/80 leading-relaxed line-clamp-4 font-sans max-w-none">
+                    {stripHtml(template.body)}
+                  </div>
                 </CardContent>
-                <CardFooter className="pt-2 pb-4 px-5 bg-gradient-to-t from-card via-card to-transparent mt-auto">
-                  <Button variant="secondary" className="w-full font-medium shadow-sm border border-border/50 bg-background hover:bg-muted" onClick={() => openSendDialog(template)}>
+                <CardFooter className="pt-2 pb-4 px-5 bg-gradient-to-t from-card via-card to-transparent mt-auto flex items-center gap-2 shrink-0">
+                  <Button variant="secondary" className="flex-1 font-medium shadow-sm border border-border/50 bg-background hover:bg-muted" onClick={() => openSendDialog(template)}>
                     <Mail className="w-4 h-4 mr-2 text-primary" /> Use Template
                   </Button>
+                  <div className="flex items-center bg-background rounded-md shadow-sm border border-border/50 p-0.5 shrink-0">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-md" 
+                      onClick={() => openEditTemplateDialog(template)}
+                      title="Edit Template"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-md" 
+                      onClick={() => handleDeleteTemplate(template._id || template.id || "")}
+                      title="Delete Template"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             </motion.div>

@@ -12,7 +12,18 @@ export interface GmailStatus {
 }
 
 export const emailService = {
-  async queue(data: { to: string; subject: string; html: string; fromEmail: string }) {
+  async queue(data: {
+    to: string;
+    subject: string;
+    html: string;
+    fromEmail: string;
+    useTemplate?: boolean;
+    attachResume?: boolean;
+    insertResumeLink?: boolean;
+    resumeLinkLabel?: string;
+    resumeId?: string;
+    contentType?: string;
+  }) {
     const response = await api.post('/api/v1/emails/queue', data);
     return response.data;
   },
@@ -68,9 +79,27 @@ export const emailService = {
     }
   },
 
-  async bulkCsv(file: File) {
+  async bulkCsv(
+    file: File,
+    options?: {
+      useTemplate?: boolean;
+      attachResume?: boolean;
+      insertResumeLink?: boolean;
+      resumeLinkLabel?: string;
+      resumeId?: string;
+      contentType?: string;
+    }
+  ) {
     const formData = new FormData();
     formData.append('file', file);
+    if (options) {
+      if (options.useTemplate !== undefined) formData.append('useTemplate', String(options.useTemplate));
+      if (options.attachResume !== undefined) formData.append('attachResume', String(options.attachResume));
+      if (options.insertResumeLink !== undefined) formData.append('insertResumeLink', String(options.insertResumeLink));
+      if (options.resumeLinkLabel !== undefined) formData.append('resumeLinkLabel', options.resumeLinkLabel);
+      if (options.resumeId !== undefined) formData.append('resumeId', options.resumeId);
+      if (options.contentType !== undefined) formData.append('contentType', options.contentType);
+    }
     const response = await api.post('/api/v1/emails/bulk-csv', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });

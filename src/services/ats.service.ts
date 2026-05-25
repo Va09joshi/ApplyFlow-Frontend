@@ -13,8 +13,9 @@ export interface ATSRecord {
     keywords: number;
   };
   matchedKeywords: string[];
-  missingKeywords: string[];
-  strengths: string[];
+  missingKeywords?: string[];
+  feedback?: string;
+  strengths?: string[];
   weaknesses: string[];
   recommendations: string[];
   suggestions: string[];

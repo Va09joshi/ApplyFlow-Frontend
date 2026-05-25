@@ -7,6 +7,10 @@ export interface Company {
   website?: string;
   hrEmails?: string[];
   tags?: string[];
+  logoUrl?: string;
+  linkedinUrl?: string;
+  topSkills?: string[];
+  hiringRoles?: string[];
   status?: string;
   createdAt: string;
   updatedAt: string;
@@ -23,7 +27,7 @@ export const companyService = {
     return response.data;
   },
 
-  async create(data: { name: string; website?: string; hrEmails?: string[]; tags?: string[] }) {
+  async create(data: { name: string; website?: string; hrEmails?: string[]; tags?: string[]; logoUrl?: string; linkedinUrl?: string; topSkills?: string[]; hiringRoles?: string[] }) {
     const response = await api.post('/api/v1/companies', data);
     return response.data;
   },
@@ -37,4 +41,9 @@ export const companyService = {
     const response = await api.delete(`/api/v1/companies/${id}`);
     return response.data;
   },
+  
+  async getTopSkills(limit = 15) {
+    const response = await api.get(`/api/v1/companies/skills?limit=${limit}`);
+    return response.data;
+  }
 };

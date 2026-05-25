@@ -12,7 +12,8 @@ import {
   Settings,
   Sparkles,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Compass
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Applications", href: "/dashboard/applications", icon: Briefcase },
   { name: "Companies", href: "/dashboard/companies", icon: Building2 },
+  { name: "Jobs", href: "/dashboard/jobs", icon: Compass },
   { name: "Email Automations", href: "/dashboard/emails", icon: Mail },
   { name: "Resume Manager", href: "/dashboard/resumes", icon: FileText },
   { name: "ATS Analyzer", href: "/dashboard/ats", icon: Bot },
