@@ -36,6 +36,16 @@ yarn-error.log*
 # vercel
 .vercel
 
+# additional project/tool ignores
+.sixth/
+.cache/
+.parcel-cache/
+.turbo/
+.vscode/
+.idea/
+*.log
+tsconfig.tsbuildinfo
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
