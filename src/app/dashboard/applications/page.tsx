@@ -50,45 +50,59 @@ export default function ApplicationsPage() {
   const [newApp, setNewApp] = useState({ companyId: "", resumeId: "", roleTitle: "" });
 
   const fetchApplications = async () => {
-    try {
-      setIsLoading(true);
-      const data = await applicationService.getAll();
-      let appsArray = [];
-      if (Array.isArray(data)) appsArray = data;
-      else if (data?.data?.docs && Array.isArray(data.data.docs)) appsArray = data.data.docs;
-      else if (data?.data && Array.isArray(data.data)) appsArray = data.data;
-      else if (data?.docs && Array.isArray(data.docs)) appsArray = data.docs;
-      setApplications(appsArray);
+    setIsLoading(true);
 
-      // Fetch dependencies for form
-      const [compData, resData] = await Promise.all([
-        companyService.getAll(1, 100),
-        resumeService.getAll(1, 100)
-      ]);
-      
-      let compsArray = [];
-      if (Array.isArray(compData)) compsArray = compData;
-      else if (compData?.data?.docs && Array.isArray(compData.data.docs)) compsArray = compData.data.docs;
-      else if (compData?.data && Array.isArray(compData.data)) compsArray = compData.data;
-      else if (compData?.docs && Array.isArray(compData.docs)) compsArray = compData.docs;
-      setCompanies(compsArray);
+    const normalizeArray = (data: unknown) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === "object") {
+        const response = data as {
+          data?: { docs?: unknown[]; data?: unknown[] } | unknown[];
+          docs?: unknown[];
+        };
+        if (Array.isArray(response.data)) return response.data;
+        if (response.data && typeof response.data === "object" && Array.isArray((response.data as { docs?: unknown[] }).docs)) {
+          return (response.data as { docs?: unknown[] }).docs || [];
+        }
+        if (Array.isArray(response.docs)) return response.docs;
+      }
+      return [];
+    };
 
-      let resArray = [];
-      if (Array.isArray(resData)) resArray = resData;
-      else if (resData?.data?.docs && Array.isArray(resData.data.docs)) resArray = resData.data.docs;
-      else if (resData?.data && Array.isArray(resData.data)) resArray = resData.data;
-      else if (resData?.docs && Array.isArray(resData.docs)) resArray = resData.docs;
-      setResumes(resArray);
+    const [appsResult, compsResult, resResult] = await Promise.allSettled([
+      applicationService.getAll(),
+      companyService.getAll(1, 100),
+      resumeService.getAll(1, 100),
+    ]);
 
-    } catch (error) {
-      toast.error("Failed to load data.");
-    } finally {
-      setIsLoading(false);
+    if (appsResult.status === "fulfilled") {
+      setApplications(normalizeArray(appsResult.value));
     }
+
+    if (compsResult.status === "fulfilled") {
+      setCompanies(normalizeArray(compsResult.value) as Company[]);
+    }
+
+    if (resResult.status === "fulfilled") {
+      setResumes(normalizeArray(resResult.value) as Resume[]);
+    }
+
+    if (appsResult.status === "rejected" && compsResult.status === "rejected" && resResult.status === "rejected") {
+      toast.error("Failed to load data.");
+    } else if (appsResult.status === "rejected") {
+      toast.error("Applications could not be loaded.");
+    } else if (compsResult.status === "rejected" || resResult.status === "rejected") {
+      toast.error("Some supporting data could not be loaded.");
+    }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchApplications();
+    const timer = window.setTimeout(() => {
+      void fetchApplications();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const getFullImageUrl = (url?: string) => {
