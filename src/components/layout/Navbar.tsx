@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Briefcase } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
@@ -12,14 +12,17 @@ import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [scrolled, setScrolled] = useState(false);
   const accessToken = useAuthStore((state) => state.accessToken);
   const logoutState = useAuthStore((state) => state.logout);
   const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
@@ -30,7 +33,8 @@ export function Navbar() {
   const handleLogout = async () => {
     try {
       await api.post('/api/v1/auth/logout');
-    } catch(e) {}
+    } catch {
+    }
     logoutState();
     router.push('/login');
   };

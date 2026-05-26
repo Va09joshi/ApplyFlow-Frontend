@@ -83,7 +83,8 @@ export function Sidebar() {
   const handleLogout = async () => {
     try {
       await api.post('/api/v1/auth/logout');
-    } catch(e) {}
+    } catch {
+    }
     logoutState();
     router.push('/login');
   };
