@@ -1,29 +1,61 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Image from "next/image";
 import { 
-  Briefcase, Mail, MessageSquare, TrendingUp, CalendarDays, 
+  Briefcase, Mail, TrendingUp, CalendarDays, 
   Loader2, Plus, Edit2, Trash2, Send, ArrowUpRight, Building2
 } from "lucide-react";
 import { 
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Legend, ComposedChart, LineChart, Line 
+  Area, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, Legend, ComposedChart, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from "recharts";
 import * as motion from "framer-motion/client";
 import { analyticsService, Analytics } from "@/services/analytics.service";
 import { applicationService, Application } from "@/services/application.service";
+import { atsService, ATSRecord } from "@/services/ats.service";
 import { toast } from "sonner";
 import Link from "next/link";
 import { dashboardService } from "@/services/dashboard.service";
 
+type DashboardPayload = Record<string, unknown> & {
+  applicationCounts?: { total?: number; interview?: number; offer?: number; rejected?: number };
+  applications?: { total?: number; interview?: number; offer?: number; rejected?: number };
+  recentActivity?: unknown[];
+  recentApplications?: unknown[];
+  recentApps?: unknown[];
+  emailAnalytics?: Record<string, unknown> & { chartData?: unknown[] };
+  emails?: Record<string, unknown> & { chartData?: unknown[] };
+  metricRecords?: unknown[];
+  analyticsRecords?: unknown[];
+  metrics?: unknown[];
+  chartData?: unknown[];
+  averageAtsScore?: number;
+  atsScore?: number;
+  jobsCount?: number;
+  companiesCount?: number;
+};
+
+type StatCard = {
+  title: string;
+  value: string | number;
+  icon: ComponentType<{ className?: string }>;
+  color: string;
+  bg: string;
+  accent: string;
+};
+
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<unknown>(null);
+  const [atsRecords, setAtsRecords] = useState<ATSRecord[]>([]);
+  const [metricRecords, setMetricRecords] = useState<Analytics[]>([]);
+  const [recentApplications, setRecentApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Analytics CRUD form
@@ -40,16 +72,75 @@ export default function Dashboard() {
   const fetchAll = async () => {
     try {
       setIsLoading(true);
-      const data = await dashboardService.getStats();
-      setDashboardData(data);
-    } catch {
-      toast.error("Failed to load dashboard data.");
+      const [dataResult, atsResult, analyticsResult, applicationsResult] = await Promise.allSettled([
+        dashboardService.getStats(),
+        atsService.getAll(1, 14),
+        analyticsService.getAll(1, 14),
+        applicationService.getAll(1, 6),
+      ]);
+
+      if (dataResult.status === "fulfilled") {
+        setDashboardData(dataResult.value);
+      }
+
+      if (atsResult.status === "fulfilled") {
+        const atsPayload = atsResult.value?.data || atsResult.value || {};
+        const atsList = atsPayload?.docs || atsPayload?.data || atsPayload || [];
+        const normalizedAts = Array.isArray(atsList) ? atsList : [];
+        setAtsRecords(normalizedAts as ATSRecord[]);
+      }
+
+      if (analyticsResult.status === "fulfilled") {
+        const analyticsPayload = analyticsResult.value?.data || analyticsResult.value || {};
+        const analyticsList = analyticsPayload?.docs || analyticsPayload?.data || analyticsPayload || [];
+        const normalizedAnalytics = Array.isArray(analyticsList) ? analyticsList : [];
+        setMetricRecords(normalizedAnalytics as Analytics[]);
+      }
+
+      if (applicationsResult.status === "fulfilled") {
+        const appsPayload = applicationsResult.value?.data || applicationsResult.value || {};
+        const appsList = appsPayload?.docs || appsPayload?.data || appsPayload || [];
+        const normalizedApps = Array.isArray(appsList) ? appsList : [];
+        setRecentApplications(normalizedApps as Application[]);
+      }
+
+      const failures = [dataResult, atsResult, analyticsResult, applicationsResult].filter((result) => result.status === "rejected");
+      if (failures.length === 4) {
+        toast.error("Failed to load dashboard data.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  const getCompanyForApp = (app: Application) => {
+    if (app.company) return app.company;
+    return null;
+  };
+
+  const getCompanyNameForApp = (app: Application) => {
+    const company = getCompanyForApp(app);
+    if (company?.name) return company.name;
+
+    const fallbackName = app.companyName || app.companyTitle;
+    if (fallbackName) return fallbackName;
+
+    if (typeof app.companyId === "string" && app.companyId.trim()) return app.companyId;
+    return "Unknown Company";
+  };
+
+  const getCompanyLogoForApp = (app: Application) => {
+    const company = getCompanyForApp(app);
+    return company?.logoUrl || "";
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchAll();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // Analytics CRUD
   const resetForm = () => {
@@ -106,13 +197,26 @@ export default function Dashboard() {
     }
   };
 
-  const payload = dashboardData?.data || dashboardData || {};
+  const payload = (((dashboardData as { data?: DashboardPayload } | null)?.data || dashboardData || {}) as DashboardPayload);
   
   const applicationCounts = payload.applicationCounts || payload.applications || { total: 0, interview: 0, offer: 0, rejected: 0 };
-  const recentApps = payload.recentActivity || payload.recentApplications || payload.recentApps || [];
-  const averageAtsScore = payload.averageAtsScore || payload.atsScore || 0;
-  const emailAnalytics = payload.emailAnalytics || payload.emails || { totalSent: 0, totalResponses: 0, totalInterviews: 0, responseRate: "0" };
-  const analyticsRecords = payload.metricRecords || payload.analyticsRecords || payload.metrics || [];
+  const emailAnalytics = (payload.emailAnalytics || payload.emails || { totalSent: 0, totalResponses: 0, totalInterviews: 0, responseRate: "0" }) as { totalSent?: number; sentToday?: number; totalResponses?: number; totalInterviews?: number; responseRate?: string };
+  const metricList = metricRecords.length > 0 ? metricRecords : (payload.metricRecords || payload.analyticsRecords || payload.metrics || []) as Analytics[];
+  const recentApps = recentApplications.length > 0 ? recentApplications : (payload.recentActivity || payload.recentApplications || payload.recentApps || []) as Application[];
+  const latestAtsRecord = atsRecords[0] || null;
+  const atsTrendData = atsRecords.slice(0, 14).reverse().map((record, index) => ({
+    label: new Date(record.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    score: record.matchPercent || 0,
+    index,
+  }));
+  const atsRadarData = latestAtsRecord
+    ? [
+        { subject: "Skills", score: latestAtsRecord.scoreBreakdown?.skills || 0 },
+        { subject: "Experience", score: latestAtsRecord.scoreBreakdown?.experience || 0 },
+        { subject: "Education", score: latestAtsRecord.scoreBreakdown?.education || 0 },
+        { subject: "Keywords", score: latestAtsRecord.scoreBreakdown?.keywords || 0 },
+      ]
+    : [];
   const chartColors = {
     sent: "hsl(200, 90%, 55%)",
     responses: "hsl(165, 70%, 45%)",
@@ -120,15 +224,25 @@ export default function Dashboard() {
   };
 
   // Chart data — sorted by date, last 14 entries, multi-series
-  const chartData = (payload.chartData || emailAnalytics.chartData || analyticsRecords)
-    .sort((a: any, b: any) => new Date(a.metricDate || a.date).getTime() - new Date(b.metricDate || b.date).getTime())
+  const chartData = metricList
+    .slice()
+    .sort((a: Analytics, b: Analytics) => new Date(a.metricDate).getTime() - new Date(b.metricDate).getTime())
     .slice(-14)
-    .map((r: any) => ({
-      date: new Date(r.metricDate || r.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      Sent: r.sentCount || r.Sent || r.sent || 0,
-      Responses: r.responsesCount || r.Responses || r.responses || 0,
-      Interviews: r.interviewsCount || r.Interviews || r.interviews || 0,
+    .map((r: Analytics) => ({
+      date: new Date(r.metricDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      Sent: r.sentCount || 0,
+      Responses: r.responsesCount || 0,
+      Interviews: r.interviewsCount || 0,
     }));
+
+  const statCards: StatCard[] = [
+    { title: "Total Apps", value: Number(applicationCounts.total || 0), icon: Briefcase, color: "text-sky-600", bg: "bg-sky-500/15", accent: "from-sky-500/20 via-cyan-500/10 to-transparent" },
+    { title: "Jobs Tracked", value: Number(payload.jobsCount || 0), icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-500/15", accent: "from-indigo-500/20 via-violet-500/10 to-transparent" },
+    { title: "Companies", value: Number(payload.companiesCount || 0), icon: Building2, color: "text-fuchsia-600", bg: "bg-fuchsia-500/15", accent: "from-fuchsia-500/20 via-pink-500/10 to-transparent" },
+    { title: "ATS Match", value: `${latestAtsRecord?.matchPercent || 0}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-500/15", accent: "from-emerald-500/20 via-lime-500/10 to-transparent" },
+    { title: "Total Emails", value: Number(emailAnalytics.totalSent || 0), icon: Send, color: "text-blue-600", bg: "bg-blue-500/15", accent: "from-blue-500/20 via-indigo-500/10 to-transparent" },
+    { title: "Sent Today", value: Number(emailAnalytics.sentToday || 0), icon: Mail, color: "text-rose-600", bg: "bg-rose-500/15", accent: "from-rose-500/20 via-orange-500/10 to-transparent" },
+  ];
 
   if (isLoading) {
     return (
@@ -186,14 +300,7 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-        {[
-          { title: "Total Apps", value: applicationCounts.total || 0, icon: Briefcase, color: "text-sky-600", bg: "bg-sky-500/15", accent: "from-sky-500/20 via-cyan-500/10 to-transparent" },
-          { title: "Jobs Tracked", value: payload.jobsCount || 0, icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-500/15", accent: "from-indigo-500/20 via-violet-500/10 to-transparent" },
-          { title: "Companies", value: payload.companiesCount || 0, icon: Building2, color: "text-fuchsia-600", bg: "bg-fuchsia-500/15", accent: "from-fuchsia-500/20 via-pink-500/10 to-transparent" },
-          { title: "Avg ATS Score", value: `${averageAtsScore}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-500/15", accent: "from-emerald-500/20 via-lime-500/10 to-transparent" },
-          { title: "Total Emails", value: emailAnalytics.totalSent || 0, icon: Send, color: "text-blue-600", bg: "bg-blue-500/15", accent: "from-blue-500/20 via-indigo-500/10 to-transparent" },
-          { title: "Sent Today", value: emailAnalytics.sentToday || 0, icon: Mail, color: "text-rose-600", bg: "bg-rose-500/15", accent: "from-rose-500/20 via-orange-500/10 to-transparent" },
-        ].map((stat, i) => (
+        {statCards.map((stat, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 20 }}
@@ -270,9 +377,97 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Line Chart */}
+        {/* ATS Score Trend */}
         <motion.div
           className="lg:col-span-5"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.28 }}
+        >
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-sm overflow-hidden">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>ATS Match Trend</CardTitle>
+                  <CardDescription>Real analysis scores from the ATS analyzer</CardDescription>
+                </div>
+                <Badge variant="outline" className="text-[10px]">
+                  Latest {latestAtsRecord?.matchPercent || 0}%
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-border/60 bg-background/50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Latest match</p>
+                  <div className="mt-2 text-3xl font-bold text-foreground">{latestAtsRecord?.matchPercent || 0}%</div>
+                  <p className="mt-1 text-xs text-muted-foreground">From the newest ATS analysis</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Analyses</p>
+                  <div className="mt-2 text-3xl font-bold text-foreground">{atsRecords.length}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">Last 14 records loaded</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Breakdown</p>
+                  <div className="mt-2 text-3xl font-bold text-foreground">
+                    {latestAtsRecord ? Math.round(((latestAtsRecord.scoreBreakdown?.skills || 0) + (latestAtsRecord.scoreBreakdown?.experience || 0) + (latestAtsRecord.scoreBreakdown?.education || 0) + (latestAtsRecord.scoreBreakdown?.keywords || 0)) / 4) : 0}%
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">Average of the latest breakdown</p>
+                </div>
+              </div>
+
+              <div className="h-[150px] w-full">
+                {atsTrendData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={atsTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} domain={[0, 100]} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "var(--background)", borderRadius: "10px", border: "1px solid var(--border)" }}
+                        formatter={(value: unknown) => [`${value ?? 0}%`, "ATS Match"]}
+                        itemStyle={{ color: "var(--foreground)" }}
+                      />
+                      <Line type="monotone" dataKey="score" stroke="#22c55e" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center border border-dashed border-border/60 rounded-xl">
+                    <TrendingUp className="w-8 h-8 mb-2 opacity-50" />
+                    <p className="text-sm">No ATS analyses yet.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="h-[150px] w-full">
+                {atsRadarData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={atsRadarData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
+                      <Radar name="Score" dataKey="score" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.28} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "var(--background)", borderRadius: "10px", border: "1px solid var(--border)" }}
+                        formatter={(value: unknown) => [`${value ?? 0}%`, "Score"]}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center border border-dashed border-border/60 rounded-xl">
+                    <TrendingUp className="w-8 h-8 mb-2 opacity-50" />
+                    <p className="text-sm">No ATS breakdown yet.</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Line Chart */}
+        <motion.div
+          className="lg:col-span-7"
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.25 }}
@@ -318,24 +513,29 @@ export default function Dashboard() {
 
         {/* Recent Activity */}
         <motion.div
-          className="lg:col-span-12"
+          className="lg:col-span-5"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-sm">
-            <CardHeader>
-              <CardTitle>Recent Applications</CardTitle>
-              <CardDescription>Latest updates on your pipeline</CardDescription>
+          <Card className="h-full border-border/50 bg-card/50 backdrop-blur-sm shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 border-b border-border/50">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <CardTitle>Recent Applications</CardTitle>
+                  <CardDescription>Latest updates on your pipeline</CardDescription>
+                </div>
+                <Badge variant="outline" className="text-[10px]">{recentApps.length} open</Badge>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               {recentApps.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[250px] text-muted-foreground text-center">
+                <div className="flex flex-col items-center justify-center h-[250px] text-muted-foreground text-center rounded-2xl border border-dashed border-border/60 bg-background/40">
                   <Briefcase className="w-8 h-8 mb-2 opacity-50" />
                   <p className="text-sm">No recent activity yet.</p>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="space-y-3">
                   {recentApps.map((activity: Application, i: number) => {
                     const status = activity.status?.toLowerCase();
                     const statusStyles =
@@ -343,23 +543,31 @@ export default function Dashboard() {
                       status === "offer" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
                       status === "rejected" ? "bg-rose-500/10 text-rose-600 border-rose-500/20" :
                       "bg-muted text-muted-foreground border-border";
+                    const statusAccent =
+                      status === "interview" ? "border-l-emerald-500" :
+                      status === "offer" ? "border-l-blue-500" :
+                      status === "rejected" ? "border-l-rose-500" : "border-l-border";
                     return (
-                      <div key={activity._id || activity.id || i} className="rounded-xl border border-border/60 bg-background/40 p-4 flex items-center justify-between gap-4 hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-500/10 flex items-center justify-center font-bold text-sm border border-border">
-                            {(activity.company?.name || "?").charAt(0).toUpperCase()}
+                      <div key={activity._id || activity.id || i} className={`rounded-2xl border border-border/60 border-l-4 ${statusAccent} bg-background/45 p-4 flex items-center justify-between gap-4 hover:bg-background/70 hover:shadow-sm transition-all`}>
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 via-cyan-500/10 to-transparent flex items-center justify-center font-bold text-sm border border-border shrink-0 overflow-hidden">
+                            {getCompanyLogoForApp(activity) ? (
+                              <Image src={getCompanyLogoForApp(activity)} alt={getCompanyNameForApp(activity)} width={48} height={48} className="w-full h-full object-cover" unoptimized />
+                            ) : (
+                              <span>{getCompanyNameForApp(activity).charAt(0).toUpperCase()}</span>
+                            )}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate">{activity.company?.name || "Unknown"}</p>
+                            <p className="text-sm font-semibold truncate">{getCompanyNameForApp(activity)}</p>
                             <p className="text-xs text-muted-foreground truncate">{activity.roleTitle}</p>
                             <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
-                              <span>Remote</span>
+                              <span>{activity.createdAt ? new Date(activity.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Recently"}</span>
                               <span className="h-1 w-1 rounded-full bg-border" />
-                              <span>{activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : ""}</span>
+                              <span>Pipeline update</span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-end gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <Badge variant="outline" className={`text-[10px] border ${statusStyles}`}>
                             {activity.status}
                           </Badge>
@@ -384,19 +592,26 @@ export default function Dashboard() {
       </div>
 
       {/* Metric Records */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Metric Records</h2>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">Metric Records</h2>
+          <p className="text-sm text-muted-foreground">A compact view of daily outreach performance.</p>
+        </div>
+        <Badge variant="outline" className="text-[10px]">{metricList.length} logged</Badge>
       </div>
 
-      {analyticsRecords.length === 0 ? (
-        <div className="text-center py-10 bg-card rounded-xl border border-border/50">
+      {metricList.length === 0 ? (
+        <div className="text-center py-10 bg-card rounded-2xl border border-border/50 shadow-sm">
           <CalendarDays className="w-10 h-10 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-medium">No records yet</h3>
-          <p className="text-muted-foreground text-sm mt-1">Log your first daily metrics to start tracking progress.</p>
+          <p className="text-muted-foreground text-sm mt-1 max-w-sm mx-auto">Use Log Metrics to add a daily update. The chart and cards above will fill in automatically after you save.</p>
+          <Button className="mt-5" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" /> Log first metric
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {analyticsRecords.map((record: Analytics, i: number) => {
+          {metricList.map((record: Analytics, i: number) => {
             const recordId = record._id || record.id || "";
             return (
               <motion.div

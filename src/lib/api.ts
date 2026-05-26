@@ -1,5 +1,12 @@
-import axios from 'axios';
+import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/useAuthStore';
+
+type AuthRequestConfig = InternalAxiosRequestConfig & {
+  skipAuth?: boolean;
+  _retry?: boolean;
+  _retryNoAuth?: boolean;
+  _retryCount?: number;
+};
 
 const baseURL =
   '/api/backend';
@@ -15,12 +22,19 @@ export const api = axios.create({
 
 // Request interceptor to add the access token to headers
 api.interceptors.request.use(
-  (config) => {
+  (config: AuthRequestConfig) => {
+    const requestConfig = config;
+
+    if (requestConfig.skipAuth) {
+      return requestConfig;
+    }
+
     const accessToken = useAuthStore.getState().accessToken;
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      requestConfig.headers = AxiosHeaders.from(requestConfig.headers);
+      requestConfig.headers.set('Authorization', `Bearer ${accessToken}`);
     }
-    return config;
+    return requestConfig;
   },
   (error) => Promise.reject(error)
 );
@@ -29,7 +43,21 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config as AuthRequestConfig;
+
+    // For read requests, retry once without the bearer token so cookie auth can still work
+    if (
+      error.response?.status === 401 &&
+      originalRequest?.method === 'get' &&
+      !originalRequest._retryNoAuth
+    ) {
+      originalRequest._retryNoAuth = true;
+      originalRequest.skipAuth = true;
+      originalRequest.headers = AxiosHeaders.from(originalRequest.headers);
+      originalRequest.headers.delete('Authorization');
+
+      return api(originalRequest);
+    }
 
     // Handle 429 Too Many Requests with retry + backoff
     if (error.response?.status === 429) {

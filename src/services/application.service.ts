@@ -6,6 +6,8 @@ export interface Application {
   id?: string;
   _id?: string;
   companyId: string;
+  companyName?: string;
+  companyTitle?: string;
   resumeId: string;
   roleTitle: string;
   status: string; // e.g., 'applied', 'interview', 'rejected'

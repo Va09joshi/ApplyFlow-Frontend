@@ -117,7 +117,25 @@ export default function ApplicationsPage() {
 
   const getCompanyForApp = (app: Application) => {
     if (app.company) return app.company;
-    return companies.find(c => (c._id || c.id) === app.companyId);
+
+    const companyId = typeof app.companyId === "string" ? app.companyId : (app.companyId as unknown as { _id?: string; id?: string })?._id || (app.companyId as unknown as { _id?: string; id?: string })?.id || "";
+    return companies.find(c => (c._id || c.id) === companyId);
+  };
+
+  const getCompanyNameForApp = (app: Application) => {
+    const company = getCompanyForApp(app);
+    if (company?.name) return company.name;
+
+    const fallbackName = app.companyName || app.companyTitle;
+    if (fallbackName) return fallbackName;
+
+    if (typeof app.companyId === "string" && app.companyId.trim()) return app.companyId;
+    return "Unknown Company";
+  };
+
+  const getCompanyLogoForApp = (app: Application) => {
+    const company = getCompanyForApp(app);
+    return company?.logoUrl || "";
   };
 
   const handleCreateApplication = async () => {
@@ -161,7 +179,7 @@ export default function ApplicationsPage() {
   };
 
   const filteredApps = applications.filter(app => {
-    const companyName = getCompanyForApp(app)?.name || "";
+    const companyName = getCompanyNameForApp(app) || "";
     return companyName.toLowerCase().includes(search.toLowerCase()) || 
            app.roleTitle.toLowerCase().includes(search.toLowerCase());
   });
@@ -287,9 +305,8 @@ export default function ApplicationsPage() {
                   filteredApps.map((app) => {
                     const appId = app._id || app.id || "";
                     const statusClass = getStatusStyle(app.status);
-                    const company = getCompanyForApp(app);
-                    const companyName = company?.name || "Unknown Company";
-                    const companyLogo = company?.logoUrl;
+                    const companyName = getCompanyNameForApp(app);
+                    const companyLogo = getCompanyLogoForApp(app);
                     return (
                     <TableRow key={appId} className="hover:bg-muted/30">
                       <TableCell className="font-medium">
