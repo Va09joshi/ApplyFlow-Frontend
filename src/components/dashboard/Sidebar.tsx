@@ -64,13 +64,20 @@ export function Sidebar() {
   };
 
   useEffect(() => {
-    api.get('/api/v1/users/me')
-      .then(res => {
-        if (res.data?.data) {
-          setUserProfile(res.data.data);
-        }
-      })
-      .catch(err => console.error("Failed to fetch user profile", err));
+    const fetchProfile = () => {
+      api.get('/api/v1/users/me')
+        .then(res => {
+          if (res.data?.data) {
+            setUserProfile(res.data.data);
+          }
+        })
+        .catch(err => console.error("Failed to fetch user profile", err));
+    };
+
+    fetchProfile();
+
+    window.addEventListener('profile-updated', fetchProfile);
+    return () => window.removeEventListener('profile-updated', fetchProfile);
   }, []);
 
   const handleLogout = async () => {

@@ -54,13 +54,13 @@ export function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <Link href="#features" className="hover:text-foreground transition-colors">
+          <Link href="/#features" className="hover:text-foreground transition-colors">
             Features
           </Link>
-          <Link href="#pricing" className="hover:text-foreground transition-colors">
+          <Link href="/#pricing" className="hover:text-foreground transition-colors">
             Pricing
           </Link>
-          <Link href="#testimonials" className="hover:text-foreground transition-colors">
+          <Link href="/#testimonials" className="hover:text-foreground transition-colors">
             Testimonials
           </Link>
         </nav>

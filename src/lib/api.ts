@@ -20,11 +20,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refreshing
+// Response interceptor to handle rate limiting and token refreshing
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Handle 429 Too Many Requests with retry + backoff
+    if (error.response?.status === 429) {
+      const retryCount = originalRequest._retryCount || 0;
+      if (retryCount < 3) {
+        originalRequest._retryCount = retryCount + 1;
+        const retryAfter = error.response.headers['retry-after'];
+        const delay = retryAfter
+          ? parseInt(retryAfter, 10) * 1000
+          : Math.min(1000 * Math.pow(2, retryCount), 8000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return api(originalRequest);
+      }
+    }
 
     // If the error is a 401 and we haven't already tried to refresh the token
     if (error.response?.status === 401 && !originalRequest._retry) {

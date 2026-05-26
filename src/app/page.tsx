@@ -91,6 +91,9 @@ export default function Home() {
   const [activeCmdTab, setActiveCmdTab] = useState<string>("single");
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
   const [showUpcoming, setShowUpcoming] = useState<boolean>(false);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState<boolean>(false);
+  const [waitlistEmail, setWaitlistEmail] = useState<string>("");
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState<boolean>(false);
 
   const handleCopyCode = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -338,13 +341,13 @@ export default function Home() {
                       
                       {/* Email Composer Fields */}
                       <div className="p-4 space-y-3 font-mono text-xs">
-                        <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                          <span className="text-muted-foreground w-12 shrink-0">Recruiter:</span>
-                          <span className="text-foreground">hiring@stripe.com</span>
+                        <div className="flex items-center gap-3 border-b border-border/40 pb-2">
+                          <span className="text-muted-foreground w-16 shrink-0">Recruiter:</span>
+                          <span className="text-foreground truncate">hiring@stripe.com</span>
                         </div>
-                        <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                          <span className="text-muted-foreground w-12 shrink-0">Subject:</span>
-                          <span className="text-foreground">Application: Senior React Developer</span>
+                        <div className="flex items-center gap-3 border-b border-border/40 pb-2">
+                          <span className="text-muted-foreground w-16 shrink-0">Subject:</span>
+                          <span className="text-foreground truncate">Application: Senior React Developer</span>
                         </div>
                         
                         <div className="bg-muted/30 border border-border/40 rounded-xl p-3 text-[11px] leading-relaxed text-muted-foreground h-32 overflow-y-auto">
@@ -972,7 +975,7 @@ export default function Home() {
         </section>
 
         {/* TESTIMONIALS SECTION */}
-        <section className="py-24 bg-muted/10 border-y border-border/40 relative">
+        <section id="testimonials" className="py-24 bg-muted/10 border-y border-border/40 relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-black mb-4">Loved by Candidates</h2>
@@ -1023,7 +1026,7 @@ export default function Home() {
         </section>
 
         {/* PRICING SECTION */}
-        <section className="py-32 relative">
+        <section id="pricing" className="py-32 relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-black mb-4">Simple Pricing</h2>
@@ -1084,7 +1087,16 @@ export default function Home() {
                     </AnimatePresence>
                   </li>
                 </ul>
-                <Link href="/signup" className={buttonVariants({ className: "w-full rounded-xl" })}>Upgrade to Pro</Link>
+                <button
+                  onClick={() => {
+                    setWaitlistSubmitted(false);
+                    setWaitlistEmail("");
+                    setIsComingSoonOpen(true);
+                  }}
+                  className={buttonVariants({ className: "w-full rounded-xl font-bold" })}
+                >
+                  Upgrade to Pro
+                </button>
               </div>
             </div>
           </div>
@@ -1146,6 +1158,101 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* COMING SOON MODAL */}
+      <AnimatePresence>
+        {isComingSoonOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+            onClick={() => setIsComingSoonOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-primary/20 bg-card p-8 md:p-10 shadow-2xl text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Glow background effect */}
+              <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsComingSoonOpen(false)}
+                className="absolute top-4 right-4 p-2 rounded-full border border-border/40 bg-muted/20 hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all focus:outline-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Top Icon */}
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-primary animate-pulse">
+                <Sparkles className="w-8 h-8" />
+              </div>
+
+              {/* Content */}
+              <h3 className="text-2xl font-black text-foreground mb-3 tracking-tight">
+                Pro Plan is Coming Soon!
+              </h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                We are putting the final touches on our automated recruiter engine. Be the first to unlock unlimited automated outreach, advanced ATS keyword optimization, and priority seatings.
+              </p>
+
+              {/* Waitlist Form */}
+              {!waitlistSubmitted ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (waitlistEmail.trim()) {
+                      setWaitlistSubmitted(true);
+                    }
+                  }}
+                  className="space-y-3"
+                >
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter your email address"
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/45 transition-all text-center"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm shadow-[0_4px_15px_rgba(var(--primary),0.2)] hover:shadow-[0_4px_20px_rgba(var(--primary),0.3)] transition-all flex items-center justify-center gap-2"
+                  >
+                    Join the Exclusive Waitlist <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-green-500/10 border border-green-500/25 rounded-2xl p-5 text-center"
+                >
+                  <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20 text-green-500">
+                    <Check className="w-5 h-5 stroke-[3]" />
+                  </div>
+                  <h4 className="text-sm font-bold text-green-500 mb-1">You are on the list!</h4>
+                  <p className="text-[11px] text-green-400/90 leading-tight">
+                    We'll email you at <span className="font-semibold">{waitlistEmail}</span> as soon as the Pro features launch.
+                  </p>
+                </motion.div>
+              )}
+
+              <div className="mt-6 text-[10px] text-muted-foreground font-medium flex items-center justify-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Free early beta perks included
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
