@@ -3,7 +3,7 @@
 Summary
 -------
 
-Lightweight Next.js (App Router) frontend for ApplyFlow — focused on authentication, dashboard, and AI-assist features. This README is written without decorative icons and uses a plain console-like presentation for quick developer onboarding.
+Lightweight Next.js (App Router) frontend for ApplyFlow — focused on authentication, dashboard, and AI-assist features.
 
 Live demo
 ---------
