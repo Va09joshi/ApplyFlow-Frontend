@@ -23,6 +23,7 @@ import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { userService } from "@/services/user.service";
 
 const sidebarItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -65,10 +66,11 @@ export function Sidebar() {
 
   useEffect(() => {
     const fetchProfile = () => {
-      api.get('/api/v1/users/me')
+      userService.getProfile()
         .then(res => {
-          if (res.data?.data) {
-            setUserProfile(res.data.data);
+          const profileData = res?.data || res || {};
+          if (profileData) {
+            setUserProfile(profileData.data || profileData);
           }
         })
         .catch(err => console.error("Failed to fetch user profile", err));

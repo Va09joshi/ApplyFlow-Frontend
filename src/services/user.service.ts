@@ -2,7 +2,7 @@ import { api } from '@/lib/api';
 
 export const userService = {
   async getProfile() {
-    const response = await api.get('/api/v1/users/me');
+    const response = await api.get('/api/users/me');
     return response.data;
   },
   
