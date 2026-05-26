@@ -15,7 +15,7 @@ import * as motion from "framer-motion/client";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import axios from "axios";
 
 const registerSchema = z.object({
@@ -30,7 +30,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [googleLoginUri, setGoogleLoginUri] = useState<string | null>(null);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const accessToken = useAuthStore((state) => state.accessToken);
 
   useEffect(() => {
@@ -38,10 +38,6 @@ export default function SignupPage() {
       router.push("/dashboard");
     }
   }, [accessToken, router]);
-
-  useEffect(() => {
-    setGoogleLoginUri(`${window.location.origin}/api/auth/google/callback`);
-  }, []);
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (axios.isAxiosError(error)) {
@@ -74,6 +70,32 @@ export default function SignupPage() {
       router.push("/login");
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to register. Please try again."));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      toast.error("Google credential not found. Please try again.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await api.post("/api/v1/auth/google", {
+        idToken: credentialResponse.credential,
+      });
+      const { accessToken, refreshToken, user } = response.data.data || response.data;
+      if (accessToken) {
+        setAuth(accessToken, refreshToken, user);
+        toast.success("Successfully signed up with Google!");
+        router.push("/dashboard");
+      } else {
+        toast.error("Failed to retrieve access token.");
+      }
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Google Signup failed. Please try again."));
     } finally {
       setIsLoading(false);
     }
@@ -146,16 +168,14 @@ export default function SignupPage() {
             </div>
 
             <div className="w-full flex justify-center">
-              {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && googleLoginUri ? (
+              {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
                 <div className="w-full rounded-lg border border-border/50 bg-background/50 p-2 sm:p-3">
                   <div className="flex justify-center [&_iframe]:mx-auto">
                     <GoogleLogin
-                      onSuccess={() => {}}
+                      onSuccess={handleGoogleSuccess}
                       onError={() => {
                         toast.error("Google Signup Failed");
                       }}
-                      ux_mode="redirect"
-                      login_uri={googleLoginUri}
                       text="continue_with"
                       shape="pill"
                       size="large"
