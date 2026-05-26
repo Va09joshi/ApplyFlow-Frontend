@@ -85,6 +85,8 @@ export default function SignupPage() {
       setIsLoading(true);
       const response = await api.post("/api/v1/auth/google", {
         idToken: credentialResponse.credential,
+        credential: credentialResponse.credential,
+        token: credentialResponse.credential,
       });
       const { accessToken, refreshToken, user } = response.data.data || response.data;
       if (accessToken) {
@@ -92,7 +94,8 @@ export default function SignupPage() {
         toast.success("Successfully signed up with Google!");
         router.push("/dashboard");
       } else {
-        toast.error("Failed to retrieve access token.");
+        console.error("Google signup response without access token:", response.data);
+        toast.error(response.data?.message || "Failed to retrieve access token.");
       }
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Google Signup failed. Please try again."));
