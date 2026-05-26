@@ -41,7 +41,15 @@ export default function SignupPage() {
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (axios.isAxiosError(error)) {
-      return error.response?.data?.message || fallback;
+      const responseData = error.response?.data;
+      return (
+        responseData?.message ||
+        responseData?.error ||
+        responseData?.errors?.[0]?.message ||
+        responseData?.errors?.[0]?.msg ||
+        error.message ||
+        fallback
+      );
     }
     return fallback;
   };
@@ -83,20 +91,25 @@ export default function SignupPage() {
 
     try {
       setIsLoading(true);
-      const response = await api.post("/api/v1/auth/google", {
+      const response = await axios.post("/api/auth/google", {
         idToken: credentialResponse.credential,
         credential: credentialResponse.credential,
         token: credentialResponse.credential,
       });
-      const { accessToken, refreshToken, user } = response.data.data || response.data;
-      if (accessToken) {
+      const payload = response.data.data || response.data;
+      const accessToken = payload?.accessToken || "";
+      const refreshToken = payload?.refreshToken || "";
+      const user = payload?.user;
+
+      if (response.status >= 200 && response.status < 300) {
         setAuth(accessToken, refreshToken, user);
         toast.success("Successfully signed up with Google!");
         router.push("/dashboard");
-      } else {
-        console.error("Google signup response without access token:", response.data);
-        toast.error(response.data?.message || "Failed to retrieve access token.");
+        return;
       }
+
+      console.error("Google signup response without success:", response.data);
+      toast.error(payload?.message || "Failed to sign up with Google.");
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Google Signup failed. Please try again."));
     } finally {
