@@ -641,6 +641,66 @@ export default function Home() {
         </section>
 
 
+        {/* SECTION 2.5: AI AGENT SHOWCASE */}
+        <section className="py-28 relative overflow-hidden bg-background">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[150px]"></div>
+          
+          <div className="container mx-auto px-4 max-w-5xl relative z-10">
+            <div className="grid md:grid-cols-2 gap-16 items-center">
+              
+              {/* Bot Image — No container, just the image with shadow */}
+              <div className="flex justify-center relative">
+                <img 
+                  src="/Bot.png" 
+                  alt="ApplyFlow AI Agent" 
+                  className="w-[26rem] h-[26rem] md:w-[32rem] md:h-[32rem] object-contain select-none drop-shadow-[0_22px_55px_rgba(255,255,255,0.28)] hover:drop-shadow-[0_28px_70px_rgba(255,255,255,0.4)] transition-all duration-500 hover:scale-105"
+                />
+              </div>
+
+              {/* Simple text describing what the AI agent does */}
+              <div className="space-y-8">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-primary mb-3 block">Your AI Agent</span>
+                  <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                    It Works While You Sleep
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mt-4">
+                    Your dedicated AI agent handles everything — from scanning jobs to landing in recruiter inboxes. Fully automated.
+                  </p>
+                </div>
+
+                <div className="space-y-5">
+                  {[
+                    { icon: "✉️", text: "Email Outreach Automation" },
+                    { icon: "📊", text: "ATS Resume Scoring & Fixes" },
+                    { icon: "🎯", text: "Smart Job Matching" },
+                    { icon: "📝", text: "Cover Letter Generation" },
+                    { icon: "🔄", text: "24/7 Background Processing" },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-4 group">
+                      <span className="text-xl">{item.icon}</span>
+                      <span className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setWaitlistSubmitted(false);
+                    setWaitlistEmail("");
+                    setIsComingSoonOpen(true);
+                  }}
+                  className={buttonVariants({ className: "rounded-xl font-bold shadow-none hover:shadow-none" })}
+                >
+                  Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+
         {/* SECTION 3: WORKFLOW EXPLAINER ANIMATIONS ("How It Works") */}
         <section id="explainer-section" className="py-24 relative overflow-hidden bg-background">
           <div className="absolute -top-40 right-10 -z-10 w-[450px] h-[450px] bg-primary/5 rounded-full blur-[120px]"></div>
