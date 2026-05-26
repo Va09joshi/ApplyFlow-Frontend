@@ -5,6 +5,21 @@ Summary
 
 Lightweight Next.js (App Router) frontend for ApplyFlow — focused on authentication, dashboard, and AI-assist features. This README is written without decorative icons and uses a plain console-like presentation for quick developer onboarding.
 
+Live demo
+---------
+
+Visit the production demo: https://applyflow.live/
+
+Why this project matters
+------------------------
+
+- **Secure by design:** avoids client-side refresh-token storage and prefers HttpOnly cookie flows for production.
+- **Production-ready:** includes security headers and environment-driven configuration to make deployments safer and easier.
+- **User-focused auth:** polished Google sign-in and progressive UX to handle differences between local and hosted environments.
+- **Extensible architecture:** `src/services`, `src/lib`, and `src/store` separate concerns for easier maintenance and feature growth.
+- **Mobile-aware:** responsive layouts and components provide a usable experience on mobile and desktop.
+
+
 Quick Start
 -----------
 
