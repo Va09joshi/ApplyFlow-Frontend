@@ -47,13 +47,15 @@ api.interceptors.response.use(
       }
     }
 
-    // If the error is a 401 and we haven't already tried to refresh the token
+    // If the error is a 401 and we have a refresh token, try to refresh once.
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = useAuthStore.getState().refreshToken;
-        if (!refreshToken) throw new Error('No refresh token');
+        if (!refreshToken) {
+          return Promise.reject(error);
+        }
 
         // Request a new token
         const res = await axios.post(`${api.defaults.baseURL}/api/v1/auth/refresh`, {
@@ -69,7 +71,7 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch (refreshError) {
-        // If refresh fails, log out the user
+        // If refresh fails, log out the user only when token-based auth was in use.
         useAuthStore.getState().logout();
         window.location.href = '/login';
         return Promise.reject(refreshError);
