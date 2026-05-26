@@ -1,77 +1,94 @@
-# ApplyFlow AI Frontend
+# ApplyFlow Frontend
 
-ApplyFlow AI is a job application management platform with AI-driven tools for outreach, ATS analysis, and pipeline tracking. This repository contains the Next.js frontend for the dashboard, automation workflows, and analytics views.
+Summary
+-------
 
-## Highlights
+Lightweight Next.js (App Router) frontend for ApplyFlow — focused on authentication, dashboard, and AI-assist features. This README is written without decorative icons and uses a plain console-like presentation for quick developer onboarding.
 
-- Dashboard with analytics, charts, and recent activity
-- AI email generator with Gmail-style compose UI
-- Applications tracker with status updates
-- Companies, resumes, ATS analyzer, and settings pages
-- Modern UI with Tailwind CSS, Recharts, and Framer Motion
+Quick Start
+-----------
 
-## Tech Stack
-
-- Next.js 16 (App Router)
-- React 19
-- TypeScript
-- Tailwind CSS
-- Recharts
-- Framer Motion
-- Zustand
-
-## Getting Started
-
-Install dependencies:
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-Run the dev server:
+2. Local development
 
 ```bash
 npm run dev
+# open http://localhost:3000
 ```
 
-Open http://localhost:3000
-
-## Environment Variables
-
-Create a `.env.local` file in the project root. Example:
+3. Build for production
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL="https://api.yourdomain.com"
+npm run build
+npm run start
 ```
 
-If your backend uses additional keys, add them here. Do not commit `.env.local`.
+Environment variables
+---------------------
 
-## Scripts
+Required (set in your environment or Vercel project):
 
-- `npm run dev` - Start the dev server
-- `npm run build` - Build for production
-- `npm run start` - Run the production build
-- `npm run lint` - Run lint
+- `NEXT_PUBLIC_API_BASE_URL` — API base URL used by the frontend
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` — Google OAuth client id
 
-## Deployment
+Optional:
 
-Deploy on Vercel:
+- `NEXT_PUBLIC_API_URL` — legacy fallback for API base URL
 
-1. Import the GitHub repo
-2. Set the environment variables from `.env.local`
-3. Deploy
+Notes on secrets
+----------------
 
-## Project Structure
+Do not commit `.env` files or credentials. This repository now ignores `.env*`, `*.pem`, and other sensitive artifacts via `.gitignore`.
 
-```text
-src/
-  app/                 # App Router pages and layouts
-  components/          # UI and layout components
-  services/            # API clients
-  store/               # Zustand state
-  lib/                 # Utilities
+Repository layout (high level)
+-----------------------------
+
+- `src/app` — Next.js App Router pages and layouts
+- `src/components` — UI components
+- `src/lib` — `api.ts` axios client and helpers
+- `src/store` — Zustand stores (auth)
+- `src/services` — API service wrappers
+
+Common tasks
+------------
+
+- Lint:
+
+```bash
+npm run lint
 ```
 
-## License
+- Test (if present):
 
-MIT
+```bash
+npm test
+```
+
+Deployment notes
+----------------
+
+This project is typically deployed to Vercel. Make sure the required environment variables are configured in the Vercel dashboard and that your Google OAuth client includes the production domain in Authorized JavaScript origins.
+
+Security guidance
+-----------------
+
+- Do not store refresh tokens in client-side accessible storage. Prefer HttpOnly cookies set by the backend for production.
+- Avoid writing credentials into JavaScript-accessible cookies. The repo now avoids client-side cookie writes for auth tokens.
+
+Troubleshooting
+---------------
+
+- If Google sign-in fails in production but works locally, check:
+  - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` value in Vercel
+  - Google Cloud Console Authorized Origins
+  - CSP or iframe restrictions introduced by the hosting environment
+
+Contact
+-------
+
+For repository-level questions, open an issue or reach out to the maintainer.
