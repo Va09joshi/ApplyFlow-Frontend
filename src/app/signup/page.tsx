@@ -162,8 +162,7 @@ export default function SignupPage() {
             <div className="w-full flex justify-center">
               {mounted ? (
                 process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
-                  <div className="relative w-full h-11 group">
-                    {/* Custom Premium UI Button */}
+                  <div className="relative w-full h-11">
                     <Button 
                       type="button"
                       variant="outline" 
@@ -190,16 +189,12 @@ export default function SignupPage() {
                       <span>Google</span>
                     </Button>
 
-                    {/* Hidden real GoogleLogin on top */}
-                    <div 
-                      className="absolute inset-0 opacity-0 cursor-pointer overflow-hidden rounded-lg"
-                      style={{ opacity: 0 }}
-                    >
-                      <div className="w-full h-full [&>div]:!w-full [&>div>iframe]:!w-full [&>div>iframe]:!h-full [&>div>iframe]:!min-w-full [&>div>iframe]:!min-h-full [&>div>iframe]:!max-w-full [&>div>iframe]:!opacity-0">
+                    <div className="absolute inset-0 z-10 opacity-0">
+                      <div className="w-full h-full [&>div]:!w-full [&>div]:!h-full [&_iframe]:!w-full [&_iframe]:!h-full">
                         <GoogleLogin
                           onSuccess={handleGoogleSuccess}
                           onError={() => {
-                            toast.error('Google Signup Failed');
+                            toast.error("Google Signup Failed");
                           }}
                           width="100%"
                           theme="filled_black"
