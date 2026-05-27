@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { resumeService, Resume } from "@/services/resume.service";
+import DOMPurify from "dompurify";
+import Papa from "papaparse";
 
 export default function EmailAutomationsPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -31,7 +33,8 @@ export default function EmailAutomationsPage() {
   // New/Edit Template Form
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
-  const [newTemplate, setNewTemplate] = useState({ name: "", subject: "", body: "" });
+  const [newTemplate, setNewTemplate] = useState({ name: "", subject: "", body: "", plainText: "", linkLabel: "", linkUrl: "" });
+  const [templatePreviewMode, setTemplatePreviewMode] = useState<"html" | "plain">("html");
   const [isCreating, setIsCreating] = useState(false);
 
   // Resumes list state
@@ -50,21 +53,37 @@ export default function EmailAutomationsPage() {
     insertResumeLink: false,
     resumeLinkLabel: "View My Resume",
     resumeId: "",
-    contentType: "html"
+    contentType: "html",
+    templateId: "",
+    linkUrl: "",
+    linkLabel: "",
+    attachments: [] as { name: string; url?: string; file?: File }[]
   });
   const [isSending, setIsSending] = useState(false);
+  const [sentDeliveryStatus, setSentDeliveryStatus] = useState<any>(null);
+
+  // Preview Email Form
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<{ html: string, plainText: string, to: string, subject: string } | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewTab, setPreviewTab] = useState<"html" | "plain">("html");
 
   // Bulk CSV Form
   const [isCsvDialogOpen, setIsCsvDialogOpen] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isUploadingCsv, setIsUploadingCsv] = useState(false);
+  const [csvResults, setCsvResults] = useState<any>(null);
+  const [csvPreviewRows, setCsvPreviewRows] = useState<any[]>([]);
+  const [csvColumns, setCsvColumns] = useState<string[]>([]);
+  const [csvMapping, setCsvMapping] = useState<Record<string, string>>({});
   const [csvOptions, setCsvOptions] = useState({
     useTemplate: true,
     attachResume: true,
     insertResumeLink: false,
     resumeLinkLabel: "View My Resume",
     resumeId: "",
-    contentType: "html"
+    contentType: "html",
+    fromEmail: ""
   });
 
   // Check Gmail connection status
@@ -276,7 +295,8 @@ export default function EmailAutomationsPage() {
     const id = template._id || template.id;
     if (!id) return;
     setEditingTemplateId(id);
-    setNewTemplate({ name: template.name, subject: template.subject, body: template.body });
+    setNewTemplate({ name: template.name, subject: template.subject, body: template.body, plainText: template.plainText || "", linkLabel: template.linkLabel || "", linkUrl: template.linkUrl || "" });
+    setTemplatePreviewMode("html");
     setIsTemplateDialogOpen(true);
   };
 
@@ -297,7 +317,7 @@ export default function EmailAutomationsPage() {
         toast.success("Template created!");
       }
       setIsTemplateDialogOpen(false);
-      setNewTemplate({ name: "", subject: "", body: "" });
+      setNewTemplate({ name: "", subject: "", body: "", plainText: "", linkLabel: "", linkUrl: "" });
       setEditingTemplateId(null);
       fetchTemplates();
     } catch (error) {
@@ -321,45 +341,163 @@ export default function EmailAutomationsPage() {
     }
   };
 
+  const handlePreviewEmail = async () => {
+    if (!sendForm.to) {
+      return toast.error("Please enter a recipient email address (To) before previewing.");
+    }
+    
+    try {
+      setIsPreviewLoading(true);
+      
+      const r = sendForm.resumeId ? resumes.find(res => (res._id || res.id) === sendForm.resumeId) : null;
+      
+      let finalHtml = sendForm.html;
+      let finalPlain = sendForm.contentType === 'plain' ? sendForm.html : sendForm.html.replace(/<[^>]+>/g, '');
+
+      if (sendForm.useTemplate && sendForm.linkUrl) {
+        finalHtml += `<br><br><a href="${sendForm.linkUrl}" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">${sendForm.linkLabel || 'Click Here'}</a>`;
+        finalPlain += `\n\n${sendForm.linkLabel || 'Click Here'}: ${sendForm.linkUrl}`;
+      }
+
+      if (sendForm.attachments && sendForm.attachments.length > 0) {
+        finalHtml += `<br><br><p><strong>Attachments:</strong></p><ul>`;
+        finalPlain += `\n\nAttachments:\n`;
+        sendForm.attachments.forEach(a => {
+          finalHtml += `<li>${a.name} (File will be attached)</li>`;
+          finalPlain += `- ${a.name} (File will be attached)\n`;
+        });
+        finalHtml += `</ul>`;
+      }
+      
+      const emailData = {
+        to: sendForm.to || "test@example.com",
+        subject: sendForm.subject || "No Subject",
+        body: finalHtml,
+        html: finalHtml,
+        plainText: finalPlain,
+        fromEmail: gmailStatus?.email || sendForm.fromEmail || "user@example.com",
+        contentType: sendForm.contentType,
+        useTemplate: sendForm.useTemplate,
+        insertResumeLink: sendForm.insertResumeLink,
+        resumeUrl: r?.fileUrl || "",
+        resumeLinkLabel: sendForm.resumeLinkLabel,
+        attachResume: sendForm.attachResume,
+        attachments: sendForm.attachments?.map(a => ({ name: a.name, url: a.url || "" })) || []
+      };
+      const res = await emailService.preview(emailData);
+      if (res?.data) {
+        setPreviewData(res.data);
+        setIsPreviewDialogOpen(true);
+      }
+    } catch (error) {
+      toast.error("Failed to generate preview.");
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
   const handleSendEmail = async () => {
+    if (!sendForm.to) {
+      return toast.error("Please enter a recipient email address (To).");
+    }
+
     try {
       setIsSending(true);
-      const emailData = {
-        ...sendForm,
-        fromEmail: gmailStatus?.email || sendForm.fromEmail,
-      };
-      await emailService.queue(emailData);
-      toast.success("Email queued for sending!");
-      setIsSendDialogOpen(false);
+      setSentDeliveryStatus(null);
       
-      const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
-      setSendForm({
-        to: "",
-        subject: "",
-        html: "",
-        fromEmail: gmailStatus?.email || "",
-        useTemplate: true,
-        attachResume: true,
-        insertResumeLink: false,
-        resumeLinkLabel: "View My Resume",
-        resumeId: defaultResumeId,
-        contentType: "html"
-      });
-    } catch (error) {
-      toast.error("Failed to queue email. Please ensure you have connected Gmail.");
+      let uploadedAttachments = [...sendForm.attachments];
+      // Upload local files to get cloud URLs
+      for (let i = 0; i < uploadedAttachments.length; i++) {
+        if (uploadedAttachments[i].file && !uploadedAttachments[i].url) {
+          try {
+            const upRes = await resumeService.upload(uploadedAttachments[i].file as File, uploadedAttachments[i].name);
+            if (upRes?.data?.fileUrl) {
+              uploadedAttachments[i].url = upRes.data.fileUrl;
+            }
+          } catch (e: any) {
+            console.warn("Upload endpoint rejected file, falling back to Base64", e);
+            try {
+              const base64Url = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(uploadedAttachments[i].file as File);
+              });
+              uploadedAttachments[i].url = base64Url;
+            } catch (fallbackErr) {
+              console.error("Failed to convert attachment to Base64", uploadedAttachments[i].name);
+              toast.error(`Failed to process attachment ${uploadedAttachments[i].name}`);
+              setIsSending(false);
+              return;
+            }
+          }
+        }
+      }
+
+      const r = sendForm.resumeId ? resumes.find(res => (res._id || res.id) === sendForm.resumeId) : null;
+
+      let finalHtml = sendForm.html;
+      let finalPlain = sendForm.contentType === 'plain' ? sendForm.html : sendForm.html.replace(/<[^>]+>/g, '');
+
+      if (sendForm.useTemplate && sendForm.linkUrl) {
+        finalHtml += `<br><br><a href="${sendForm.linkUrl}" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">${sendForm.linkLabel || 'Click Here'}</a>`;
+        finalPlain += `\n\n${sendForm.linkLabel || 'Click Here'}: ${sendForm.linkUrl}`;
+      }
+
+      if (uploadedAttachments.filter(a => a.url).length > 0) {
+        finalHtml += `<br><br><p><strong>Attachments:</strong></p><ul>`;
+        finalPlain += `\n\nAttachments:\n`;
+        uploadedAttachments.filter(a => a.url).forEach(a => {
+          finalHtml += `<li><a href="${a.url}">${a.name}</a></li>`;
+          finalPlain += `- ${a.name}: ${a.url}\n`;
+        });
+        finalHtml += `</ul>`;
+      }
+
+      const emailData = {
+        to: sendForm.to,
+        subject: sendForm.subject,
+        body: finalHtml,
+        html: finalHtml,
+        plainText: finalPlain,
+        fromEmail: gmailStatus?.email || sendForm.fromEmail,
+        contentType: sendForm.contentType,
+        useTemplate: sendForm.useTemplate,
+        insertResumeLink: sendForm.insertResumeLink,
+        resumeUrl: r?.fileUrl || "",
+        resumeLinkLabel: sendForm.resumeLinkLabel,
+        attachResume: sendForm.attachResume,
+        attachments: uploadedAttachments.filter(a => a.url).map(a => ({ name: a.name, url: a.url! }))
+      };
+      
+      const res = await emailService.queue(emailData);
+      
+      if (res?.data?.delivery) {
+        setSentDeliveryStatus(res.data.delivery);
+      } else {
+        toast.success("Email queued for sending!");
+        setIsSendDialogOpen(false);
+        setSendForm({ ...sendForm, to: "", subject: "", html: "", attachments: [], templateId: "", linkUrl: "", linkLabel: "" });
+      }
+    } catch (error: any) {
+      console.error("Queue email error:", error?.response?.data || error);
+      const errMsg = error?.response?.data?.message || error?.message || "Unknown error";
+      toast.error(`Failed to queue email: ${errMsg}`);
     } finally {
       setIsSending(false);
     }
   };
 
+
   const handleBulkCsvUpload = async () => {
     if (!csvFile) return toast.error("Please select a CSV file first.");
+    if (!csvMapping['to']) return toast.error("Please map the 'To (Email)' column.");
     try {
       setIsUploadingCsv(true);
-      await emailService.bulkCsv(csvFile, csvOptions);
-      toast.success("Bulk emails queued successfully!");
-      setIsCsvDialogOpen(false);
-      setCsvFile(null);
+      const payload = { ...csvOptions, mapping: JSON.stringify(csvMapping) };
+      const res = await emailService.bulkCsv(csvFile, payload as any);
+      toast.success("Bulk emails processed!");
+      setCsvResults(res?.data || res); // show summary instead of closing
       
       const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
       setCsvOptions({
@@ -368,7 +506,8 @@ export default function EmailAutomationsPage() {
         insertResumeLink: false,
         resumeLinkLabel: "View My Resume",
         resumeId: defaultResumeId,
-        contentType: "html"
+        contentType: "html",
+        fromEmail: ""
       });
     } catch (error) {
       toast.error("Failed to upload CSV.");
@@ -390,7 +529,11 @@ export default function EmailAutomationsPage() {
         insertResumeLink: false,
         resumeLinkLabel: "View My Resume",
         resumeId: defaultResumeId,
-        contentType: "html"
+        contentType: "html",
+        templateId: template._id || template.id || "",
+        linkUrl: template.linkUrl || "",
+        linkLabel: template.linkLabel || "",
+        attachments: [],
       });
     } else {
       setSendForm({
@@ -403,7 +546,11 @@ export default function EmailAutomationsPage() {
         insertResumeLink: false,
         resumeLinkLabel: "View My Resume",
         resumeId: defaultResumeId,
-        contentType: "html"
+        contentType: "html",
+        templateId: "",
+        linkUrl: "",
+        linkLabel: "",
+        attachments: [],
       });
     }
     setIsSendDialogOpen(true);
@@ -526,38 +673,117 @@ export default function EmailAutomationsPage() {
               Send Email
             </DialogTrigger>
             <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0 overflow-hidden gap-0 flex flex-col border border-border/60 shadow-2xl rounded-2xl bg-background">
-              <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10 shrink-0">
-                <DialogTitle className="text-lg">New Message</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
-                  <span className="text-muted-foreground text-sm w-14 shrink-0">To</span>
-                  <input 
-                    className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70" 
-                    value={sendForm.to} 
-                    onChange={e => setSendForm({...sendForm, to: e.target.value})} 
-                    placeholder="hr@company.com" 
-                  />
-                </div>
-                <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
-                  <span className="text-muted-foreground text-sm w-14 shrink-0">From</span>
-                  {gmailStatus ? (
-                    <div className="flex items-center gap-2 px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/5 shrink-0">
-                      <Avatar className="h-4 w-4">
-                        <AvatarImage src={gmailStatus.avatar} />
-                        <AvatarFallback className="text-[8px]">{getInitials(gmailStatus.name)}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs font-medium text-foreground">{gmailStatus.email}</span>
+              {sentDeliveryStatus ? (
+                <div className="p-8 flex flex-col items-center justify-center text-center space-y-6 animate-in zoom-in-95 duration-300">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-bold tracking-tight">Email Sent Successfully</h2>
+                    <p className="text-muted-foreground text-sm">Your email has been queued and processed by the delivery provider.</p>
+                  </div>
+                  
+                  <div className="w-full bg-muted/30 border border-border/50 rounded-xl p-5 text-sm space-y-3 text-left">
+                    <div className="flex justify-between border-b border-border/30 pb-2">
+                      <span className="text-muted-foreground">Provider</span>
+                      <span className="font-semibold uppercase tracking-wider text-xs">{sentDeliveryStatus.provider || "SMTP"}</span>
                     </div>
-                  ) : (
-                    <input 
-                      className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70 shrink-0" 
-                      value={sendForm.fromEmail} 
-                      onChange={e => setSendForm({...sendForm, fromEmail: e.target.value})} 
-                      placeholder="you@gmail.com" 
-                    />
-                  )}
+                    <div className="flex justify-between border-b border-border/30 pb-2">
+                      <span className="text-muted-foreground">Status</span>
+                      <Badge variant="outline" className="text-[10px] h-5 border-emerald-500/30 text-emerald-600 bg-emerald-500/10">
+                        {sentDeliveryStatus.sent ? "Delivered" : "Queued"}
+                      </Badge>
+                    </div>
+                    {sentDeliveryStatus.messageId && (
+                      <div className="flex justify-between border-b border-border/30 pb-2">
+                        <span className="text-muted-foreground">Message ID</span>
+                        <span className="font-mono text-xs text-muted-foreground truncate max-w-[200px]">{sentDeliveryStatus.messageId}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Timestamp</span>
+                      <span className="font-mono text-xs">{new Date().toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 w-full pt-4">
+                    <Button 
+                      className="flex-1" 
+                      variant="outline" 
+                      onClick={() => {
+                        setIsSendDialogOpen(false);
+                        setSentDeliveryStatus(null);
+                        setSendForm({ ...sendForm, to: "", subject: "", html: "", attachments: [], templateId: "", linkUrl: "", linkLabel: "" });
+                      }}
+                    >
+                      Close
+                    </Button>
+                    <Button className="flex-1" onClick={handlePreviewEmail}>
+                      View Sent Preview
+                    </Button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10 shrink-0 flex flex-row items-center justify-between">
+                    <DialogTitle className="text-lg">New Message</DialogTitle>
+                    <Select onValueChange={(val) => {
+                      const t = templates.find(temp => (temp._id || temp.id) === val);
+                      if (t) {
+                        setSendForm(prev => ({
+                          ...prev,
+                          subject: t.subject,
+                          html: prev.contentType === 'plain' ? (t.plainText || t.body) : t.body,
+                          useTemplate: true,
+                          templateId: t._id || t.id || "",
+                          linkUrl: t.linkUrl || "",
+                          linkLabel: t.linkLabel || "",
+                          resumeLinkLabel: t.linkLabel || "View My Resume",
+                        }));
+                      }
+                    }}>
+                      <SelectTrigger className="w-[200px] h-8 bg-background border-border/50 text-xs">
+                        <SelectValue placeholder="Select Template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates.map(t => (
+                          <SelectItem key={t._id || t.id} value={t._id || t.id || ""}>{t.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </DialogHeader>
+                  <div className="flex flex-col flex-1 overflow-hidden">
+                    <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
+                      <span className="text-muted-foreground text-sm w-14 shrink-0">To</span>
+                      <input 
+                        className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70" 
+                        value={sendForm.to} 
+                        onChange={e => setSendForm({...sendForm, to: e.target.value})} 
+                        placeholder="hr@company.com" 
+                      />
+                    </div>
+                    <div className="px-6 py-2.5 border-b border-border/50 flex items-center group focus-within:bg-muted/5 transition-colors shrink-0">
+                      <span className="text-muted-foreground text-sm w-14 shrink-0">From</span>
+                      {gmailStatus ? (
+                        <div className="flex items-center gap-2 px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/5 shrink-0">
+                          <Avatar className="h-4 w-4">
+                            <AvatarImage src={gmailStatus.avatar} />
+                            <AvatarFallback className="text-[8px]">{getInitials(gmailStatus.name)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs font-medium text-foreground">{gmailStatus.email}</span>
+                        </div>
+                      ) : (
+                        <div className="flex-1 flex items-center gap-2">
+                          <input 
+                            className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/70 shrink-0" 
+                            value={sendForm.fromEmail} 
+                            onChange={e => setSendForm({...sendForm, fromEmail: e.target.value})} 
+                            placeholder="you@domain.com" 
+                          />
+                          <Button variant="link" size="sm" className="h-6 px-2 text-[10px]" onClick={handleConnectGmail}>Connect Gmail</Button>
+                        </div>
+                      )}
+                    </div>
                 <div className="px-6 py-3 border-b border-border/50 flex items-center focus-within:bg-muted/5 transition-colors shrink-0">
                   <input 
                     className="flex-1 bg-transparent outline-none text-sm font-semibold placeholder:font-normal placeholder:text-muted-foreground/70" 
@@ -629,6 +855,35 @@ export default function EmailAutomationsPage() {
                         </div>
 
                         <div className="space-y-3">
+                          {sendForm.useTemplate && (
+                            <div className="space-y-3 pb-2 border-b border-border/30">
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Custom Action Button</span>
+                                <span className="text-[9px] text-muted-foreground mb-2">Configure the primary button in the template.</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">Button Text</label>
+                                  <Input 
+                                    value={sendForm.linkLabel} 
+                                    onChange={(e) => setSendForm({ ...sendForm, linkLabel: e.target.value })}
+                                    placeholder="e.g. Portfolio"
+                                    className="h-8 bg-background/50 text-xs border-border/40"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-muted-foreground uppercase">Button URL</label>
+                                  <Input 
+                                    value={sendForm.linkUrl} 
+                                    onChange={(e) => setSendForm({ ...sendForm, linkUrl: e.target.value })}
+                                    placeholder="https://..."
+                                    className="h-8 bg-background/50 text-xs border-border/40"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="flex items-center justify-between p-2 rounded-lg border border-border/40 bg-background/50 hover:bg-background/80 transition-colors">
                             <div className="flex flex-col">
                               <span className="text-xs font-semibold text-foreground">Insert Resume Link</span>
@@ -640,7 +895,7 @@ export default function EmailAutomationsPage() {
                             />
                           </div>
 
-                          <div className="flex flex-col gap-1">
+                          <div className="flex flex-col gap-0.5 justify-center">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
                             <Select 
                               value={sendForm.resumeId} 
@@ -651,27 +906,73 @@ export default function EmailAutomationsPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="">Default Resume (Fallback)</SelectItem>
-                                {resumes.map((r, i) => (
-                                  <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
-                                    {r.name} {r.isDefault ? "(Default)" : ""}
-                                  </SelectItem>
-                                ))}
+                                {resumes.map((r, i) => {
+                                  let displayName = r.name || "Resume Document";
+                                  if (/^[0-9a-fA-F]{24}$/.test(displayName)) {
+                                    displayName = "Resume Document";
+                                  }
+                                  return (
+                                    <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
+                                      {displayName} {r.isDefault ? "(Default)" : ""}
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                           </div>
-                        </div>
 
-                        {sendForm.insertResumeLink && (
-                          <div className="md:col-span-2 space-y-1 animate-in fade-in duration-200">
-                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
-                            <Input 
-                              value={sendForm.resumeLinkLabel} 
-                              onChange={(e) => setSendForm({ ...sendForm, resumeLinkLabel: e.target.value })}
-                              placeholder="View My Resume"
-                              className="h-8 bg-background/50 text-xs border-border/40"
-                            />
+                          {sendForm.insertResumeLink && (
+                            <div className="space-y-1 pt-1 animate-in fade-in duration-200">
+                              <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
+                              <Input 
+                                value={sendForm.resumeLinkLabel} 
+                                onChange={(e) => setSendForm({ ...sendForm, resumeLinkLabel: e.target.value })}
+                                placeholder="View My Resume"
+                                className="h-8 bg-background/50 text-xs border-border/40"
+                              />
+                            </div>
+                          )}
+
+                          <div className="pt-2 border-t border-border/30">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Additional Attachments</label>
+                            <div 
+                              className="border border-dashed border-border/60 rounded-md p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/10 transition-colors bg-background/30"
+                              onClick={() => document.getElementById('attachment-upload')?.click()}
+                            >
+                              <UploadCloud className="w-4 h-4 text-muted-foreground mb-1" />
+                              <span className="text-[9px] text-muted-foreground">Click to browse or drag & drop</span>
+                              <input 
+                                id="attachment-upload" 
+                                type="file" 
+                                multiple 
+                                className="hidden" 
+                                onChange={(e) => {
+                                  if (e.target.files) {
+                                    const newFiles = Array.from(e.target.files).map(f => ({ name: f.name, file: f }));
+                                    setSendForm(prev => ({ ...prev, attachments: [...(prev.attachments || []), ...newFiles] }));
+                                  }
+                                }} 
+                              />
+                            </div>
+                            {sendForm.attachments && sendForm.attachments.length > 0 && (
+                              <div className="mt-2 space-y-1.5 max-h-[100px] overflow-y-auto custom-scrollbar">
+                                {sendForm.attachments.map((att, idx) => (
+                                  <div key={idx} className="flex items-center justify-between bg-background/50 border border-border/40 px-2 py-1.5 rounded text-[10px]">
+                                    <span className="truncate max-w-[140px] text-foreground/80" title={att.name}>{att.name}</span>
+                                    <button 
+                                      className="text-destructive hover:bg-destructive/10 p-0.5 rounded"
+                                      onClick={() => {
+                                        setSendForm(prev => ({ ...prev, attachments: prev.attachments.filter((_, i) => i !== idx) }));
+                                      }}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -697,14 +998,71 @@ export default function EmailAutomationsPage() {
                 </div>
               </div>
               <div className="px-6 py-3 bg-muted/10 flex items-center justify-between border-t border-border/50 shrink-0">
-                <Button className="px-6 rounded-full font-medium shadow-sm" onClick={handleSendEmail} disabled={isSending || (!gmailStatus && !sendForm.fromEmail)}>
-                  {isSending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-3.5 h-3.5 mr-2" />} Send
-                </Button>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-foreground" onClick={() => setIsSendDialogOpen(false)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                    <div className="flex items-center gap-2">
+                      <Button className="px-6 rounded-full font-medium shadow-sm" onClick={handleSendEmail} disabled={isSending || (!gmailStatus && !sendForm.fromEmail)}>
+                        {isSending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-3.5 h-3.5 mr-2" />} Send
+                      </Button>
+                      <Button variant="outline" className="px-4 rounded-full" onClick={handlePreviewEmail} disabled={isPreviewLoading}>
+                        {isPreviewLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-3.5 h-3.5 mr-2" />} Preview
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:text-foreground" onClick={() => setIsSendDialogOpen(false)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isPreviewDialogOpen} onOpenChange={setIsPreviewDialogOpen}>
+            <DialogContent className="sm:max-w-[700px] max-h-[85vh] p-0 overflow-hidden flex flex-col">
+              <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10">
+                <DialogTitle>Email Preview</DialogTitle>
+                <div className="flex gap-4 pt-2">
+                  <div className="text-xs text-muted-foreground"><strong>To:</strong> {previewData?.to || 'Not specified'}</div>
+                  <div className="text-xs text-muted-foreground"><strong>Subject:</strong> {previewData?.subject || 'Not specified'}</div>
                 </div>
+              </DialogHeader>
+              
+              <div className="flex border-b border-border/50 bg-muted/5">
+                <button
+                  className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${previewTab === 'html' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  onClick={() => setPreviewTab('html')}
+                >
+                  Visual (HTML)
+                </button>
+                <button
+                  className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors ${previewTab === 'plain' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  onClick={() => setPreviewTab('plain')}
+                >
+                  Plain Text
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-zinc-950 min-h-[350px]">
+                {previewTab === 'html' && previewData?.html && (
+                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-blue-600">
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewData.html) }} />
+                    {sendForm.insertResumeLink && sendForm.resumeLinkLabel && sendForm.resumeId && (
+                      <div className="mt-6">
+                        <a href="#" className="inline-block px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-md text-decoration-none hover:bg-blue-700">
+                          {sendForm.resumeLinkLabel}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {previewTab === 'plain' && previewData?.plainText && (
+                  <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/80">
+                    {previewData.plainText}
+                    {sendForm.insertResumeLink && sendForm.resumeLinkLabel && sendForm.resumeId && (
+                      `\n\n[${sendForm.resumeLinkLabel}: https://example.com/resume-preview]`
+                    )}
+                  </div>
+                )}
               </div>
             </DialogContent>
           </Dialog>
@@ -716,119 +1074,254 @@ export default function EmailAutomationsPage() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Upload Bulk CSV</DialogTitle>
+                <DialogTitle>{csvResults ? "Bulk Upload Complete" : "Upload Bulk CSV"}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>CSV File</Label>
-                  <Input 
-                    type="file" 
-                    accept=".csv"
-                    onChange={e => setCsvFile(e.target.files?.[0] || null)} 
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Upload a CSV file containing email data.</p>
-                  <div className="mt-2.5 p-2.5 rounded-lg border border-primary/20 bg-primary/5 text-[11px] text-muted-foreground leading-relaxed animate-in fade-in duration-200">
-                    💡 <strong>Pro Tip</strong>: You can personalize content types per recipient! Include a column named <code>contentType</code> with the value <code>plain</code> inside your CSV file to send lightweight plain-text emails for individual rows.
+              
+              {csvResults ? (
+                <div className="space-y-4 pt-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                   </div>
+                  <div className="bg-muted/30 border border-border/50 rounded-lg p-4 text-sm space-y-3 text-left">
+                    <div className="flex justify-between border-b border-border/30 pb-2">
+                      <span className="text-muted-foreground">Rows Imported</span>
+                      <span className="font-bold">{csvResults.imported || csvResults.total || 0}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-border/30 pb-2">
+                      <span className="text-muted-foreground">Successfully Queued</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-500">{csvResults.success || csvResults.sent || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Errors</span>
+                      <span className="font-bold text-destructive">{csvResults.errors || csvResults.failed || 0}</span>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4" onClick={() => { setCsvResults(null); setIsCsvDialogOpen(false); }}>
+                    Done
+                  </Button>
                 </div>
-
-                {/* Global CSV Options */}
-                <div className="space-y-3 p-3 rounded-lg border border-border/40 bg-muted/10">
-                  <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                    <Settings2 className="w-3.5 h-3.5 text-primary animate-pulse" />
-                    Global CSV Delivery Settings
-                  </span>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
-                      <div className="flex flex-col">
-                        <span className="text-[11px] font-semibold text-foreground">Wrap in Premium Card</span>
-                        <span className="text-[9px] text-muted-foreground">Apply template wrapper</span>
-                      </div>
-                      <Switch 
-                        checked={csvOptions.useTemplate} 
-                        onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, useTemplate: checked })} 
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
-                      <div className="flex flex-col">
-                        <span className="text-[11px] font-semibold text-foreground">Attach Resume PDF</span>
-                        <span className="text-[9px] text-muted-foreground">Attach physical PDF file</span>
-                      </div>
-                      <Switch 
-                        checked={csvOptions.attachResume} 
-                        onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, attachResume: checked })} 
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
-                      <div className="flex flex-col">
-                        <span className="text-[11px] font-semibold text-foreground">Insert Resume Link</span>
-                        <span className="text-[9px] text-muted-foreground">Embed a clickable preview button</span>
-                      </div>
-                      <Switch 
-                        checked={csvOptions.insertResumeLink} 
-                        onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, insertResumeLink: checked })} 
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-0.5 justify-center">
-                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
-                      <Select 
-                        value={csvOptions.resumeId} 
-                        onValueChange={(val) => setCsvOptions({ ...csvOptions, resumeId: val || "" })}
-                      >
-                        <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
-                          <SelectValue placeholder="Default Resume (Fallback)" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Default Resume (Fallback)</SelectItem>
-                          {resumes.map((r, i) => (
-                            <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
-                              {r.name} {r.isDefault ? "(Default)" : ""}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex flex-col gap-0.5 justify-center">
-                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Content Type</label>
-                      <Select 
-                        value={csvOptions.contentType} 
-                        onValueChange={(val) => setCsvOptions({ ...csvOptions, contentType: val || "html", ...(val === "plain" ? { useTemplate: false } : {}) })}
-                      >
-                        <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
-                          <SelectValue placeholder="HTML Formatted" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="html">HTML Formatted</SelectItem>
-                          <SelectItem value="plain">Plain Text</SelectItem>
-                          <SelectItem value="auto">Auto Detect</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+              ) : (
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>CSV File</Label>
+                    <Input 
+                      type="file" 
+                      accept=".csv"
+                      onChange={e => {
+                        const file = e.target.files?.[0] || null;
+                        setCsvFile(file);
+                        if (file) {
+                          Papa.parse(file, {
+                            header: true,
+                            preview: 20,
+                            skipEmptyLines: true,
+                            complete: (results) => {
+                              setCsvPreviewRows(results.data);
+                              if (results.meta.fields) {
+                                setCsvColumns(results.meta.fields);
+                                const mapping: Record<string, string> = {};
+                                const lower = results.meta.fields.map(f => f.toLowerCase());
+                                if (lower.includes('to')) mapping['to'] = results.meta.fields[lower.indexOf('to')];
+                                else if (lower.includes('email')) mapping['to'] = results.meta.fields[lower.indexOf('email')];
+                                
+                                if (lower.includes('subject')) mapping['subject'] = results.meta.fields[lower.indexOf('subject')];
+                                if (lower.includes('name')) mapping['name'] = results.meta.fields[lower.indexOf('name')];
+                                if (lower.includes('role')) mapping['role'] = results.meta.fields[lower.indexOf('role')];
+                                setCsvMapping(mapping);
+                              }
+                            }
+                          });
+                        } else {
+                          setCsvPreviewRows([]);
+                          setCsvColumns([]);
+                        }
+                      }} 
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Upload a CSV file containing email data.</p>
                   </div>
 
-                  {csvOptions.insertResumeLink && (
-                    <div className="space-y-1 pt-1 animate-in fade-in duration-200">
-                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
-                      <Input 
-                        value={csvOptions.resumeLinkLabel} 
-                        onChange={(e) => setCsvOptions({ ...csvOptions, resumeLinkLabel: e.target.value })}
-                        placeholder="View My Resume"
-                        className="h-8 bg-background/50 text-xs border-border/40"
-                      />
+                  {csvColumns.length > 0 && (
+                    <div className="space-y-3 p-3 rounded-lg border border-border/40 bg-muted/5 animate-in fade-in">
+                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Column Mapping</span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-muted-foreground uppercase">To (Email) *</label>
+                          <Select value={csvMapping['to'] || ""} onValueChange={(v) => setCsvMapping({...csvMapping, to: v})}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select column" /></SelectTrigger>
+                            <SelectContent>{csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Subject</label>
+                          <Select value={csvMapping['subject'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, subject: v === "none" ? "" : v})}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Skip mapping</SelectItem>
+                              {csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Name</label>
+                          <Select value={csvMapping['name'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, name: v === "none" ? "" : v})}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Skip mapping</SelectItem>
+                              {csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Role</label>
+                          <Select value={csvMapping['role'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, role: v === "none" ? "" : v})}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Skip mapping</SelectItem>
+                              {csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
 
-                <Button className="w-full" onClick={handleBulkCsvUpload} disabled={isUploadingCsv || !csvFile}>
-                  {isUploadingCsv ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />} 
-                  {isUploadingCsv ? "Uploading..." : "Upload & Send"}
-                </Button>
-              </div>
+                  {csvPreviewRows.length > 0 && (
+                    <div className="border border-border/40 rounded-lg overflow-hidden bg-background">
+                      <div className="bg-muted/10 px-3 py-2 border-b border-border/30">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase">Preview (First 20 rows)</span>
+                      </div>
+                      <div className="overflow-x-auto max-h-[150px] overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-xs text-left whitespace-nowrap">
+                          <thead className="bg-muted/5 sticky top-0">
+                            <tr>
+                              {csvColumns.map(c => (
+                                <th key={c} className="px-3 py-1.5 border-b border-border/30 font-medium text-muted-foreground">{c}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {csvPreviewRows.map((row, i) => (
+                              <tr key={i} className="border-b border-border/10 hover:bg-muted/5 last:border-0">
+                                {csvColumns.map(c => (
+                                  <td key={c} className="px-3 py-1.5 text-foreground/80">{row[c] as React.ReactNode}</td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Global CSV Options */}
+                  <div className="space-y-3 p-3 rounded-lg border border-border/40 bg-muted/10">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Settings2 className="w-3.5 h-3.5 text-primary animate-pulse" />
+                      Global CSV Delivery Settings
+                    </span>
+
+                    <div className="space-y-1 mb-2 border-b border-border/30 pb-3">
+                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Sender Email (Optional)</label>
+                      <Input 
+                        placeholder="e.g. your_custom@domain.com" 
+                        value={csvOptions.fromEmail}
+                        onChange={e => setCsvOptions({ ...csvOptions, fromEmail: e.target.value })}
+                        className="h-8 bg-background/50 text-xs border-border/40"
+                      />
+                      <p className="text-[9px] text-muted-foreground">If left empty, defaults to the connected Gmail account.</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-semibold text-foreground">Wrap in Premium Card</span>
+                          <span className="text-[9px] text-muted-foreground">Apply template wrapper</span>
+                        </div>
+                        <Switch 
+                          checked={csvOptions.useTemplate} 
+                          onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, useTemplate: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-semibold text-foreground">Attach Resume PDF</span>
+                          <span className="text-[9px] text-muted-foreground">Attach physical PDF file</span>
+                        </div>
+                        <Switch 
+                          checked={csvOptions.attachResume} 
+                          onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, attachResume: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-semibold text-foreground">Insert Resume Link</span>
+                          <span className="text-[9px] text-muted-foreground">Embed a clickable preview button</span>
+                        </div>
+                        <Switch 
+                          checked={csvOptions.insertResumeLink} 
+                          onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, insertResumeLink: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-0.5 justify-center">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
+                        <Select 
+                          value={csvOptions.resumeId} 
+                          onValueChange={(val) => setCsvOptions({ ...csvOptions, resumeId: val || "" })}
+                        >
+                          <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
+                            <SelectValue placeholder="Default Resume (Fallback)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Default Resume (Fallback)</SelectItem>
+                            {resumes.map((r, i) => (
+                              <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
+                                {r.name} {r.isDefault ? "(Default)" : ""}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex flex-col gap-0.5 justify-center">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Content Type</label>
+                        <Select 
+                          value={csvOptions.contentType} 
+                          onValueChange={(val) => setCsvOptions({ ...csvOptions, contentType: val || "html", ...(val === "plain" ? { useTemplate: false } : {}) })}
+                        >
+                          <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
+                            <SelectValue placeholder="HTML Formatted" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="html">HTML Formatted</SelectItem>
+                            <SelectItem value="plain">Plain Text</SelectItem>
+                            <SelectItem value="auto">Auto Detect</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {csvOptions.insertResumeLink && (
+                      <div className="space-y-1 pt-1 animate-in fade-in duration-200">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
+                        <Input 
+                          value={csvOptions.resumeLinkLabel} 
+                          onChange={(e) => setCsvOptions({ ...csvOptions, resumeLinkLabel: e.target.value })}
+                          placeholder="View My Resume"
+                          className="h-8 bg-background/50 text-xs border-border/40"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <Button className="w-full" onClick={handleBulkCsvUpload} disabled={isUploadingCsv || !csvFile}>
+                    {isUploadingCsv ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />} 
+                    {isUploadingCsv ? "Uploading..." : "Upload & Send"}
+                  </Button>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 
@@ -841,13 +1334,14 @@ export default function EmailAutomationsPage() {
           setIsTemplateDialogOpen(open);
           if (!open) {
             setEditingTemplateId(null);
-            setNewTemplate({ name: "", subject: "", body: "" });
+            setNewTemplate({ name: "", subject: "", body: "", plainText: "", linkLabel: "", linkUrl: "" });
           }
         }}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={() => {
               setEditingTemplateId(null);
-              setNewTemplate({ name: "", subject: "", body: "" });
+              setNewTemplate({ name: "", subject: "", body: "", plainText: "", linkLabel: "", linkUrl: "" });
+              setTemplatePreviewMode("html");
             }}>
               <Plus className="w-4 h-4 mr-2" /> New Template
             </Button>
@@ -876,16 +1370,93 @@ export default function EmailAutomationsPage() {
                 />
               </div>
               
+              {/* Extra Template Fields */}
+              <div className="px-6 py-3 border-b border-border/50 grid grid-cols-2 gap-4 bg-muted/10 shrink-0">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase">Link Label (Optional)</label>
+                  <input 
+                    className="w-full bg-background border border-border/40 px-3 py-1.5 rounded-md text-sm outline-none focus:border-primary/50 transition-colors" 
+                    value={newTemplate.linkLabel} 
+                    onChange={e => setNewTemplate({...newTemplate, linkLabel: e.target.value})} 
+                    placeholder="e.g. View My Resume" 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase flex items-center justify-between">
+                    Link URL (Optional)
+                    {newTemplate.linkUrl && (() => {
+                      try { new URL(newTemplate.linkUrl); return null; }
+                      catch { return <span className="text-destructive font-normal lowercase">Invalid URL</span>; }
+                    })()}
+                  </label>
+                  <input 
+                    className={`w-full bg-background border px-3 py-1.5 rounded-md text-sm outline-none transition-colors ${newTemplate.linkUrl && (() => { try { new URL(newTemplate.linkUrl); return false; } catch { return true; }})() ? 'border-destructive focus:border-destructive' : 'border-border/40 focus:border-primary/50'}`}
+                    value={newTemplate.linkUrl} 
+                    onChange={e => setNewTemplate({...newTemplate, linkUrl: e.target.value})} 
+                    placeholder="https://..." 
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between px-6 py-2 border-b border-border/50 bg-muted/5 shrink-0">
+                <span className="text-xs font-semibold text-muted-foreground">Message Body</span>
+                <div className="flex items-center gap-3">
+                  <Select onValueChange={(val) => {
+                    const placeholder = `{{${val}}}`;
+                    if (templatePreviewMode === "plain") {
+                      // Basic append for textarea if cursor not tracked, but we can do a simple append.
+                      setNewTemplate(prev => ({...prev, plainText: prev.plainText + placeholder}));
+                    } else {
+                      document.execCommand('insertText', false, placeholder);
+                      setNewTemplate(prev => ({...prev, body: prev.body + (document.activeElement?.tagName === 'DIV' ? '' : placeholder)}));
+                    }
+                  }}>
+                    <SelectTrigger className="h-7 w-[140px] text-[10px] bg-background">
+                      <SelectValue placeholder="Insert Placeholder" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['name', 'role', 'company'].map(p => (
+                        <SelectItem key={p} value={p}>{`{{${p}}}`}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex items-center bg-muted/50 p-0.5 rounded-lg border border-border/40">
+                  <button
+                    onClick={() => setTemplatePreviewMode("html")}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide rounded-md transition-all ${templatePreviewMode === "html" ? "bg-background shadow-[0_1px_2px_rgba(0,0,0,0.1)] text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Visual / HTML
+                  </button>
+                  <button
+                    onClick={() => setTemplatePreviewMode("plain")}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide rounded-md transition-all ${templatePreviewMode === "plain" ? "bg-background shadow-[0_1px_2px_rgba(0,0,0,0.1)] text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Plain Text
+                  </button>
+                </div>
+                </div>
+              </div>
+
               {/* Scrollable Template Body Editor */}
               <div className="flex-1 overflow-y-auto bg-background flex flex-col min-h-0">
                 <div className="px-6 py-4 flex-1 min-h-[300px]">
-                  <div 
-                    contentEditable
-                    suppressContentEditableWarning
-                    className="w-full h-full min-h-[280px] bg-transparent outline-none resize-none text-sm text-foreground/90 leading-relaxed empty:before:content-['Hi_{{name}},_write_your_template_body_here..._You_can_use_placeholders_like_{{name}},_{{company}},_and_{{role}}.'] empty:before:text-muted-foreground/70"
-                    onBlur={e => setNewTemplate({...newTemplate, body: e.currentTarget.innerHTML})} 
-                    dangerouslySetInnerHTML={{ __html: newTemplate.body }}
-                  />
+                  {templatePreviewMode === "plain" ? (
+                    <textarea
+                      className="w-full h-full min-h-[280px] bg-transparent outline-none resize-none text-sm text-foreground/90 font-mono leading-relaxed placeholder:text-muted-foreground/70"
+                      value={newTemplate.plainText}
+                      onChange={e => setNewTemplate({ ...newTemplate, plainText: e.target.value })}
+                      placeholder="Write your plain text version here... Use placeholders like {{name}} or {{role}}."
+                    />
+                  ) : (
+                    <div 
+                      contentEditable
+                      suppressContentEditableWarning
+                      className="w-full h-full min-h-[280px] bg-transparent outline-none resize-none text-sm text-foreground/90 leading-relaxed empty:before:content-['Hi_{{name}},_write_your_template_body_here..._You_can_use_placeholders_like_{{name}},_{{company}},_and_{{role}}.'] empty:before:text-muted-foreground/70 prose prose-sm max-w-none"
+                      onBlur={e => setNewTemplate({...newTemplate, body: e.currentTarget.innerHTML})} 
+                      dangerouslySetInnerHTML={{ __html: newTemplate.body }}
+                    />
+                  )}
                 </div>
               </div>
             </div>

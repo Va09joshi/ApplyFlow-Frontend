@@ -6,13 +6,16 @@ export interface Template {
   name: string;
   subject: string;
   body: string;
+  plainText?: string;
+  linkLabel?: string;
+  linkUrl?: string;
   placeholders?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 export const templateService = {
-  async create(data: { name: string; subject: string; body: string; placeholders?: string[] }) {
+  async create(data: { name: string; subject: string; body: string; plainText?: string; linkLabel?: string; linkUrl?: string; placeholders?: string[] }) {
     const response = await api.post('/api/v1/templates', data);
     return response.data;
   },

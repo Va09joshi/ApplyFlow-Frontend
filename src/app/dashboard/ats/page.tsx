@@ -24,46 +24,6 @@ export default function ATSAnalyzerPage() {
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<string>("");
 
-  useEffect(() => {
-    const fetchResumes = async () => {
-      try {
-        const data = await resumeService.getAll(1, 100);
-        let resumesArray: Resume[] = [];
-        if (Array.isArray(data)) resumesArray = data;
-        else if (data?.data?.docs && Array.isArray(data.data.docs)) resumesArray = data.data.docs;
-        else if (data?.data && Array.isArray(data.data)) resumesArray = data.data;
-        else if (data?.docs && Array.isArray(data.docs)) resumesArray = data.docs;
-        
-        setResumes(resumesArray);
-        if (resumesArray.length > 0) {
-          setSelectedResumeId(resumesArray[0]._id || resumesArray[0].id || "");
-        }
-      } catch (error) {
-        toast.error("Failed to load resumes");
-      }
-    };
-
-    const fetchHistory = async () => {
-      try {
-        setIsLoadingHistory(true);
-        const responseBody = await atsService.getAll();
-        let arr: ATSRecord[] = [];
-        if (Array.isArray(responseBody)) arr = responseBody;
-        else if (responseBody?.data?.docs && Array.isArray(responseBody.data.docs)) arr = responseBody.data.docs;
-        else if (responseBody?.data && Array.isArray(responseBody.data)) arr = responseBody.data;
-        else if (responseBody?.docs && Array.isArray(responseBody.docs)) arr = responseBody.docs;
-        setPastAnalyses(arr.map((r: any) => normalizeResult(r)));
-      } catch {
-        // silently fail on history
-      } finally {
-        setIsLoadingHistory(false);
-      }
-    };
-
-    fetchResumes();
-    fetchHistory();
-  }, []);
-
   // Normalize any ATS result to ensure consistent field names and types
   const normalizeResult = (raw: any): ATSRecord => {
     if (!raw || typeof raw !== "object") {
@@ -106,6 +66,48 @@ export default function ATSAnalyzerPage() {
       createdAt: r.createdAt || r.created_at || new Date().toISOString(),
     };
   };
+
+  const fetchHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const responseBody = await atsService.getAll();
+      let arr: ATSRecord[] = [];
+      if (Array.isArray(responseBody)) arr = responseBody;
+      else if (responseBody?.data?.docs && Array.isArray(responseBody.data.docs)) arr = responseBody.data.docs;
+      else if (responseBody?.data && Array.isArray(responseBody.data)) arr = responseBody.data;
+      else if (responseBody?.docs && Array.isArray(responseBody.docs)) arr = responseBody.docs;
+      setPastAnalyses(arr.map((r: any) => normalizeResult(r)));
+    } catch {
+      // silently fail on history
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchResumes = async () => {
+      try {
+        const data = await resumeService.getAll(1, 100);
+        let resumesArray: Resume[] = [];
+        if (Array.isArray(data)) resumesArray = data;
+        else if (data?.data?.docs && Array.isArray(data.data.docs)) resumesArray = data.data.docs;
+        else if (data?.data && Array.isArray(data.data)) resumesArray = data.data;
+        else if (data?.docs && Array.isArray(data.docs)) resumesArray = data.docs;
+        
+        setResumes(resumesArray);
+        if (resumesArray.length > 0) {
+          setSelectedResumeId(resumesArray[0]._id || resumesArray[0].id || "");
+        }
+      } catch (error) {
+        toast.error("Failed to load resumes");
+      }
+    };
+
+    fetchResumes();
+    fetchHistory();
+  }, []);
+
+
 
   // Helper: deeply unwrap API response to find the actual result object
   const unwrapResponse = (response: any): any => {
@@ -161,7 +163,7 @@ export default function ATSAnalyzerPage() {
       setResult(data);
       
       if (data && data.matchPercent > 0) {
-        setPastAnalyses(prev => [data, ...prev]);
+        await fetchHistory(); // Refetch from backend to get the upserted record properly
       }
       toast.success("Analysis complete!");
     } catch (error) {

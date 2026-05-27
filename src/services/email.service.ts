@@ -11,20 +11,30 @@ export interface GmailStatus {
   expiresAt: string;
 }
 
+export interface EmailPayload {
+  to: string;
+  subject: string;
+  body?: string;
+  html?: string;
+  plainText: string;
+  fromEmail: string;
+  contentType: string;
+  useTemplate?: boolean;
+  insertResumeLink?: boolean;
+  resumeUrl?: string;
+  resumeLinkLabel?: string;
+  attachResume?: boolean;
+  attachments?: { name: string; url: string }[];
+}
+
 export const emailService = {
-  async queue(data: {
-    to: string;
-    subject: string;
-    html: string;
-    fromEmail: string;
-    useTemplate?: boolean;
-    attachResume?: boolean;
-    insertResumeLink?: boolean;
-    resumeLinkLabel?: string;
-    resumeId?: string;
-    contentType?: string;
-  }) {
+  async queue(data: EmailPayload) {
     const response = await api.post('/api/v1/emails/queue', data);
+    return response.data;
+  },
+
+  async preview(data: EmailPayload) {
+    const response = await api.post('/api/v1/emails/preview', data);
     return response.data;
   },
 

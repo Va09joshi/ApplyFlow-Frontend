@@ -42,14 +42,20 @@ export default function SignupPage() {
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (axios.isAxiosError(error)) {
       const responseData = error.response?.data;
-      return (
+      const rawMessage = 
         responseData?.message ||
         responseData?.error ||
         responseData?.errors?.[0]?.message ||
         responseData?.errors?.[0]?.msg ||
         error.message ||
-        fallback
-      );
+        "";
+      
+      // Handle MongoDB Duplicate Key Error for Emails
+      if (typeof rawMessage === 'string' && rawMessage.includes("E11000 duplicate key error") && rawMessage.includes("email")) {
+        return "An account with this email already exists. Please log in or use a different email.";
+      }
+
+      return rawMessage || fallback;
     }
     return fallback;
   };

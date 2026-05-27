@@ -80,6 +80,10 @@ api.interceptors.response.use(
       try {
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
+          useAuthStore.getState().logout();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
           return Promise.reject(error);
         }
 
