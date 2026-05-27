@@ -1146,14 +1146,14 @@ export default function EmailAutomationsPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <label className="text-[9px] font-bold text-muted-foreground uppercase">To (Email) *</label>
-                          <Select value={csvMapping['to'] || ""} onValueChange={(v) => setCsvMapping({...csvMapping, to: v})}>
+                          <Select value={csvMapping['to'] || ""} onValueChange={(v) => setCsvMapping({...csvMapping, to: v ?? ""})}>
                             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select column" /></SelectTrigger>
                             <SelectContent>{csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1">
                           <label className="text-[9px] font-bold text-muted-foreground uppercase">Subject</label>
-                          <Select value={csvMapping['subject'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, subject: v === "none" ? "" : v})}>
+                          <Select value={csvMapping['subject'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, subject: (v === "none" || v == null) ? "" : v})}>
                             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">Skip mapping</SelectItem>
@@ -1163,7 +1163,7 @@ export default function EmailAutomationsPage() {
                         </div>
                         <div className="space-y-1">
                           <label className="text-[9px] font-bold text-muted-foreground uppercase">Name</label>
-                          <Select value={csvMapping['name'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, name: v === "none" ? "" : v})}>
+                          <Select value={csvMapping['name'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, name: (v === "none" || v == null) ? "" : v})}>
                             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">Skip mapping</SelectItem>
@@ -1173,7 +1173,7 @@ export default function EmailAutomationsPage() {
                         </div>
                         <div className="space-y-1">
                           <label className="text-[9px] font-bold text-muted-foreground uppercase">Role</label>
-                          <Select value={csvMapping['role'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, role: v === "none" ? "" : v})}>
+                          <Select value={csvMapping['role'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, role: (v === "none" || v == null) ? "" : v})}>
                             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">Skip mapping</SelectItem>
