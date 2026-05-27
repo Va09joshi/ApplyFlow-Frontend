@@ -218,22 +218,13 @@ export default function Home() {
       <main className="flex-1">
         
         {/* HERO SECTION */}
-        <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
+        <section className="relative pt-28 pb-48 md:pt-36 md:pb-64 overflow-hidden bg-gradient-to-b from-background via-primary/5 to-primary/10">
+
           <div className="absolute top-1/4 right-0 -z-10 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
           <div className="absolute bottom-10 left-0 -z-10 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] opacity-70"></div>
 
           <div className="container mx-auto px-4 text-center z-10 relative">
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold mb-6 text-primary shadow-[0_0_15px_rgba(var(--primary),0.05)]"
-            >
-              <Sparkles className="w-3.5 h-3.5 animate-pulse text-indigo-400" />
-              <span>ApplyFlow AI 2.0: Automated Job Outbox</span>
-            </motion.div>
-
+            
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -264,13 +255,19 @@ export default function Home() {
               >
                 Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
-              <a 
-                href="#automation-center"
-                className={buttonVariants({ variant: "outline", size: "lg" }) + " w-full sm:w-auto rounded-full px-8 border-border/60 hover:bg-muted/50 font-medium"}
-              >
-                Explore Command Center <ChevronRight className="ml-2 w-4 h-4 text-muted-foreground" />
-              </a>
             </motion.div>
+          </div>
+
+          {/* Organic, Realistic SVG Wave Divider - Themed for Light/Dark */}
+          <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-0 translate-y-px">
+            <svg className="relative block w-full h-[100px] md:h-[200px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+              {/* Back Layer: Indigo in light mode, dark bg in dark mode */}
+              <path fill="currentColor" className="text-indigo-500/15 dark:text-background/30" d="M0,128L48,149.3C96,171,192,213,288,218.7C384,224,480,192,576,170.7C672,149,768,139,864,160C960,181,1056,235,1152,240C1248,245,1344,203,1392,181.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+              {/* Middle Layer: Primary tint in light mode, dark bg in dark mode */}
+              <path fill="currentColor" className="text-primary/20 dark:text-background/60" d="M0,224L48,208C96,192,192,160,288,144C384,128,480,128,576,149.3C672,171,768,213,864,224C960,235,1056,213,1152,192C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+              {/* Front Layer: Solid background color to seamlessly blend into the next section */}
+              <path fill="currentColor" className="text-background" d="M0,192L48,208C96,224,192,256,288,256C384,256,480,224,576,202.7C672,181,768,171,864,181.3C960,192,1056,224,1152,229.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
           </div>
         </section>
 
@@ -280,30 +277,30 @@ export default function Home() {
           <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
 
           <div className="container mx-auto px-4 max-w-6xl relative z-10">
-            <div className="text-center mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">Application Suite</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-3">Automation Command Center</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
-                Interact with the actual visual models of the ApplyFlow engine. Switch tabs below to see how our core outbox pipeline handles candidate delivery.
+            <div className="text-center mb-14">
+              <span className="inline-block py-1.5 px-4 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-5">Application Suite</span>
+              <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight drop-shadow-sm">Automation Command Center</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg font-medium leading-relaxed">
+                Interact with the visual models of the ApplyFlow engine. Switch tabs below to see how our core outbox pipeline handles candidate delivery.
               </p>
             </div>
 
             {/* Tab Swappers */}
-            <div className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto bg-muted/30 p-1.5 rounded-2xl border border-border/40">
+            <div className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto bg-muted/40 p-1.5 rounded-2xl border border-border/50 shadow-sm">
               {[
-                { id: "single", label: "Single Outreach", icon: <Send className="w-3.5 h-3.5" /> },
-                { id: "bulk", label: "CSV Bulk Sharing", icon: <UploadCloud className="w-3.5 h-3.5" /> },
-                { id: "ats", label: "ATS Auditor", icon: <Layers className="w-3.5 h-3.5" /> },
-                { id: "occupancy", label: "Company Occupancy", icon: <Database className="w-3.5 h-3.5" /> },
-                { id: "templates", label: "Reusable Templates", icon: <Layout className="w-3.5 h-3.5" /> }
+                { id: "single", label: "Single Outreach", icon: <Send className="w-4 h-4" /> },
+                { id: "bulk", label: "CSV Bulk Sharing", icon: <UploadCloud className="w-4 h-4" /> },
+                { id: "ats", label: "ATS Auditor", icon: <Layers className="w-4 h-4" /> },
+                { id: "occupancy", label: "Company Occupancy", icon: <Database className="w-4 h-4" /> },
+                { id: "templates", label: "Reusable Templates", icon: <Layout className="w-4 h-4" /> }
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveCmdTab(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all ${
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
                     activeCmdTab === tab.id
-                      ? "bg-card text-primary shadow-sm border border-border/50 ring-1 ring-primary/10"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
                   {tab.icon}
@@ -313,7 +310,7 @@ export default function Home() {
             </div>
 
             {/* Interactive Showcase Window */}
-            <div className="bg-card/70 border border-border/50 rounded-3xl p-6 md:p-10 shadow-2xl backdrop-blur-xl min-h-[420px] flex items-center justify-center relative overflow-hidden">
+            <div className="min-h-[420px] flex items-center justify-center relative w-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full blur-2xl pointer-events-none"></div>
 
               <AnimatePresence mode="wait">
@@ -327,58 +324,84 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.98 }}
                     className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
                   >
-                    <div className="md:col-span-7 bg-background border border-border/60 rounded-2xl overflow-hidden shadow-lg flex flex-col">
-                      <div className="bg-muted/40 border-b border-border/50 px-4 py-3 flex items-center justify-between">
-                        <span className="text-xs font-bold font-mono text-muted-foreground flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-primary" /> outbox_composer.exe
-                        </span>
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 rounded-full bg-red-500/50"></div>
-                          <div className="w-2 h-2 rounded-full bg-yellow-500/50"></div>
-                          <div className="w-2 h-2 rounded-full bg-green-500/50"></div>
+                    <div className="md:col-span-7 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/10 flex flex-col">
+                      <div className="bg-muted/30 border-b border-border/40 px-4 py-3 flex items-center gap-4">
+                        <div className="flex gap-1.5">
+                          <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-black/10"></div>
+                          <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-black/10"></div>
+                          <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-black/10"></div>
                         </div>
+                        <span className="text-xs font-semibold font-mono text-muted-foreground flex-1 text-center pr-12">
+                          outbox_composer.exe
+                        </span>
                       </div>
                       
                       {/* Email Composer Fields */}
-                      <div className="p-4 space-y-3 font-mono text-xs">
-                        <div className="flex items-center gap-3 border-b border-border/40 pb-2">
-                          <span className="text-muted-foreground w-16 shrink-0">Recruiter:</span>
-                          <span className="text-foreground truncate">hiring@stripe.com</span>
+                      <div className="p-6 space-y-4 font-mono text-[13px]">
+                        <div className="flex flex-col gap-1.5 border-b border-border/30 pb-3">
+                          <span className="text-muted-foreground text-[10px] uppercase tracking-widest font-bold">To</span>
+                          <span className="text-foreground font-medium">hiring@stripe.com</span>
                         </div>
-                        <div className="flex items-center gap-3 border-b border-border/40 pb-2">
-                          <span className="text-muted-foreground w-16 shrink-0">Subject:</span>
-                          <span className="text-foreground truncate">Application: Senior React Developer</span>
+                        <div className="flex flex-col gap-1.5 border-b border-border/30 pb-3">
+                          <span className="text-muted-foreground text-[10px] uppercase tracking-widest font-bold">Subject</span>
+                          <span className="text-foreground font-bold">Application: Senior React Developer</span>
                         </div>
                         
-                        <div className="bg-muted/30 border border-border/40 rounded-xl p-3 text-[11px] leading-relaxed text-muted-foreground h-32 overflow-y-auto">
+                        <div className="text-muted-foreground/80 leading-relaxed pt-2 font-sans text-sm">
                           <p>Hi Recruiting Team,</p>
-                          <p className="mt-2">I noticed your opening for a UI Developer. My background matches your tech-stack: React, Next.js, and TypeScript. I recently built a highly responsive dashboard showing...</p>
+                          <p className="mt-3">I noticed your opening for a UI Developer. My background matches your tech-stack: React, Next.js, and TypeScript. I recently built a highly responsive dashboard showing...</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="md:col-span-5 space-y-4">
                       <div>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">Generic Outbox Mailer</span>
-                        <h4 className="text-xl font-extrabold text-foreground">Personalized Outreach, Delivered Orgnaically</h4>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-2">Generic Outbox Mailer</span>
+                        <h4 className="text-2xl font-black text-foreground tracking-tight">Personalized Outreach, Delivered Organically</h4>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                           Our single email outbox wraps outreach emails dynamically. Toggle premium card headers, secure PDF resume attachments, and embed interactive tracking action buttons automatically!
                         </p>
                       </div>
 
-                      {/* Outbox features toggles mockup */}
-                      <div className="bg-background/80 border border-border/40 rounded-xl p-3 space-y-2.5">
-                        <div className="flex items-center justify-between text-[11px] font-bold">
-                          <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" /> Wrap in Premium HTML Card</span>
-                          <span className="text-green-500">Enabled</span>
+                      {/* Clean Modern Toggles */}
+                      <div className="space-y-4 mt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Sparkles className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-foreground">Premium HTML Card</p>
+                            <p className="text-[11px] text-muted-foreground font-medium">Wrapped automatically</p>
+                          </div>
+                          <div className="w-10 h-5 rounded-full bg-primary relative shadow-inner">
+                            <div className="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"></div>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] font-bold">
-                          <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-primary" /> Attach Verified PDF Resume</span>
-                          <span className="text-green-500">Enabled</span>
+                        
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <FileText className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-foreground">PDF Resume Attached</p>
+                            <p className="text-[11px] text-muted-foreground font-medium">Verified format</p>
+                          </div>
+                          <div className="w-10 h-5 rounded-full bg-primary relative shadow-inner">
+                            <div className="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"></div>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] font-bold">
-                          <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Embed View Resume Link</span>
-                          <span className="text-amber-500">Auto (Based on score)</span>
+
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                            <CheckCircle2 className="w-4 h-4 text-amber-500" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-foreground">Smart Tracking Links</p>
+                            <p className="text-[11px] text-amber-500 font-bold">Auto (Based on score)</p>
+                          </div>
+                          <div className="w-10 h-5 rounded-full bg-muted border border-border/50 relative">
+                            <div className="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-muted-foreground/30 shadow-sm"></div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -394,7 +417,7 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.98 }}
                     className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
                   >
-                    <div className="md:col-span-7 bg-background border border-border/60 rounded-2xl overflow-hidden shadow-lg p-5 flex flex-col gap-4">
+                    <div className="md:col-span-7 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/10 p-6 flex flex-col gap-4">
                       
                       {/* Upload Box Mock */}
                       <div className="border-2 border-dashed border-primary/20 rounded-xl p-6 text-center bg-primary/5 hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-2">
@@ -428,8 +451,8 @@ export default function Home() {
 
                     <div className="md:col-span-5 space-y-4">
                       <div>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">Bulk Mail Sharing</span>
-                        <h4 className="text-xl font-extrabold text-foreground">Spreadsheet Leads, Dispatched in 1 Click</h4>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-2">Bulk Mail Sharing</span>
+                        <h4 className="text-2xl font-black text-foreground tracking-tight">Spreadsheet Leads, Dispatched in 1 Click</h4>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                           Drop lead lists containing columns like email, company, and first name. Map headers effortlessly, select HTML/Plain text formatting presets, and let ApplyFlow schedule individual, organic delivery packages globally.
                         </p>
@@ -458,7 +481,7 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.98 }}
                     className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
                   >
-                    <div className="md:col-span-7 bg-background border border-border/60 rounded-2xl overflow-hidden shadow-lg p-6 flex flex-col items-center">
+                    <div className="md:col-span-7 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/10 p-8 flex flex-col items-center">
                       <div className="relative w-28 h-28 flex items-center justify-center mb-4">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                           <circle cx="18" cy="18" r="16" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" className="opacity-20" />
@@ -493,8 +516,8 @@ export default function Home() {
 
                     <div className="md:col-span-5 space-y-4">
                       <div>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">ATS Score Auditor</span>
-                        <h4 className="text-xl font-extrabold text-foreground">Beat the Bots. Secure Audited Audits</h4>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-2">ATS Score Auditor</span>
+                        <h4 className="text-2xl font-black text-foreground tracking-tight">Beat the Bots. Secure Audited Audits</h4>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                           We calculate your matching index instantly by cross-referencing your resume text against direct vacancy criteria. Our AI optimizer injects action bullets, raising your success dial into targeted interview levels.
                         </p>
@@ -520,7 +543,7 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.98 }}
                     className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
                   >
-                    <div className="md:col-span-7 bg-background border border-border/60 rounded-2xl overflow-hidden shadow-lg p-4 flex flex-col gap-3">
+                    <div className="md:col-span-7 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/10 p-6 flex flex-col gap-4">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-border/40 pb-2">
                         Company Occupancy & Hiring Statistics
                       </span>
@@ -548,8 +571,8 @@ export default function Home() {
 
                     <div className="md:col-span-5 space-y-4">
                       <div>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">Company Occupancy stats</span>
-                        <h4 className="text-xl font-extrabold text-foreground">Target Hiring Hotbeds Automatically</h4>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-2">Company Occupancy stats</span>
+                        <h4 className="text-2xl font-black text-foreground tracking-tight">Target Hiring Hotbeds Automatically</h4>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                           Track which major corporations have active roles, high-occupancy hiring budgets, and low-competition referral avenues. Secure a clear view of open vacancies mapping to your profile index.
                         </p>
@@ -620,8 +643,8 @@ export default function Home() {
 
                     <div className="md:col-span-5 space-y-4">
                       <div>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">Save & Share Templates</span>
-                        <h4 className="text-xl font-extrabold text-foreground">Standardized Quality. Dispatched at Scale</h4>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-2">Save & Share Templates</span>
+                        <h4 className="text-2xl font-black text-foreground tracking-tight">Standardized Quality. Dispatched at Scale</h4>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                           Stop starting from scratch. Construct specialized outreach cover outlines, save drafts securely into your workspace dashboard library, and quickly clone or share them to fast-track your campaign.
                         </p>
@@ -642,14 +665,21 @@ export default function Home() {
 
 
         {/* SECTION 2.5: AI AGENT SHOWCASE */}
-        <section className="py-28 relative overflow-hidden bg-background">
+        <section className="pt-40 pb-28 relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background">
+          {/* Top Simple Wave Divider */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-0 rotate-180 -translate-y-px">
+            <svg className="relative block w-full h-[60px] md:h-[120px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+              <path fill="currentColor" className="text-background" d="M0,192L48,208C96,224,192,256,288,256C384,256,480,224,576,202.7C672,181,768,171,864,181.3C960,192,1056,224,1152,229.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+          </div>
+
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[150px]"></div>
           
           <div className="container mx-auto px-4 max-w-5xl relative z-10">
             <div className="grid md:grid-cols-2 gap-16 items-center">
               
-              {/* Bot Image — No container, just the image with shadow */}
-              <div className="flex justify-center relative">
+              {/* Bot Image — Moved to right via order-last */}
+              <div className="flex justify-center relative md:order-last">
                 <img 
                   src="/Bot.png" 
                   alt="ApplyFlow AI Agent" 
@@ -658,7 +688,7 @@ export default function Home() {
               </div>
 
               {/* Simple text describing what the AI agent does */}
-              <div className="space-y-8">
+              <div className="space-y-8 md:order-first">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-widest text-primary mb-3 block">Your AI Agent</span>
                   <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
@@ -669,17 +699,23 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="space-y-5">
+                <div className="relative space-y-6 py-2">
+                  {/* Vertical connecting line */}
+                  <div className="absolute left-[11px] top-5 bottom-5 w-px bg-border/70 z-0"></div>
+                  
                   {[
-                    { icon: "✉️", text: "Email Outreach Automation" },
-                    { icon: "📊", text: "ATS Resume Scoring & Fixes" },
-                    { icon: "🎯", text: "Smart Job Matching" },
-                    { icon: "📝", text: "Cover Letter Generation" },
-                    { icon: "🔄", text: "24/7 Background Processing" },
+                    { text: "Email Outreach Automation" },
+                    { text: "ATS Resume Scoring & Fixes" },
+                    { text: "Smart Job Matching" },
+                    { text: "Cover Letter Generation" },
+                    { text: "24/7 Background Processing" },
                   ].map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4 group">
-                      <span className="text-xl">{item.icon}</span>
-                      <span className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">{item.text}</span>
+                    <div key={idx} className="flex items-center gap-5 group relative z-10">
+                      {/* Sleek Timeline Dot */}
+                      <div className="w-[23px] h-[23px] rounded-full bg-background border-2 border-border/80 flex items-center justify-center group-hover:border-foreground transition-colors shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-border group-hover:bg-foreground transition-colors"></div>
+                      </div>
+                      <span className="text-base font-semibold text-muted-foreground group-hover:text-foreground transition-colors">{item.text}</span>
                     </div>
                   ))}
                 </div>
@@ -701,302 +737,53 @@ export default function Home() {
         </section>
 
 
-        {/* SECTION 3: WORKFLOW EXPLAINER ANIMATIONS ("How It Works") */}
+        {/* SECTION 3: SIMPLE WORKFLOW EXPLAINER */}
         <section id="explainer-section" className="py-24 relative overflow-hidden bg-background">
           <div className="absolute -top-40 right-10 -z-10 w-[450px] h-[450px] bg-primary/5 rounded-full blur-[120px]"></div>
           
-          <div className="container mx-auto px-4 max-w-5xl relative z-10">
-            <div className="text-center mb-24">
-              <span className="text-xs font-bold uppercase tracking-widest text-primary mb-3 block">Workflow</span>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-4">How It Works</h2>
+          <div className="container mx-auto px-4 max-w-6xl relative z-10">
+            <div className="text-center mb-20">
+              <span className="inline-block py-1.5 px-4 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-5">Workflow</span>
+              <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight drop-shadow-sm">How It Works</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg font-medium leading-relaxed">
+                Four simple steps to automate your entire outreach pipeline.
+              </p>
             </div>
 
-            <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-background via-background to-primary/5 p-8 md:p-12 shadow-2xl backdrop-blur-xl">
-              <div className="mb-8">
-                <span className="text-xs font-bold uppercase tracking-widest text-primary">Console</span>
-                <h3 className="text-3xl font-extrabold mt-2">Live Simulation</h3>
-              </div>
+            <div className="relative grid md:grid-cols-4 gap-8">
+              {/* Timeline Connecting Line */}
+              <div className="hidden md:block absolute top-[44px] left-[12%] right-[12%] h-0.5 bg-border/40 z-0"></div>
 
-              <div className="grid gap-10 lg:grid-cols-[300px_1fr]">
-                <div className="rounded-2xl border border-border/60 bg-card/50 p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Steps</span>
-                    <span className="text-[10px] font-mono text-muted-foreground">{flowStep} / 4</span>
-                  </div>
-                  <div className="relative flex flex-col">
-                    {flowSteps.map((item, index) => {
-                      const Icon = item.icon;
-                      return (
-                        <React.Fragment key={item.step}>
-                          {index > 0 && (
-                            <div className="w-px h-4 bg-border/60 ml-[30px] shrink-0"></div>
-                          )}
-                          <button
-                            onClick={() => {
-                            setFlowStep(item.step);
-                            setIsFlowAutoPlay(false);
-                          }}
-                          className={`relative w-full rounded-2xl border px-4 py-4 text-left transition-all ${
-                            flowStep === item.step
-                              ? "border-primary/50 bg-primary/10 shadow-md"
-                              : "border-border/50 bg-background/40 hover:bg-muted/30"
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div
-                              className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border ${
-                                flowStep === item.step
-                                  ? "border-primary/50 bg-primary/20 text-primary"
-                                  : "border-border/60 bg-muted/40 text-muted-foreground"
-                              }`}
-                            >
-                              <Icon className="h-3.5 w-3.5" />
-                            </div>
-                            <div>
-                              <p className={`text-xs font-bold ${flowStep === item.step ? "text-primary" : "text-foreground"}`}>
-                                {item.label}
-                              </p>
-                              <p className="text-[10px] text-muted-foreground">{item.desc}</p>
-                            </div>
-                          </div>
-                          {flowStep === item.step && (
-                            <div className="mt-2 text-[10px] font-semibold text-emerald-500">{item.status}</div>
-                          )}
-                        </button>
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="relative bg-card/40 border border-border/50 rounded-3xl p-8 md:p-12 min-h-[480px] shadow-xl flex flex-col justify-between overflow-hidden backdrop-blur-xl">
-                  <div className="absolute inset-0 bg-grid-white/[0.02] -z-10"></div>
-                  <div className="flex items-start justify-between gap-4 mb-8">
-                    <div>
-                      <h4 className="text-xl font-bold">Stage {activeFlow.step}: {activeFlow.label}</h4>
+              {[
+                { step: 1, title: "Profile Scan", icon: FileText, desc: "We extract parameters from your resume and build an identity profile." },
+                { step: 2, title: "ATS Match", icon: Search, desc: "We cross-reference keywords with job descriptions to ensure high match rates." },
+                { step: 3, title: "Smart Draft", icon: Sparkles, desc: "Our AI generates a highly personalized outreach email or cover letter." },
+                { step: 4, title: "Dispatch", icon: Send, desc: "Emails are sent natively on your behalf to recruiters and hiring managers." },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.step} className="relative flex flex-col items-center text-center z-10 group">
+                    <div className="w-[88px] h-[88px] rounded-full bg-background flex items-center justify-center p-2 mb-6">
+                      <div className="w-full h-full rounded-full flex items-center justify-center ring-4 transition-all duration-500 bg-muted/50 ring-border/50 group-hover:ring-foreground/20 text-muted-foreground group-hover:bg-foreground group-hover:text-background group-hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] dark:group-hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]">
+                        <Icon className="w-7 h-7 transition-colors" />
+                      </div>
                     </div>
-                    <button
-                      onClick={() => setIsFlowAutoPlay(prev => !prev)}
-                      className="px-3 py-1.5 rounded-full bg-muted/65 hover:bg-muted/100 border border-border/50 text-[10px] font-bold flex items-center gap-1.5 transition-all text-foreground"
-                    >
-                      {isFlowAutoPlay ? (
-                        <>
-                          <Pause className="w-3 h-3 text-primary shrink-0" /> Pause Simulation
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-3 h-3 text-primary shrink-0 animate-pulse" /> Play Simulation
-                        </>
-                      )}
-                    </button>
+                    <h4 className="text-xl font-black mb-3 text-foreground">{item.title}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-[250px]">{item.desc}</p>
                   </div>
-                  
-                  <div className="flex-1 flex items-center justify-center relative">
-                    <AnimatePresence mode="wait">
-                  
-                  {/* Step 1 Content: Parsing Resume */}
-                  {flowStep === 1 && (
-                    <motion.div
-                      key="step-1"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.4 }}
-                      className="w-full max-w-lg flex flex-col md:flex-row items-center justify-center gap-8"
-                    >
-                      <div className="bg-background/80 border border-border/60 rounded-full p-8 shadow-lg flex flex-col items-center justify-center relative w-48 h-48 shrink-0">
-                        <div className="absolute inset-0 rounded-full border-4 border-dashed border-primary/20 animate-[spin_10s_linear_infinite]"></div>
-                        <div className="absolute inset-2 rounded-full border border-primary/30 animate-[spin_4s_linear_infinite_reverse]"></div>
-                        
-                        <FileText className="w-8 h-8 text-primary mb-2" />
-                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase animate-pulse">Scanning</span>
-                        <span className="text-xs font-mono mt-1 text-muted-foreground">profile.pdf</span>
-                      </div>
-
-                      <div className="space-y-4 max-w-xs text-center md:text-left">
-                        <div>
-                          <h4 className="text-lg font-bold">Extracting Data</h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                            Pulling structured parameters from your resume document.
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                          {["React", "TypeScript", "Tailwind"].map((tech, idx) => (
-                            <motion.div
-                              key={tech}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: idx * 0.2, duration: 0.3 }}
-                              className="bg-primary/10 border border-primary/20 rounded-full px-3 py-1 text-[10px] text-primary font-bold flex items-center gap-1.5"
-                            >
-                              <Check className="w-3 h-3 stroke-[3]" /> {tech}
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Step 2 Content: ATS Match Score */}
-                  {flowStep === 2 && (
-                    <motion.div
-                      key="step-2"
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.4 }}
-                      className="w-full max-w-xl flex flex-col md:flex-row items-center gap-10"
-                    >
-                      <div className="bg-card/40 border border-border/50 rounded-3xl p-8 flex flex-col items-center justify-center shrink-0 w-52 h-64 shadow-inner relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none"></div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">ATS Compatibility</span>
-                        
-                        <span className="text-5xl font-black text-foreground mb-8">94%</span>
-                        
-                        <span className="text-xs text-green-500 font-bold bg-green-500/10 border border-green-500/20 px-4 py-1.5 rounded-full">
-                          Highly Qualified
-                        </span>
-                      </div>
-
-                      <div className="flex-1 space-y-8">
-                        <div>
-                          <h4 className="text-lg font-bold mb-3">Auditing Profile</h4>
-                          <p className="text-sm text-muted-foreground leading-relaxed">
-                            Comparing resume keywords against job requirements.
-                          </p>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                          <div className="flex items-center gap-2 text-sm text-green-500 font-bold">
-                            <Check className="w-4 h-4 stroke-[3]" /> React, NextJS
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-green-500 font-bold">
-                            <Check className="w-4 h-4 stroke-[3]" /> Tailwind, REST
-                          </div>
-                          <div className="flex items-start gap-2 text-amber-500 font-bold">
-                            <RefreshCw className="w-4 h-4 mt-0.5 animate-spin-slow shrink-0" />
-                            <div className="flex flex-col text-sm leading-tight gap-1">
-                              <span>GraphQL</span>
-                              <span className="text-amber-500/80">(Autofixed)</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-green-500 font-bold">
-                            <Check className="w-4 h-4 stroke-[3]" /> TypeScript
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Step 3 Content: Smart Outreach Write */}
-                  {flowStep === 3 && (
-                    <motion.div
-                      key="step-3"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.4 }}
-                      className="w-full max-w-xl bg-background/80 border border-border/60 rounded-2xl p-5 shadow-lg relative flex flex-col gap-3.5 font-mono"
-                    >
-                      <div className="flex items-center justify-between border-b border-border/40 pb-2 shrink-0">
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                          <Terminal className="w-3 h-3 text-primary" /> draft_outreach_vercel.html
-                        </span>
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 rounded-full bg-red-500/60"></div>
-                          <div className="w-2 h-2 rounded-full bg-yellow-500/60"></div>
-                          <div className="w-2 h-2 rounded-full bg-green-500/60"></div>
-                        </div>
-                      </div>
-
-                      <div className="text-[11px] leading-relaxed text-muted-foreground h-36 overflow-hidden relative">
-                        <div className="text-foreground font-bold mb-1">Subject: Optimizing dashboard load speeds at Vercel</div>
-                        
-                        <p className="mt-2 text-foreground font-semibold">Hi hiring team,</p>
-                        
-                        <motion.div 
-                          className="mt-1 leading-normal"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 1 }}
-                        >
-                          <p>I noticed the opening for a Frontend Developer. My experience aligns closely with your tech-stack:</p>
-                          <ul className="list-disc list-inside mt-1 pl-1 text-primary">
-                            <li>Engineered interactive dashboards.</li>
-                            <li>Leveraged Next.js Server Components.</li>
-                          </ul>
-                        </motion.div>
-                        
-                        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background/90 to-transparent"></div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Step 4 Content: Outbox dispatch */}
-                  {flowStep === 4 && (
-                    <motion.div
-                      key="step-4"
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.4 }}
-                      className="w-full max-w-lg flex flex-col items-center justify-center gap-6 relative"
-                    >
-                      <div className="flex items-center gap-12 justify-center relative w-full">
-                        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center relative shadow-[0_0_20px_rgba(var(--primary),0.05)] z-10 shrink-0">
-                          <Send className="w-7 h-7 text-primary animate-pulse" />
-                          <span className="text-[8px] font-mono font-bold text-primary mt-1">OUTBOX</span>
-                        </div>
-
-                        <div className="absolute inset-x-12 h-0.5 border-t-2 border-dashed border-border flex items-center justify-center z-0">
-                          <motion.div
-                            initial={{ left: "0%", opacity: 0 }}
-                            animate={{ left: "100%", opacity: [0, 1, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                            className="absolute"
-                          >
-                            <SendHorizontal className="w-5 h-5 text-indigo-400 rotate-0 translate-y-[-10px] transform drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                          </motion.div>
-                        </div>
-
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex flex-col items-center justify-center relative z-10 shrink-0">
-                          <Mail className="w-7 h-7 text-indigo-400" />
-                          <span className="text-[8px] font-mono font-bold text-indigo-400 mt-1">RECRUITER</span>
-                        </div>
-                      </div>
-
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.4 }}
-                        className="bg-green-500/10 border border-green-500/25 rounded-2xl px-5 py-3 flex items-center gap-2.5 text-green-500 text-xs font-bold shadow-sm"
-                      >
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        <span>Outreach Sent Successfully!</span>
-                      </motion.div>
-                    </motion.div>
-                  )}
-
-                </AnimatePresence>
-              </div>
-
-                  <div className="flex items-center justify-center border-t border-border/20 pt-6 mt-8 shrink-0">
-                    <span className="text-xs text-muted-foreground flex items-center gap-2 font-medium">
-                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                      Step {flowStep} of 4
-                    </span>
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
-
           </div>
         </section>
 
         {/* CORE FEATURES LIST SECTION */}
-        <section id="features" className="py-32 border-y border-border/40 relative overflow-hidden">
-          <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-60 mix-blend-screen" style={{ backgroundImage: "url('/hero-bg.png')" }}></div>
-          <div className="absolute inset-0 z-0 bg-gradient-to-t from-background via-background/40 to-background/80"></div>
+        <section id="features" className="py-32 border-y border-border/40 relative overflow-hidden bg-background">
+          <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-[0.15] dark:opacity-60 mix-blend-multiply dark:mix-blend-screen" style={{ backgroundImage: "url('/hero-bg.png')" }}></div>
+          <div className="absolute inset-0 z-0 bg-gradient-to-t from-background via-background/60 to-background/90 dark:to-background/80"></div>
+          
+          {/* Subtle blue gradient specifically for light mode - placed above the white fade so it's visible */}
+          <div className="absolute inset-0 z-0 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent dark:hidden mix-blend-multiply"></div>
           
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
@@ -1024,7 +811,7 @@ export default function Home() {
               ].map((feature, i) => (
                 <div
                   key={i}
-                  className="p-8 rounded-3xl bg-background/50 backdrop-blur-xl border border-white/5 shadow-2xl hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-center text-center group"
+                  className="p-8 rounded-3xl bg-card/80 dark:bg-background/50 backdrop-blur-xl border border-border/50 dark:border-white/5 shadow-2xl hover:bg-muted/50 dark:hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-center text-center group"
                 >
                   <h3 className="text-xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
@@ -1201,8 +988,15 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-border/40 py-10 bg-card">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+      <footer className="relative pt-24 pb-10 bg-muted/40 dark:bg-card mt-10">
+        {/* Top Simple Wave Divider */}
+        <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-0 rotate-180 -translate-y-px">
+          <svg className="relative block w-full h-[40px] md:h-[80px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="currentColor" className="text-background" d="M0,192L48,208C96,224,192,256,288,256C384,256,480,224,576,202.7C672,181,768,171,864,181.3C960,192,1056,224,1152,229.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left relative z-10">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-inner">
               <Bot className="w-4.5 h-4.5 text-primary-foreground" />
@@ -1213,8 +1007,8 @@ export default function Home() {
             © {new Date().getFullYear()} ApplyFlow AI Inc. All rights reserved.
           </p>
           <div className="flex gap-6 text-xs font-semibold text-muted-foreground">
-            <Link href="#" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
           </div>
         </div>
       </footer>

@@ -17,8 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ApplyFlow AI - Job Application Automation",
-  description: "Automate your job applications, email generation, and ATS analysis.",
+  title: "ApplyFlow AI - Clean, Good, and Make More Automation",
+  description: "Automate your job applications, email generation, and ATS analysis with a clean and good platform to make more progress.",
+  keywords: ["clean", "good", "make more", "job application", "automation", "AI", "ApplyFlow"],
 };
 
 export default function RootLayout({
