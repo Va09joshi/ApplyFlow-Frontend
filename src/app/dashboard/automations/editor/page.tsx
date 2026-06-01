@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { ArrowLeftIcon, SaveIcon } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-export default function AutomationEditorPage() {
+function AutomationEditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const autoId = searchParams.get("id");
@@ -189,5 +189,13 @@ export default function AutomationEditorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AutomationEditorPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading Editor...</div>}>
+      <AutomationEditorContent />
+    </Suspense>
   );
 }

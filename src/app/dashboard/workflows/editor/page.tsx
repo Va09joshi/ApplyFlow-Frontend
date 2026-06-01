@@ -261,10 +261,14 @@ function WorkflowEditor() {
   );
 }
 
+import { Suspense } from 'react';
+
 export default function WorkflowEditorPage() {
   return (
     <ReactFlowProvider>
-      <WorkflowEditor />
+      <Suspense fallback={<div className="flex-1 flex items-center justify-center">Loading editor...</div>}>
+        <WorkflowEditor />
+      </Suspense>
     </ReactFlowProvider>
   );
 }
