@@ -18,7 +18,7 @@ import { useEffect } from "react";
 export default function AIEmailGeneratorPage() {
   const router = useRouter();
   const [generating, setGenerating] = useState(false);
-  const [generatedDraft, setGeneratedDraft] = useState<{subject: string, plainText: string, html: string} | null>(null);
+  const [generatedDraft, setGeneratedDraft] = useState<{ subject: string, plainText: string, html: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [previewMode, setPreviewMode] = useState<"html" | "plain">("html");
 
@@ -40,7 +40,7 @@ export default function AIEmailGeneratorPage() {
   const [role, setRole] = useState("");
   const [tone, setTone] = useState("professional");
   const [highlights, setHighlights] = useState("");
-  
+
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
 
@@ -53,7 +53,7 @@ export default function AIEmailGeneratorPage() {
         else if (data?.data?.docs && Array.isArray(data.data.docs)) resumesArray = data.data.docs;
         else if (data?.data && Array.isArray(data.data)) resumesArray = data.data;
         else if (data?.docs && Array.isArray(data.docs)) resumesArray = data.docs;
-        
+
         setResumes(resumesArray);
         if (resumesArray.length > 0) {
           setSelectedResumeId(resumesArray[0]._id || resumesArray[0].id || "");
@@ -92,7 +92,7 @@ export default function AIEmailGeneratorPage() {
     try {
       setGenerating(true);
       setGeneratedDraft(null);
-      
+
       const response = await aiService.generate({
         type: "job_application_email",
         payload: {
@@ -105,11 +105,11 @@ export default function AIEmailGeneratorPage() {
           guidance: buildGenerationGuidance()
         }
       });
-      
+
       // Handle structured response
       // Ensure we extract the deepest payload whether it's wrapped in { data: ... } or not
       const payload = response?.data?.data || response?.data || response;
-      
+
       if (payload?.subject && (payload?.plainText || payload?.html || payload?.body)) {
         let finalHtml = payload.html || payload.body || "";
         // Fallback: if the backend sends plain text instead of real HTML, convert newlines to <br/>
@@ -124,20 +124,20 @@ export default function AIEmailGeneratorPage() {
         });
       } else {
         // Fallback for older raw text payloads
-        const text = payload?.text || payload?.result || payload?.content || 
-                   payload?.generated || payload?.email || payload?.output ||
-                   (typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2));
-                   
+        const text = payload?.text || payload?.result || payload?.content ||
+          payload?.generated || payload?.email || payload?.output ||
+          (typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2));
+
         let subject = "Outreach Application";
         let body = typeof text === 'string' ? text : JSON.stringify(text, null, 2);
-        
+
         const subjectMatch = body.match(/subject:\s*(.*)/i);
         if (subjectMatch) {
           subject = subjectMatch[1].trim();
           body = body.replace(/subject:\s*.*\n?/i, "").trim();
         }
         body = body.replace(/^```html\s*/i, "").replace(/\s*```$/i, "");
-        
+
         setGeneratedDraft({
           subject,
           plainText: body,
@@ -162,7 +162,7 @@ export default function AIEmailGeneratorPage() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -192,92 +192,112 @@ export default function AIEmailGeneratorPage() {
               </CardTitle>
               <CardDescription>Tell the AI who you are targeting to maximize your response rate.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Your Name</Label>
-                <Input 
-                  id="name" 
-                  placeholder="e.g., Alex" 
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="bg-background border-border/60 focus-visible:ring-rose-500/30" 
-                />
+            <CardContent className="space-y-5 pt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                    <div className="w-1 h-3.5 bg-blue-500 rounded-full"></div>
+                    Your Name
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Alex"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="bg-blue-50/30 border-blue-100 focus-visible:ring-blue-500/30 dark:bg-blue-950/10 dark:border-blue-900/30 shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="company" className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
+                    <div className="w-1 h-3.5 bg-purple-500 rounded-full"></div>
+                    Company Name
+                  </Label>
+                  <Input
+                    id="company"
+                    placeholder="e.g., Vercel"
+                    value={company}
+                    onChange={e => setCompany(e.target.value)}
+                    className="bg-purple-50/30 border-purple-100 focus-visible:ring-purple-500/30 dark:bg-purple-950/10 dark:border-purple-900/30 shadow-sm"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company">Company Name</Label>
-                <Input 
-                  id="company" 
-                  placeholder="e.g., Vercel" 
-                  value={company}
-                  onChange={e => setCompany(e.target.value)}
-                  className="bg-background border-border/60 focus-visible:ring-rose-500/30" 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="role">Target Role</Label>
-                <Input 
-                  id="role" 
-                  placeholder="e.g., Frontend Engineer" 
+                <Label htmlFor="role" className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 font-semibold">
+                  <div className="w-1 h-3.5 bg-cyan-500 rounded-full"></div>
+                  Target Role
+                </Label>
+                <Input
+                  id="role"
+                  placeholder="e.g., Frontend Engineer"
                   value={role}
                   onChange={e => setRole(e.target.value)}
-                  className="bg-background border-border/60 focus-visible:ring-rose-500/30" 
+                  className="bg-cyan-50/30 border-cyan-100 focus-visible:ring-cyan-500/30 dark:bg-cyan-950/10 dark:border-cyan-900/30 shadow-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="resume">Select Resume (Optional)</Label>
-                <Select value={selectedResumeId} onValueChange={(val) => val && setSelectedResumeId(val)}>
-                  <SelectTrigger className="bg-background border-border/60 focus-visible:ring-rose-500/30">
-                    <SelectValue placeholder="Select a resume" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Resume</SelectItem>
-                    {resumes.map(r => {
-                      let displayName = r.name || "Resume Document";
-                      if (/^[0-9a-fA-F]{24}$/.test(displayName)) {
-                        displayName = "Resume Document";
-                      }
-                      return (
-                        <SelectItem key={r._id || r.id} value={r._id || r.id || ""}>
-                          {displayName}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="resume" className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-semibold">
+                    <div className="w-1 h-3.5 bg-orange-500 rounded-full"></div>
+                    Select Resume (Optional)
+                  </Label>
+                  <Select value={selectedResumeId} onValueChange={(val) => val && setSelectedResumeId(val)}>
+                    <SelectTrigger className="bg-orange-50/30 border-orange-100 focus-visible:ring-orange-500/30 dark:bg-orange-950/10 dark:border-orange-900/30 shadow-sm">
+                      <SelectValue placeholder="Select a resume" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Resume</SelectItem>
+                      {resumes.map(r => {
+                        let displayName = r.name || "Resume Document";
+                        if (/^[0-9a-fA-F]{24}$/.test(displayName)) {
+                          displayName = "Resume Document";
+                        }
+                        return (
+                          <SelectItem key={r._id || r.id} value={r._id || r.id || ""}>
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tone" className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <div className="w-1 h-3.5 bg-emerald-500 rounded-full"></div>
+                    Email Tone
+                  </Label>
+                  <Select value={tone} onValueChange={(val) => val && setTone(val)}>
+                    <SelectTrigger className="bg-emerald-50/30 border-emerald-100 focus-visible:ring-emerald-500/30 dark:bg-emerald-950/10 dark:border-emerald-900/30 shadow-sm">
+                      <SelectValue placeholder="Select tone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">Professional & Direct</SelectItem>
+                      <SelectItem value="enthusiastic">Enthusiastic & Passionate</SelectItem>
+                      <SelectItem value="casual">Casual & Friendly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tone">Email Tone</Label>
-                <Select value={tone} onValueChange={(val) => val && setTone(val)}>
-                  <SelectTrigger className="bg-background border-border/60 focus-visible:ring-rose-500/30">
-                    <SelectValue placeholder="Select tone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">Professional & Direct</SelectItem>
-                    <SelectItem value="enthusiastic">Enthusiastic & Passionate</SelectItem>
-                    <SelectItem value="casual">Casual & Friendly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-
-
-              <div className="space-y-2">
-                <Label htmlFor="highlights" className="font-semibold text-foreground/90">Strategic Highlights</Label>
-                <Textarea 
-                  id="highlights" 
-                  placeholder="e.g., Mention my 5 years in React, leading the Vercel migration, and improving page speed by 40%..." 
-                  className="resize-none h-28 bg-background border-border/60 focus-visible:ring-rose-500/30 text-sm leading-relaxed"
+                <Label htmlFor="highlights" className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold">
+                  <div className="w-1 h-3.5 bg-rose-500 rounded-full"></div>
+                  Strategic Highlights
+                </Label>
+                <Textarea
+                  id="highlights"
+                  placeholder="e.g., Mention my 5 years in React, leading the Vercel migration, and improving page speed by 40%..."
+                  className="resize-none h-28 bg-rose-50/30 border-rose-100 focus-visible:ring-rose-500/30 text-sm leading-relaxed dark:bg-rose-950/10 dark:border-rose-900/30 shadow-sm"
                   value={highlights}
                   onChange={e => setHighlights(e.target.value)}
                 />
               </div>
 
-              <Button 
-                className="w-full mt-4 h-12 bg-rose-600 hover:bg-rose-600/90 text-white shadow-sm" 
+              <Button
+                className="w-full mt-4 h-12 bg-rose-600 hover:bg-rose-600/90 text-white shadow-sm"
                 onClick={handleGenerate}
                 disabled={generating}
               >
@@ -352,7 +372,7 @@ export default function AIEmailGeneratorPage() {
                     </span>
                   </div>
                 </header>
-                
+
                 {generatedDraft && (
                   <div className="flex items-center justify-between px-5 py-2.5 border-b border-border/30 bg-card shadow-sm z-10 relative">
                     <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/40">
@@ -369,8 +389,8 @@ export default function AIEmailGeneratorPage() {
                         Raw HTML
                       </button>
                     </div>
-                    
-                    <Button 
+
+                    <Button
                       onClick={handleQueueInOutbox}
                       size="sm"
                       className="h-7 text-xs font-bold bg-rose-600 hover:bg-rose-600/90 text-white shadow-sm px-3 rounded-md transition-all duration-200 active:scale-95"
@@ -412,19 +432,19 @@ export default function AIEmailGeneratorPage() {
                       transition={{ duration: 0.4 }}
                       className="h-full flex flex-col absolute inset-0 p-5"
                     >
-                        {previewMode === "plain" ? (
-                          <Textarea 
-                            value={generatedDraft.plainText}
-                            onChange={(e) => setGeneratedDraft({...generatedDraft, plainText: e.target.value})}
-                            className="w-full h-full min-h-[400px] resize-none border-0 bg-transparent focus-visible:ring-0 text-xs font-mono leading-relaxed p-0 text-foreground/80"
-                            placeholder="Raw text goes here..."
-                          />
-                        ) : (
-                          <div 
-                            className="w-full h-full min-h-[400px] bg-transparent text-[15px] leading-relaxed p-0 overflow-y-auto prose prose-sm dark:prose-invert max-w-none text-foreground/90 font-serif"
-                            dangerouslySetInnerHTML={{ __html: generatedDraft.html }}
-                          />
-                        )}
+                      {previewMode === "plain" ? (
+                        <Textarea
+                          value={generatedDraft.plainText}
+                          onChange={(e) => setGeneratedDraft({ ...generatedDraft, plainText: e.target.value })}
+                          className="w-full h-full min-h-[400px] resize-none border-0 bg-transparent focus-visible:ring-0 text-xs font-mono leading-relaxed p-0 text-foreground/80"
+                          placeholder="Raw text goes here..."
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full min-h-[400px] bg-transparent text-[15px] leading-relaxed p-0 overflow-y-auto prose prose-sm dark:prose-invert max-w-none text-foreground/90 font-serif"
+                          dangerouslySetInnerHTML={{ __html: generatedDraft.html }}
+                        />
+                      )}
                     </motion.div>
                   )}
                 </div>

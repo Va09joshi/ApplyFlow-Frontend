@@ -86,33 +86,28 @@ export default function WorkflowsPage() {
           </div>
           <Skeleton className="h-10 w-36" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="flex flex-col h-[220px]">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-5 w-10 rounded-full" />
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3 mb-4" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-5 w-24 rounded-full" />
+            <Card key={i} className="flex flex-row items-center justify-between rounded-2xl border-border/60 shadow-sm bg-card p-5 gap-6">
+              <div className="flex flex-col flex-1 gap-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="h-5 w-32 rounded-full" />
                   <Skeleton className="h-5 w-20 rounded-full" />
                 </div>
-              </CardContent>
-              <CardFooter className="pt-3 border-t flex justify-between">
-                <div className="flex gap-2">
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-40 mt-1" />
+              </div>
+              <div className="flex flex-col items-end justify-between self-stretch">
+                <Skeleton className="h-6 w-11 rounded-full" />
+                <div className="flex items-center gap-4 mt-auto">
+                  <Skeleton className="h-5 w-8" />
+                  <Skeleton className="h-5 w-16" />
+                  <div className="w-px h-4 bg-border/60 mx-1"></div>
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-5 w-5" />
                 </div>
-                <div className="flex gap-1">
-                  <Skeleton className="h-8 w-8" />
-                  <Skeleton className="h-8 w-8" />
-                </div>
-              </CardFooter>
+              </div>
             </Card>
           ))}
         </div>
@@ -137,53 +132,50 @@ export default function WorkflowsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col gap-4">
         {workflows.map(workflow => (
-          <Card key={workflow._id} className="flex flex-col">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-xl line-clamp-1">{workflow.name}</CardTitle>
-                <Switch 
-                  checked={workflow.active} 
-                  onCheckedChange={(checked) => toggleActive(workflow._id, checked)} 
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <div className="text-sm text-muted-foreground mb-4">{workflow.description || "No description provided."}</div>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="capitalize">
+          <Card key={workflow._id} className={`flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border-border/60 shadow-sm bg-card hover:shadow-md transition-shadow p-5 gap-5 border-l-[5px] ${workflow.active ? 'border-l-blue-500' : 'border-l-muted-foreground/30'}`}>
+            <div className="flex flex-col flex-1 gap-2.5">
+              <div className="flex flex-wrap items-center gap-3">
+                <CardTitle className="text-[19px] font-bold mr-1">{workflow.name}</CardTitle>
+                <Badge variant="secondary" className="bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-semibold border-0 rounded-full px-3 py-0.5 text-xs">
                   Trigger: {workflow.trigger?.type?.replace('_', ' ') || 'None'}
                 </Badge>
-                <Badge variant="outline">{workflow.nodes?.length || 0} Nodes</Badge>
+                <Badge variant="outline" className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 rounded-full px-3 py-0.5 text-xs font-semibold border-0">
+                  {workflow.nodes?.length || 0} Nodes
+                </Badge>
               </div>
-              {workflow.lastRunAt && (
-                <div className="mt-4 text-xs text-muted-foreground">
-                  Last run: {new Date(workflow.lastRunAt).toLocaleString()}
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="pt-3 border-t flex justify-between items-center gap-2">
-              <div className="flex gap-2">
+              <div className="text-[15px] font-medium text-muted-foreground">{workflow.description || "No description provided."}</div>
+              <div className="text-[13px] font-medium text-muted-foreground/80">
+                Last run: {workflow.lastRunAt ? new Date(workflow.lastRunAt).toLocaleString() : 'Never'}
+              </div>
+            </div>
+            
+            <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between self-stretch mt-4 sm:mt-0 gap-4 sm:gap-0 border-t sm:border-0 border-border/40 pt-4 sm:pt-0">
+              <Switch 
+                checked={workflow.active} 
+                onCheckedChange={(checked) => toggleActive(workflow._id, checked)} 
+                className="data-[state=checked]:bg-blue-600"
+              />
+              <div className="flex items-center gap-4 mt-auto">
                 <Link href={`/dashboard/workflows/editor?id=${workflow._id}`}>
-                  <Button variant="link" className="px-0">Edit</Button>
+                  <button className="text-blue-600 hover:text-blue-700 font-bold text-sm transition-colors">Edit</button>
                 </Link>
                 <Link href={`/dashboard/workflows/${workflow._id}/runs`}>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
-                    <ListIcon className="w-4 h-4 mr-2" />
+                  <button className="flex items-center text-muted-foreground hover:text-foreground font-semibold text-sm transition-colors">
+                    <ListIcon className="w-4 h-4 mr-1.5" />
                     Runs
-                  </Button>
+                  </button>
                 </Link>
+                <div className="w-px h-4 bg-border/60 mx-1 hidden sm:block"></div>
+                <button className="text-muted-foreground/60 hover:text-foreground transition-colors ml-auto sm:ml-0" onClick={() => duplicateWorkflow(workflow)}>
+                  <CopyIcon className="w-[18px] h-[18px]" />
+                </button>
+                <button className="text-red-500/80 hover:text-red-600 transition-colors" onClick={() => deleteWorkflow(workflow._id)}>
+                  <Trash2Icon className="w-[18px] h-[18px]" />
+                </button>
               </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" onClick={() => duplicateWorkflow(workflow)}>
-                  <CopyIcon className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => deleteWorkflow(workflow._id)}>
-                  <Trash2Icon className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardFooter>
+            </div>
           </Card>
         ))}
 

@@ -48,20 +48,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as AuthRequestConfig;
 
-    // For read requests, retry once without the bearer token so cookie auth can still work
-    if (
-      error.response?.status === 401 &&
-      originalRequest?.method === 'get' &&
-      !originalRequest._retryNoAuth
-    ) {
-      originalRequest._retryNoAuth = true;
-      originalRequest.skipAuth = true;
-      originalRequest.headers = AxiosHeaders.from(originalRequest.headers);
-      originalRequest.headers.delete('Authorization');
-
-      return api(originalRequest);
-    }
-
     // Handle 429 Too Many Requests with retry + backoff
     if (error.response?.status === 429) {
       const retryCount = originalRequest._retryCount || 0;

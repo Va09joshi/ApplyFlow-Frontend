@@ -31,6 +31,7 @@ function WorkflowEditor() {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   
   const [workflowName, setWorkflowName] = useState('Untitled Workflow');
+  const [workflowDescription, setWorkflowDescription] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -45,6 +46,7 @@ function WorkflowEditor() {
       const { data } = await api.get(`/api/v1/workflows/${workflowId}`);
       if (data.success && data.data) {
         setWorkflowName(data.data.name);
+        setWorkflowDescription(data.data.description || '');
         setNodes(data.data.nodes || []);
         setEdges(data.data.edges || []);
         
@@ -133,6 +135,7 @@ function WorkflowEditor() {
       const triggerNode = nodes.find(n => n.type === 'trigger');
       const payload = {
         name: workflowName,
+        description: workflowDescription,
         nodes,
         edges,
         trigger: triggerNode ? { type: 'gmail.email.received', config: triggerNode.data } : { type: 'manual' }
@@ -199,16 +202,25 @@ function WorkflowEditor() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background overflow-hidden">
       {/* Top Navbar */}
-      <div className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 z-10 shadow-sm">
+      <div className="py-2 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 z-10 shadow-sm">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/workflows')}>
+          <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard/workflows')} className="mt-1">
             <ArrowLeftIcon className="w-5 h-5" />
           </Button>
-          <Input 
-            className="w-64 font-semibold text-lg border-transparent hover:border-border focus:border-primary bg-transparent" 
-            value={workflowName}
-            onChange={(e) => setWorkflowName(e.target.value)}
-          />
+          <div className="flex flex-col">
+            <Input 
+              className="w-72 font-bold text-lg border-transparent hover:border-border focus:border-primary bg-transparent h-8 px-2 focus-visible:ring-0 shadow-none" 
+              value={workflowName}
+              onChange={(e) => setWorkflowName(e.target.value)}
+              placeholder="Workflow Name"
+            />
+            <Input 
+              className="w-72 text-sm text-muted-foreground border-transparent hover:border-border focus:border-primary bg-transparent h-7 px-2 focus-visible:ring-0 shadow-none" 
+              value={workflowDescription}
+              onChange={(e) => setWorkflowDescription(e.target.value)}
+              placeholder="Add a description..."
+            />
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={runWorkflow} disabled={isRunning || isSaving}>

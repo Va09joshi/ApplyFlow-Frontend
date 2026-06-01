@@ -118,6 +118,10 @@ export default function EmailAutomationsPage() {
         checkGmailStatus();
         toast.success(`Gmail connected as ${payload?.email || 'your account'}`);
         setIsConnectingGmail(false);
+        
+        // Automatically trigger a sync so they don't have to press the button
+        toast.info("Automatically checking for new emails...");
+        api.get("/api/v1/gmail/sync").catch(e => console.error("Auto sync failed", e));
       }
     };
     window.addEventListener('message', handleMessage);
@@ -227,15 +231,21 @@ export default function EmailAutomationsPage() {
   const handleSyncGmail = async () => {
     try {
       setIsSyncing(true);
-      const res = await api.post("/api/v1/gmail/sync");
+      const res = await api.get("/api/v1/gmail/sync");
       if (res.data.success) {
         toast.success("Gmail sync triggered! Checking for new emails and running workflows...");
       } else {
         toast.error("Failed to start sync");
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred starting sync");
+    } catch (error) {
+      const err = error as any;
+      const errorDetail = String(err?.response?.data?.error || err?.response?.data?.message || err?.message || "").toLowerCase();
+      
+      if (errorDetail.includes("insufficient permission") || errorDetail.includes("forbidden") || errorDetail.includes("scope") || errorDetail.includes("invalid_grant")) {
+        toast.error("Permission denied or session expired! Please disconnect and reconnect Gmail, making sure to check the boxes allowing access to read and send emails.");
+      } else {
+        toast.error(err?.response?.data?.message ? `Sync failed: ${err.response.data.message}` : "An error occurred starting sync");
+      }
     } finally {
       // Keep syncing spinner for a bit to feel like it's doing work
       setTimeout(() => setIsSyncing(false), 2000);
