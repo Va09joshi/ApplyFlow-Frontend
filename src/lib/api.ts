@@ -8,8 +8,11 @@ type AuthRequestConfig = InternalAxiosRequestConfig & {
   _retryCount?: number;
 };
 
-const baseURL =
-  '/api/backend';
+// Use the in-app proxy for client-side calls to avoid CORS during development.
+// On the server (SSR), prefer an explicit environment variable or fallback host.
+const baseURL = typeof window === 'undefined'
+  ? (process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, '') || 'https://backend.applyflow.live')
+  : '/api/backend';
 
 export const api = axios.create({
   baseURL,

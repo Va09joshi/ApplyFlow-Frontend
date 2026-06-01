@@ -32,12 +32,41 @@ const proxyRequest = async (request: Request) => {
   const hasBody = !["GET", "HEAD"].includes(method);
   const body = hasBody ? await request.arrayBuffer() : undefined;
 
-  const backendResponse = await fetch(backendUrl, {
-    method,
-    headers,
-    body,
-    cache: "no-store",
-  });
+  let backendResponse: Response;
+  try {
+    backendResponse = await fetch(backendUrl, {
+      method,
+      headers,
+      body,
+      cache: "no-store",
+    });
+  } catch (err: any) {
+    // If primary backend is unreachable, optionally try a fallback URL.
+    const fallback = process.env.NEXT_PUBLIC_API_FALLBACK_URL;
+    if (fallback) {
+      try {
+        const fallbackUrl = new URL(backendUrl.pathname + backendUrl.search, fallback);
+        // eslint-disable-next-line no-console
+        console.warn(`Primary backend unreachable; trying fallback ${fallbackUrl}`);
+        backendResponse = await fetch(fallbackUrl, {
+          method,
+          headers,
+          body,
+          cache: "no-store",
+        });
+      } catch (fallbackErr: any) {
+        return NextResponse.json(
+          { message: "Unable to reach backend API (primary and fallback).", error: String(fallbackErr?.message || fallbackErr) },
+          { status: 502 }
+        );
+      }
+    } else {
+      return NextResponse.json(
+        { message: "Unable to reach backend API.", error: String(err?.message || err) },
+        { status: 502 }
+      );
+    }
+  }
 
   const responseHeaders = new Headers({
     "Content-Type": backendResponse.headers.get("content-type") || "application/json; charset=utf-8",

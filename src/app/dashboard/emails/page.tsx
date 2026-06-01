@@ -7,7 +7,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Send, Settings2, Plus, Mail, Trash2, Loader2, Play, UploadCloud, Edit2, CheckCircle2, LogOut } from "lucide-react";
+import { Send, Settings2, Plus, Mail, Trash2, Loader2, Play, UploadCloud, Edit2, CheckCircle2, LogOut, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import * as motion from "framer-motion/client";
 import { templateService, Template } from "@/services/template.service";
 import { emailService, GmailStatus } from "@/services/email.service";
@@ -29,6 +30,7 @@ export default function EmailAutomationsPage() {
   const [isCheckingGmail, setIsCheckingGmail] = useState(true);
   const [isConnectingGmail, setIsConnectingGmail] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // New/Edit Template Form
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
@@ -136,11 +138,23 @@ export default function EmailAutomationsPage() {
         const height = 600;
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
+
+        // Open the actual auth URL returned by the backend. Rewriting the
+        // popup origin to a different host (e.g. `backend.applyflow.live`) will
+        // make the browser navigate to that host and can trigger SSL/unsafe
+        // warnings if that domain is not serving valid HTTPS. To avoid those
+        // warnings we open the URL exactly as the backend returned it.
+        const authUrl = res.data.url as string;
         const popup = window.open(
-          res.data.url,
+          authUrl,
           'Gmail Connect',
           `width=${width},height=${height},left=${left},top=${top}`
         );
+
+        // For branding/display purposes we still keep `NEXT_PUBLIC_OAUTH_DISPLAY_HOST`
+        // available in env and can surface it in the UI (labels/messages), but
+        // we must not navigate the user to it unless that host is properly
+        // configured with TLS and registered with Google.
 
         // Actively poll the backend status while popup is open.
         // The backend callback processes the OAuth code and stores credentials,
@@ -201,10 +215,29 @@ export default function EmailAutomationsPage() {
       setGmailStatus(null);
       setSendForm(prev => ({ ...prev, fromEmail: "" }));
       toast.success("Gmail disconnected successfully");
-    } catch {
-      toast.error("Failed to disconnect Gmail");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to disconnect Gmail account");
     } finally {
       setIsDisconnecting(false);
+    }
+  };
+
+  const handleSyncGmail = async () => {
+    try {
+      setIsSyncing(true);
+      const res = await api.post("/api/v1/gmail/sync");
+      if (res.data.success) {
+        toast.success("Gmail sync triggered! Checking for new emails and running workflows...");
+      } else {
+        toast.error("Failed to start sync");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred starting sync");
+    } finally {
+      // Keep syncing spinner for a bit to feel like it's doing work
+      setTimeout(() => setIsSyncing(false), 2000);
     }
   };
 
@@ -581,14 +614,13 @@ export default function EmailAutomationsPage() {
   // Strip HTML utility for card preview snippets
   const stripHtml = (html: string) => {
     if (!html) return "";
-    let text = html.replace(/<[^>]*>/g, ' ');
-    text = text
+    let text = html
       .replace(/&nbsp;/g, ' ')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/\s+/g, ' ')
-      .trim();
+      .replace(/&amp;/g, '&');
+    text = text.replace(/<[^>]*>/g, ' ');
+    text = text.replace(/\s+/g, ' ').trim();
     return text;
   };
 
@@ -635,20 +667,33 @@ export default function EmailAutomationsPage() {
                 <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-emerald-500/30 text-emerald-600 bg-emerald-500/10 font-semibold shrink-0">
                   Connected
                 </Badge>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all duration-200"
-                  onClick={handleDisconnectGmail}
-                  disabled={isDisconnecting}
-                  title="Disconnect Gmail"
-                >
-                  {isDisconnecting ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <LogOut className="w-3 h-3" />
-                  )}
-                </Button>
+                
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                    onClick={handleSyncGmail}
+                    disabled={isSyncing}
+                    title="Force Sync Emails"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-primary' : ''}`} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={handleDisconnectGmail}
+                    disabled={isDisconnecting}
+                    title="Disconnect Gmail"
+                  >
+                    {isDisconnecting ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <LogOut className="w-3 h-3" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -1476,8 +1521,28 @@ export default function EmailAutomationsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="h-[260px] border-border/40 bg-card flex flex-col overflow-hidden relative">
+              <CardHeader className="pb-4 pt-5 px-5 border-b border-border/20">
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-24 rounded-md" />
+                  <Skeleton className="h-6 w-full rounded-md" />
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 pt-5 pb-4 px-5">
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-[90%]" />
+                  <Skeleton className="h-4 w-[80%]" />
+                </div>
+              </CardContent>
+              <CardFooter className="pt-3 pb-5 px-5 bg-card mt-auto flex items-center gap-3 border-t border-border/10">
+                <Skeleton className="h-10 flex-1 rounded-md" />
+                <Skeleton className="h-10 w-[80px] rounded-md" />
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       ) : templates.length === 0 ? (
         <div className="text-center py-10 bg-card rounded-xl border border-border/50">
@@ -1490,38 +1555,45 @@ export default function EmailAutomationsPage() {
           {templates.map((template, i) => (
             <motion.div
               key={template._id || template.id || i}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: i * 0.1 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.05, ease: "easeOut" }}
+              className="h-full"
             >
-              <Card className="h-full border-border/50 bg-card hover:shadow-md hover:border-border transition-all flex flex-col group overflow-hidden relative">
-                <CardHeader className="pb-3 bg-muted/10 border-b border-border/30">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1.5 flex-1 min-w-0">
+              <Card className="h-full border-border/40 bg-card hover:-translate-y-1.5 transition-all duration-300 flex flex-col group overflow-hidden relative hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-primary/30 dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]">
+                {/* Decorative top gradient border */}
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary/40 via-primary to-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <CardHeader className="pb-4 pt-5 px-5 bg-gradient-to-b from-muted/30 to-transparent border-b border-border/20">
+                  <div className="flex justify-between items-start gap-4 relative z-10">
+                    <div className="space-y-2.5 flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider bg-background/50">Template</Badge>
+                        <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary border-primary/20 shadow-sm">Template</Badge>
                         <span className="text-xs font-medium text-muted-foreground truncate" title={template.name}>{template.name}</span>
                       </div>
-                      <CardTitle className="text-base font-semibold leading-snug line-clamp-2" title={template.subject}>
+                      <CardTitle className="text-base font-semibold leading-snug line-clamp-2 text-foreground/90 group-hover:text-primary transition-colors" title={template.subject}>
                         {template.subject || "(No Subject)"}
                       </CardTitle>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="flex-1 pt-4 pb-2 px-5">
-                  <div className="text-sm text-foreground/80 leading-relaxed line-clamp-4 font-sans max-w-none">
-                    {stripHtml(template.body)}
+                <CardContent className="flex-1 pt-5 pb-4 px-5 relative z-10">
+                  <div className="text-sm text-muted-foreground leading-relaxed line-clamp-4 font-sans max-w-none relative">
+                    {template.plainText ? template.plainText : stripHtml(template.body)}
                   </div>
                 </CardContent>
-                <CardFooter className="pt-2 pb-4 px-5 bg-gradient-to-t from-card via-card to-transparent mt-auto flex items-center gap-2 shrink-0">
-                  <Button variant="secondary" className="flex-1 font-medium shadow-sm border border-border/50 bg-background hover:bg-muted" onClick={() => openSendDialog(template)}>
-                    <Mail className="w-4 h-4 mr-2 text-primary" /> Use Template
+                <CardFooter className="pt-3 pb-5 px-5 bg-card mt-auto flex items-center gap-3 shrink-0 relative z-10 border-t border-border/10">
+                  <Button 
+                    className="flex-1 font-medium shadow-sm transition-all bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-0 group-hover:shadow-md" 
+                    onClick={() => openSendDialog(template)}
+                  >
+                    <Mail className="w-4 h-4 mr-2" /> Use Template
                   </Button>
-                  <div className="flex items-center bg-background rounded-md shadow-sm border border-border/50 p-0.5 shrink-0">
+                  <div className="flex items-center bg-muted/40 rounded-lg p-1 shrink-0 transition-colors group-hover:bg-muted/70">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-md" 
+                      className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-background rounded-md transition-all" 
                       onClick={() => openEditTemplateDialog(template)}
                       title="Edit Template"
                     >
@@ -1530,7 +1602,7 @@ export default function EmailAutomationsPage() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-md" 
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all" 
                       onClick={() => handleDeleteTemplate(template._id || template.id || "")}
                       title="Delete Template"
                     >

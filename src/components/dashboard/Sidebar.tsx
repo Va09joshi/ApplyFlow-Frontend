@@ -13,7 +13,10 @@ import {
   Sparkles,
   LogOut,
   ChevronRight,
-  Compass
+  Compass,
+  Kanban,
+  Inbox,
+  Workflow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,7 +33,11 @@ const sidebarItems = [
   { name: "Applications", href: "/dashboard/applications", icon: Briefcase },
   { name: "Companies", href: "/dashboard/companies", icon: Building2 },
   { name: "Jobs", href: "/dashboard/jobs", icon: Compass },
-  { name: "Email Automations", href: "/dashboard/emails", icon: Mail },
+  { name: "Pipeline", href: "/dashboard/pipeline", icon: Kanban },
+  { name: "Inbox & Threads", href: "/dashboard/inbox", icon: Inbox },
+  { name: "Emails & Templates", href: "/dashboard/emails", icon: Mail },
+  { name: "Workflows", href: "/dashboard/workflows", icon: Workflow },
+  { name: "Email Automations", href: "/dashboard/automations", icon: Mail },
   { name: "Resume Manager", href: "/dashboard/resumes", icon: FileText },
   { name: "ATS Analyzer", href: "/dashboard/ats", icon: Bot },
   { name: "AI Generator", href: "/dashboard/ai", icon: Sparkles },
