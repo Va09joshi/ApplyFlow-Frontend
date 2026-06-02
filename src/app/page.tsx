@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { 
+import {
   ArrowRight, Bot, Sparkles, ChevronRight, CheckCircle2, Briefcase,
   Send, MessageSquare, Terminal, FileText, Check, Search, User, RefreshCw, Star, X,
   Play, Pause, Paperclip, SendHorizontal, Mail, UploadCloud, Layers, Database, Code, Copy, Layout,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, GitMerge, Workflow
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,9 +86,43 @@ const MOCK_CATEGORIES: Category[] = [
   }
 ];
 
+const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="group border-b border-border/40 last:border-0">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between py-6 text-left focus:outline-none"
+      >
+        <span className={`font-bold text-lg md:text-xl transition-colors duration-200 ${isOpen ? 'text-primary' : 'text-foreground group-hover:text-primary/80'}`}>
+          {question}
+        </span>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'text-primary rotate-180' : 'text-muted-foreground group-hover:text-primary'}`}>
+          <ChevronDown className="w-5 h-5" />
+        </div>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="pb-8 text-muted-foreground leading-relaxed md:text-lg pr-8">
+              {answer}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export default function Home() {
   // --- STATE 1: Automation Command Center Tab switcher ---
-  const [activeCmdTab, setActiveCmdTab] = useState<string>("single");
+  const [activeCmdTab, setActiveCmdTab] = useState<string>("workflow");
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
   const [showUpcoming, setShowUpcoming] = useState<boolean>(false);
   const [isComingSoonOpen, setIsComingSoonOpen] = useState<boolean>(false);
@@ -216,7 +250,7 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-1">
-        
+
         {/* HERO SECTION */}
         <section className="relative pt-28 pb-48 md:pt-36 md:pb-64 overflow-hidden bg-gradient-to-b from-background via-primary/5 to-primary/10">
 
@@ -224,7 +258,7 @@ export default function Home() {
           <div className="absolute bottom-10 left-0 -z-10 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] opacity-70"></div>
 
           <div className="container mx-auto px-4 text-center z-10 relative">
-            
+
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -253,7 +287,13 @@ export default function Home() {
                 href="/signup"
                 className={buttonVariants({ size: "lg" }) + " w-full sm:w-auto rounded-full px-8 font-semibold shadow-[0_4px_20px_rgba(var(--primary),0.35)] hover:shadow-[0_4px_30px_rgba(var(--primary),0.5)] transition-all transform hover:-translate-y-0.5"}
               >
-                Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
+                Get Started for Free <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+              <Link 
+                href="/#pricing"
+                className={buttonVariants({ size: "lg", variant: "outline" }) + " w-full sm:w-auto rounded-full px-8 font-semibold bg-background hover:bg-muted/50 transition-all transform hover:-translate-y-0.5"}
+              >
+                View Pricing
               </Link>
             </motion.div>
           </div>
@@ -268,6 +308,39 @@ export default function Home() {
               {/* Front Layer: Solid background color to seamlessly blend into the next section */}
               <path fill="currentColor" className="text-background" d="M0,192L48,208C96,224,192,256,288,256C384,256,480,224,576,202.7C672,181,768,171,864,181.3C960,192,1056,224,1152,229.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
+          </div>
+        </section>
+
+        {/* TRUSTED BY / SOCIAL PROOF */}
+        <section className="py-16 border-b border-border/40 bg-muted/20 relative z-10">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-sm font-semibold text-muted-foreground mb-8 uppercase tracking-widest">
+              Trusted By
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-10 md:gap-20 opacity-90 transition-all duration-500 mb-12">
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/90">
+                <svg className="w-8 h-8 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.187 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg> 
+                Google
+              </div>
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/90">
+                <svg className="w-8 h-8 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg> 
+                LinkedIn
+              </div>
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/90">
+                <svg className="w-8 h-8 text-[#EA4335]" viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg> 
+                Gmail
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
+              <div className="bg-background rounded-2xl p-4 shadow-sm border border-border/50">
+                <span className="text-3xl font-black text-primary block">10,000+</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Applications Sent</span>
+              </div>
+              <div className="bg-background rounded-2xl p-4 shadow-sm border border-border/50">
+                <span className="text-3xl font-black text-primary block">99%</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Automation Success Rate</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -288,20 +361,18 @@ export default function Home() {
             {/* Tab Swappers */}
             <div className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto bg-muted/40 p-1.5 rounded-2xl border border-border/50 shadow-sm">
               {[
-                { id: "single", label: "Single Outreach", icon: <Send className="w-4 h-4" /> },
-                { id: "bulk", label: "CSV Bulk Sharing", icon: <UploadCloud className="w-4 h-4" /> },
-                { id: "ats", label: "ATS Auditor", icon: <Layers className="w-4 h-4" /> },
-                { id: "occupancy", label: "Company Occupancy", icon: <Database className="w-4 h-4" /> },
-                { id: "templates", label: "Reusable Templates", icon: <Layout className="w-4 h-4" /> }
+                { id: "workflow", label: "Visual Builder", icon: <GitMerge className="w-4 h-4" /> },
+                { id: "single", label: "Email Dispatch", icon: <Send className="w-4 h-4" /> },
+                { id: "templates", label: "Template Engine", icon: <Layout className="w-4 h-4" /> },
+                { id: "ats", label: "ATS Auditor", icon: <Layers className="w-4 h-4" /> }
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveCmdTab(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${
-                    activeCmdTab === tab.id
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all duration-200 ${activeCmdTab === tab.id
                       ? "bg-background text-foreground shadow-sm ring-1 ring-border"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
+                    }`}
                 >
                   {tab.icon}
                   {tab.label}
@@ -314,7 +385,89 @@ export default function Home() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full blur-2xl pointer-events-none"></div>
 
               <AnimatePresence mode="wait">
-                
+
+                {/* Visual Workflow Mockup */}
+                {activeCmdTab === "workflow" && (
+                  <motion.div
+                    key="cmd-workflow"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
+                  >
+                    <div className="md:col-span-7 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/10 flex flex-col h-[360px] relative">
+                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                      
+                      <div className="absolute top-8 left-0 right-0 flex flex-col items-center">
+                        <div className="bg-background border border-border rounded-lg p-3 shadow-sm w-56 flex items-center gap-3 z-10 relative hover:border-primary/50 transition-colors cursor-pointer group">
+                          <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <Search className="w-4 h-4 text-blue-500" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-muted-foreground">Trigger</p>
+                            <p className="text-xs font-semibold">Job Match Found</p>
+                          </div>
+                        </div>
+                        
+                        <div className="h-6 w-px bg-border/80 my-1"></div>
+                        
+                        <div className="bg-background border border-primary/40 rounded-lg p-3 shadow-sm w-56 flex items-center gap-3 z-10 relative ring-1 ring-primary/20 hover:border-primary/80 transition-colors cursor-pointer group">
+                          <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <Bot className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-muted-foreground">AI Action</p>
+                            <p className="text-xs font-semibold">Draft Cold Email</p>
+                          </div>
+                        </div>
+
+                        <div className="h-6 w-px bg-border/80 my-1"></div>
+                        
+                        <div className="bg-background border border-border rounded-lg p-3 shadow-sm w-56 flex items-center gap-3 z-10 relative hover:border-emerald-500/50 transition-colors cursor-pointer group">
+                          <div className="w-8 h-8 rounded-md bg-emerald-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <Send className="w-4 h-4 text-emerald-500" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-muted-foreground">Action</p>
+                            <p className="text-xs font-semibold">Send via Gmail</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-5 space-y-4">
+                      <div>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-2">Visual Workflow Builder</span>
+                        <h4 className="text-2xl font-black text-foreground tracking-tight">Build complex pipelines without coding</h4>
+                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                          Drag and drop nodes to create fully automated sequences. Connect your ATS, set AI parameters, and dispatch emails in a seamless flow.
+                        </p>
+                      </div>
+
+                      <div className="space-y-4 mt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Sparkles className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-foreground">AI Integration</p>
+                            <p className="text-[11px] text-muted-foreground font-medium">Native LLM nodes</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <GitMerge className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-foreground">Conditional Logic</p>
+                            <p className="text-[11px] text-muted-foreground font-medium">Split paths based on fit score</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Single Outreach Mockup */}
                 {activeCmdTab === "single" && (
                   <motion.div
@@ -335,7 +488,7 @@ export default function Home() {
                           outbox_composer.exe
                         </span>
                       </div>
-                      
+
                       {/* Email Composer Fields */}
                       <div className="p-6 space-y-4 font-mono text-[13px]">
                         <div className="flex flex-col gap-1.5 border-b border-border/30 pb-3">
@@ -346,7 +499,7 @@ export default function Home() {
                           <span className="text-muted-foreground text-[10px] uppercase tracking-widest font-bold">Subject</span>
                           <span className="text-foreground font-bold">Application: Senior React Developer</span>
                         </div>
-                        
+
                         <div className="text-muted-foreground/80 leading-relaxed pt-2 font-sans text-sm">
                           <p>Hi Recruiting Team,</p>
                           <p className="mt-3">I noticed your opening for a UI Developer. My background matches your tech-stack: React, Next.js, and TypeScript. I recently built a highly responsive dashboard showing...</p>
@@ -377,7 +530,7 @@ export default function Home() {
                             <div className="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"></div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <FileText className="w-4 h-4 text-primary" />
@@ -418,7 +571,7 @@ export default function Home() {
                     className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
                   >
                     <div className="md:col-span-7 bg-card border border-border/40 rounded-2xl overflow-hidden shadow-2xl shadow-black/10 p-6 flex flex-col gap-4">
-                      
+
                       {/* Upload Box Mock */}
                       <div className="border-2 border-dashed border-primary/20 rounded-xl p-6 text-center bg-primary/5 hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-2">
                         <UploadCloud className="w-8 h-8 text-primary animate-bounce" />
@@ -433,7 +586,7 @@ export default function Home() {
                           <div className="text-primary">CSV Column</div>
                           <div className="text-center text-muted-foreground">&rarr;</div>
                           <div className="text-right text-foreground">Outbox Field</div>
-                          
+
                           <div className="border-t border-border/20 pt-1.5">recipient_email</div>
                           <div className="text-center text-muted-foreground border-t border-border/20 pt-1.5">&rarr;</div>
                           <div className="text-right text-green-500 border-t border-border/20 pt-1.5">to (Email)</div>
@@ -501,7 +654,7 @@ export default function Home() {
                         </svg>
                         <span className="absolute text-3xl font-black text-foreground">92%</span>
                       </div>
-                      
+
                       <div className="w-full grid grid-cols-2 gap-3 text-xs">
                         <div className="bg-green-500/5 border border-green-500/10 rounded-xl p-3 text-center">
                           <span className="text-[9px] uppercase tracking-wider text-green-500 font-bold block mb-1">Keywords Match</span>
@@ -547,7 +700,7 @@ export default function Home() {
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block border-b border-border/40 pb-2">
                         Company Occupancy & Hiring Statistics
                       </span>
-                      
+
                       <div className="space-y-2">
                         {[
                           { name: "Vercel Inc.", occupancy: "14 Active Roles", referrals: "82% success", rate: "High" },
@@ -559,9 +712,8 @@ export default function Home() {
                             <span className="font-bold text-foreground">{company.name}</span>
                             <span className="text-muted-foreground font-mono">{company.occupancy}</span>
                             <span className="text-indigo-400 font-mono">{company.referrals}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                              company.rate.includes("Very") ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
-                            }`}>
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${company.rate.includes("Very") ? "bg-green-500/10 text-green-500" : "bg-primary/10 text-primary"
+                              }`}>
                               {company.rate}
                             </span>
                           </div>
@@ -610,8 +762,8 @@ export default function Home() {
                           desc: "Refined cover template optimized for infrastructure teams."
                         }
                       ].map(temp => (
-                        <div 
-                          key={temp.id} 
+                        <div
+                          key={temp.id}
                           className="bg-background border border-border/60 rounded-xl p-4 flex flex-col justify-between shadow hover:border-primary/40 transition-colors group"
                         >
                           <div>
@@ -674,15 +826,15 @@ export default function Home() {
           </div>
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[150px]"></div>
-          
+
           <div className="container mx-auto px-4 max-w-5xl relative z-10">
             <div className="grid md:grid-cols-2 gap-16 items-center">
-              
+
               {/* Bot Image — Moved to right via order-last */}
               <div className="flex justify-center relative md:order-last">
-                <img 
-                  src="/Bot.png" 
-                  alt="ApplyFlow AI Agent" 
+                <img
+                  src="/Bot.png"
+                  alt="ApplyFlow AI Agent"
                   className="w-[26rem] h-[26rem] md:w-[32rem] md:h-[32rem] object-contain select-none drop-shadow-[0_22px_55px_rgba(255,255,255,0.28)] hover:drop-shadow-[0_28px_70px_rgba(255,255,255,0.4)] transition-all duration-500 hover:scale-105"
                 />
               </div>
@@ -702,7 +854,7 @@ export default function Home() {
                 <div className="relative space-y-6 py-2">
                   {/* Vertical connecting line */}
                   <div className="absolute left-[11px] top-5 bottom-5 w-px bg-border/70 z-0"></div>
-                  
+
                   {[
                     { text: "Email Outreach Automation" },
                     { text: "ATS Resume Scoring & Fixes" },
@@ -740,7 +892,7 @@ export default function Home() {
         {/* SECTION 3: SIMPLE WORKFLOW EXPLAINER */}
         <section id="explainer-section" className="py-24 relative overflow-hidden bg-background">
           <div className="absolute -top-40 right-10 -z-10 w-[450px] h-[450px] bg-primary/5 rounded-full blur-[120px]"></div>
-          
+
           <div className="container mx-auto px-4 max-w-6xl relative z-10">
             <div className="text-center mb-20">
               <span className="inline-block py-1.5 px-4 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-5">Workflow</span>
@@ -750,15 +902,14 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="relative grid md:grid-cols-4 gap-8">
+            <div className="relative grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {/* Timeline Connecting Line */}
-              <div className="hidden md:block absolute top-[44px] left-[12%] right-[12%] h-0.5 bg-border/40 z-0"></div>
+              <div className="hidden md:block absolute top-[44px] left-[16%] right-[16%] h-0.5 bg-border/40 z-0"></div>
 
               {[
-                { step: 1, title: "Profile Scan", icon: FileText, desc: "We extract parameters from your resume and build an identity profile." },
-                { step: 2, title: "ATS Match", icon: Search, desc: "We cross-reference keywords with job descriptions to ensure high match rates." },
-                { step: 3, title: "Smart Draft", icon: Sparkles, desc: "Our AI generates a highly personalized outreach email or cover letter." },
-                { step: 4, title: "Dispatch", icon: Send, desc: "Emails are sent natively on your behalf to recruiters and hiring managers." },
+                { step: 1, title: "Connect your Inbox", icon: FileText, desc: "Seamlessly integrate your preferred email provider." },
+                { step: 2, title: "Generate your Workflow", icon: Search, desc: "Type a prompt to visually build your automation pipeline." },
+                { step: 3, title: "Let AI handle the rest", icon: Sparkles, desc: "Relax as your customized AI agent executes the outreach." }
               ].map((item) => {
                 const Icon = item.icon;
                 return (
@@ -781,10 +932,10 @@ export default function Home() {
         <section id="features" className="py-32 border-y border-border/40 relative overflow-hidden bg-background">
           <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-[0.15] dark:opacity-60 mix-blend-multiply dark:mix-blend-screen" style={{ backgroundImage: "url('/hero-bg.png')" }}></div>
           <div className="absolute inset-0 z-0 bg-gradient-to-t from-background via-background/60 to-background/90 dark:to-background/80"></div>
-          
+
           {/* Subtle blue gradient specifically for light mode - placed above the white fade so it's visible */}
           <div className="absolute inset-0 z-0 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent dark:hidden mix-blend-multiply"></div>
-          
+
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <span className="inline-flex text-xs font-bold uppercase tracking-widest text-primary mb-4 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md">Application Suite</span>
@@ -797,16 +948,16 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
                 {
-                  title: "Beat ATS Systems",
-                  description: "Scan your resume against live requirements in real-time. Instantly spot missing structural keywords and inject optimized bullet accomplishments in 1 click."
+                  title: "AI-Powered Workflows",
+                  description: "Generate complex automation pipelines just by typing a prompt."
                 },
                 {
-                  title: "Autopilot Sends",
-                  description: "Select individual job contacts or drop standard spreadsheets. ApplyFlow parses leads and automatically delivers contextual, tailored pitches at optimal schedules."
+                  title: "Smart ATS Matching",
+                  description: "Scan your resume against live requirements in real-time. Instantly spot missing structural keywords."
                 },
                 {
-                  title: "Bespoke Outreach",
-                  description: "No generic templates. The engine structures natural cold pitches specific to hiring companies, matching referral criteria to bypass standard applicant filter lines."
+                  title: "Autopilot Outreach",
+                  description: "Select individual job contacts or drop standard spreadsheets to automatically deliver contextual pitches."
                 }
               ].map((feature, i) => (
                 <div
@@ -830,23 +981,23 @@ export default function Home() {
             </div>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
-                { 
-                  name: "Sarah J.", 
-                  role: "Frontend Engineer", 
+                {
+                  name: "Jane Doe",
+                  role: "Software Engineer",
                   image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-                  text: "ApplyFlow got me 3 interviews at top tech companies in my first week. The automated outreach is incredible." 
+                  text: "ApplyFlow saved me 20 hours a week and helped me land 5 interviews!"
                 },
-                { 
-                  name: "David M.", 
-                  role: "Product Manager", 
+                {
+                  name: "David M.",
+                  role: "Product Manager",
                   image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop&crop=face",
-                  text: "The ATS optimization alone is worth it. It spotted 5 missing keywords that I completely overlooked in my resume." 
+                  text: "The ATS optimization alone is worth it. It spotted 5 missing keywords that I completely overlooked in my resume."
                 },
-                { 
-                  name: "Emily R.", 
-                  role: "UX Designer", 
+                {
+                  name: "Emily R.",
+                  role: "UX Designer",
                   image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
-                  text: "Finally, a tool that takes the busywork out of job hunting. I just load my profile and let the AI do the heavy lifting." 
+                  text: "Finally, a tool that takes the busywork out of job hunting. I just load my profile and let the AI do the heavy lifting."
                 }
               ].map((t, i) => (
                 <div key={i} className="bg-gradient-to-b from-card/80 to-card border border-border/50 rounded-3xl p-8 shadow-xl flex flex-col gap-6 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
@@ -882,45 +1033,44 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {/* Basic Plan */}
               <div className="bg-card/50 border border-border/60 rounded-3xl p-8 flex flex-col">
-                <h3 className="text-2xl font-bold mb-2">Basic</h3>
+                <h3 className="text-2xl font-bold mb-2">Free</h3>
+                <p className="text-muted-foreground text-sm mb-4">Perfect for getting started.</p>
                 <div className="flex items-end gap-1 mb-6">
                   <span className="text-4xl font-black">$0</span>
-                  <span className="text-muted-foreground text-sm mb-1">/ forever</span>
                 </div>
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> 1 Resume parsing limit</li>
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Basic ATS keyword checks</li>
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> 5 AI email drafts / month</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> 1 Active Workflow</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Basic AI Generation</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Community Support</li>
                 </ul>
-                <Link href="/signup" className={buttonVariants({ variant: "outline", className: "w-full rounded-xl" })}>Get Started</Link>
+                <Link href="/signup" className={buttonVariants({ variant: "outline", className: "w-full rounded-xl" })}>Start Free</Link>
               </div>
-              
+
               {/* Pro Plan */}
               <div className="bg-gradient-to-b from-primary/10 to-card border border-primary/30 rounded-3xl p-8 flex flex-col relative shadow-2xl">
                 <div className="absolute top-0 right-8 -translate-y-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">Most Popular</div>
                 <h3 className="text-2xl font-bold mb-2 text-primary">Pro</h3>
+                <p className="text-muted-foreground text-sm mb-4">Perfect for getting started.</p>
                 <div className="flex items-end gap-1 mb-6">
-                  <span className="text-4xl font-black">$19</span>
+                  <span className="text-4xl font-black">$15</span>
                   <span className="text-muted-foreground text-sm mb-1">/ month</span>
                 </div>
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Unlimited resume versions</li>
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Advanced ATS optimization</li>
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Unlimited automated outreach</li>
-                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Priority support</li>
-                  
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Unlimited Workflows</li>
+                  <li className="flex items-center gap-3 text-sm"><Check className="w-4 h-4 text-primary" /> Priority Support</li>
+
                   <li className="pt-2">
-                    <button 
+                    <button
                       onClick={() => setShowUpcoming(!showUpcoming)}
                       className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors focus:outline-none"
                     >
                       {showUpcoming ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                       {showUpcoming ? "Hide upcoming features" : "Show upcoming features"}
                     </button>
-                    
+
                     <AnimatePresence>
                       {showUpcoming && (
-                        <motion.ul 
+                        <motion.ul
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
@@ -928,7 +1078,6 @@ export default function Home() {
                         >
                           <li className="flex items-center gap-3 text-sm text-muted-foreground"><Sparkles className="w-4 h-4 text-indigo-400" /> LinkedIn Auto-Apply Bot</li>
                           <li className="flex items-center gap-3 text-sm text-muted-foreground"><Sparkles className="w-4 h-4 text-indigo-400" /> Custom Domain Email Sending</li>
-                          <li className="flex items-center gap-3 text-sm text-muted-foreground"><Sparkles className="w-4 h-4 text-indigo-400" /> Interview Voice Coach AI</li>
                         </motion.ul>
                       )}
                     </AnimatePresence>
@@ -949,21 +1098,41 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FAQ SECTION */}
+        <section id="faq" className="py-24 bg-muted/10 border-y border-border/40 relative">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-black mb-4">Frequently Asked Questions</h2>
+              <p className="text-muted-foreground">Everything you need to know about ApplyFlow AI.</p>
+            </div>
+            <div className="max-w-3xl mx-auto border-t border-border/40 mt-8">
+              {[
+                { q: "Do I need to know how to code?", a: "No! Our visual builder and AI generator let you build workflows with plain text." },
+                { q: "What email providers do you support?", a: "We natively support Gmail, Outlook, and custom IMAP/SMTP domains for seamless sending." },
+                { q: "How many workflows can I build?", a: "Free users can build 1 active workflow, while Pro users have unlimited workflows and advanced AI generation capabilities." },
+                { q: "Is my data secure?", a: "Absolutely. We use enterprise-grade encryption and never sell your data to third parties. Your email credentials are fully encrypted." }
+              ].map((faq, i) => (
+                <FAQItem key={i} question={faq.q} answer={faq.a} />
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* PRICING & CONVERT CTA */}
         <section className="py-24 relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-primary/10 rounded-full blur-[110px] pointer-events-none"></div>
-          
+
           <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-4xl mx-auto bg-card border border-border/50 rounded-[2.5rem] p-10 md:p-16 shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-grid-white/[0.01] -z-10"></div>
-              
+
               <h2 className="text-3xl md:text-5xl font-extrabold mb-5 tracking-tight leading-tight">
                 Ready to Get Placed?
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-sm md:text-base leading-relaxed">
                 Join thousands of candidates securing premium responses from major tech firms with ApplyFlow AI outbox delivery.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row justify-center gap-6 mb-10">
                 <div className="flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
                   <CheckCircle2 className="w-4 h-4 text-primary" /> No Credit Card Required
@@ -976,7 +1145,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <Link 
+              <Link
                 href="/signup"
                 className={buttonVariants({ size: "lg" }) + " rounded-full px-10 bg-primary hover:bg-primary/95 text-primary-foreground font-bold shadow-[0_4px_25px_rgba(var(--primary),0.3)] transform hover:-translate-y-0.5 transition-all"}
               >
