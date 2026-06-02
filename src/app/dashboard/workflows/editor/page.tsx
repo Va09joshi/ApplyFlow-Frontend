@@ -11,7 +11,7 @@ import { ConfigPanel } from '@/components/workflows/ConfigPanel';
 import { RunLogsTray } from '@/components/workflows/RunLogsTray';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeftIcon, SaveIcon, PlayIcon, CheckCircle2Icon, Loader2Icon } from 'lucide-react';
+import { ArrowLeftIcon, SaveIcon, PlayIcon, CheckCircle2Icon, Loader2Icon, SparklesIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -35,11 +35,40 @@ function WorkflowEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
+  const [prompt, setPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
   useEffect(() => {
     if (workflowId) {
       fetchWorkflow();
     }
   }, [workflowId]);
+
+  const handleAIGenerate = async (directPrompt?: string) => {
+    const textToUse = typeof directPrompt === 'string' ? directPrompt : prompt;
+    if (!textToUse.trim()) return;
+    
+    setIsGenerating(true);
+    try {
+      const { data } = await api.post('/api/v1/workflows/generate', { prompt: textToUse });
+      
+      const payload = data.data || data; // Handle both wrapped and direct structures
+      
+      if (payload && payload.nodes && payload.edges) {
+         setNodes(payload.nodes);
+         setEdges(payload.edges);
+         setPrompt("");
+         toast.success("Workflow generated successfully");
+      } else {
+        toast.error("Invalid response from AI");
+      }
+    } catch (error: any) {
+      console.error("Failed to generate workflow:", error);
+      toast.error(error.response?.data?.message || "Failed to generate workflow");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const fetchWorkflow = async () => {
     try {
@@ -178,12 +207,17 @@ function WorkflowEditor() {
 
       // Find trigger node if any, to pass mock data
       const triggerNode = nodes.find(n => n.type === 'trigger');
-      const mockPayload = triggerNode ? {
-        from: 'candidate@example.com',
-        subject: 'My Application',
+      const mockEmail = {
+        from: triggerNode?.data?.fromContains || 'candidate@example.com',
+        subject: triggerNode?.data?.subjectContains || 'My Application',
         html: '<p>Here is my application.</p>',
         plainText: 'Here is my application.',
-        companyId: triggerNode.data?.companyId
+        companyId: triggerNode?.data?.companyId
+      };
+      
+      const mockPayload = triggerNode ? {
+        email: mockEmail,
+        ...mockEmail
       } : {};
 
       const { data } = await api.post(`/api/v1/workflows/${workflowId}/preview`, mockPayload);
@@ -239,6 +273,62 @@ function WorkflowEditor() {
         <NodeSidebar />
         
         <div className="flex-1 relative" ref={reactFlowWrapper}>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+            <div className="flex gap-2 bg-card p-2 rounded-lg shadow-md border border-border items-center">
+              <Input 
+                placeholder="Describe a workflow... (e.g. Receive email -> AI Classify)" 
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="w-[28rem] h-9"
+                disabled={isGenerating}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && prompt.trim() && !isGenerating) {
+                    handleAIGenerate();
+                  }
+                }}
+              />
+              <Button 
+                onClick={() => handleAIGenerate()}
+                disabled={isGenerating || !prompt.trim()}
+                size="sm"
+                className="gap-2"
+              >
+                {isGenerating ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SparklesIcon className="w-4 h-4" />}
+                {isGenerating ? "Generating..." : "Generate AI"}
+              </Button>
+            </div>
+            
+            {/* One-Click Presets */}
+            <div className="flex gap-2 mt-1">
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-7 text-xs bg-card border shadow-sm"
+                onClick={() => {
+                  const p = "When an email is received, send an email to the sender saying 'Thank you for your email!'";
+                  setPrompt(p);
+                  handleAIGenerate(p);
+                }}
+                disabled={isGenerating}
+              >
+                Auto-Reply Flow
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-7 text-xs bg-card border shadow-sm"
+                onClick={() => {
+                  const p = "When I receive an email, use AI to classify it, and if it's a job match, search for a job and send an email.";
+                  setPrompt(p);
+                  handleAIGenerate(p);
+                }}
+                disabled={isGenerating}
+              >
+                Job Match & Email
+              </Button>
+            </div>
+          </div>
+
           <ReactFlow
             nodes={nodes}
             edges={edges}

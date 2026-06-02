@@ -16,7 +16,7 @@ const baseURL = typeof window === 'undefined'
 
 export const api = axios.create({
   baseURL,
-  timeout: 15000,
+  timeout: 60000, // Increased to 60s to handle Render free tier cold starts
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

@@ -87,6 +87,13 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
               />
             </div>
             <div className="space-y-2 flex items-center justify-between">
+              <Label>Reply to original thread</Label>
+              <Switch
+                checked={node.data.replyToOriginalThread !== false}
+                onCheckedChange={(checked) => handleUpdate('replyToOriginalThread', checked)}
+              />
+            </div>
+            <div className="space-y-2 flex items-center justify-between">
               <Label>Send as HTML</Label>
               <Switch
                 checked={node.data.contentType === 'html'}
