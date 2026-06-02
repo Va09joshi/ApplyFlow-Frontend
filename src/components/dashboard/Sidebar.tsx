@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -52,7 +53,8 @@ export function Sidebar() {
     email?: string;
     avatarUrl?: string;
     avatar?: string;
-    profile?: { avatarUrl?: string; avatar?: string };
+    plan?: "free" | "pro";
+    profile?: { avatarUrl?: string; avatar?: string; plan?: "free" | "pro" };
   } | null>(null);
 
   const getFullImageUrl = (url?: string) => {
@@ -159,7 +161,14 @@ export function Sidebar() {
             <AvatarFallback>{getInitials(userProfile?.name)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-medium truncate">{userProfile?.name || "User"}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium truncate">{userProfile?.name || "User"}</span>
+              {(userProfile?.plan === "pro" || userProfile?.profile?.plan === "pro") ? (
+                <Badge className="h-4 px-1 text-[9px] bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 border-0 font-bold uppercase tracking-wider text-yellow-950">Pro</Badge>
+              ) : (
+                <Badge variant="outline" className="h-4 px-1 text-[9px] text-muted-foreground border-muted-foreground/30 font-bold uppercase tracking-wider">Free</Badge>
+              )}
+            </div>
             <span className="text-xs text-muted-foreground truncate">{userProfile?.email || "user@applyflow.ai"}</span>
           </div>
           <Button variant="ghost" size="icon" className="ml-auto h-8 w-8 text-muted-foreground hover:text-destructive" onClick={handleLogout}>

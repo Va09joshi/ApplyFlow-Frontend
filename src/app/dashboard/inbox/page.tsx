@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { formatDistanceToNow, format } from "date-fns";
 import { Mail, Search, Link2Icon, Inbox, User, Clock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -43,15 +44,18 @@ export default function InboxPage() {
   const [isLinkOpen, setIsLinkOpen] = useState(false);
   const [linkData, setLinkData] = useState({ applicationId: "", companyId: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCompanyOnly, setShowCompanyOnly] = useState(false);
 
   useEffect(() => {
     fetchThreads();
-  }, []);
+  }, [showCompanyOnly]);
 
   const fetchThreads = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/api/v1/emails/threads");
+      const { data } = await api.get("/api/v1/emails/threads", {
+        params: { onlyCompany: showCompanyOnly ? true : undefined }
+      });
       if (data.success) {
         setThreads(data.data?.threads || data.data || []);
       }
@@ -100,6 +104,14 @@ export default function InboxPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search emails..."
               className="pl-9 bg-white dark:bg-gray-950 rounded-xl border-gray-200 dark:border-gray-800 focus-visible:ring-blue-500"
+            />
+          </div>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Emails Only</span>
+            <Switch 
+              checked={showCompanyOnly} 
+              onCheckedChange={setShowCompanyOnly}
+              className="data-[state=checked]:bg-blue-600"
             />
           </div>
         </div>

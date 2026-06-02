@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeftIcon, SaveIcon, PlayIcon, CheckCircle2Icon, Loader2Icon, SparklesIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { UpgradeProModal } from '@/components/modals/UpgradeProModal';
 
 let id = 1;
 const getId = () => `node_${id++}`;
@@ -37,6 +38,7 @@ function WorkflowEditor() {
 
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     if (workflowId) {
@@ -64,7 +66,11 @@ function WorkflowEditor() {
       }
     } catch (error: any) {
       console.error("Failed to generate workflow:", error);
-      toast.error(error.response?.data?.message || "Failed to generate workflow");
+      if (error.response?.status === 403) {
+        setShowUpgradeModal(true);
+      } else {
+        toast.error(error.response?.data?.message || "Failed to generate workflow");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -178,9 +184,13 @@ function WorkflowEditor() {
         toast.success("Workflow created");
         router.replace(`/dashboard/workflows/editor?id=${data.data._id}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to save workflow");
+      if (err.response?.status === 403) {
+        setShowUpgradeModal(true);
+      } else {
+        toast.error("Failed to save workflow");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -359,6 +369,7 @@ function WorkflowEditor() {
       </div>
 
       <RunLogsTray />
+      <UpgradeProModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
 }

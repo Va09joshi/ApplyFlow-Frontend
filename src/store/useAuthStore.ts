@@ -5,6 +5,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
+  plan?: "free" | "pro";
 }
 
 interface AuthState {

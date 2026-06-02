@@ -10,10 +10,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2Icon, PlusIcon, PlayCircleIcon, CopyIcon, ListIcon } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { UpgradeProModal } from "@/components/modals/UpgradeProModal";
 
 export default function WorkflowsPage() {
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     fetchWorkflows();
@@ -59,9 +61,13 @@ export default function WorkflowsPage() {
         setWorkflows([data.data, ...workflows]);
         toast.success("Workflow duplicated");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to duplicate workflow");
+      if (err.response?.status === 403) {
+        setShowUpgradeModal(true);
+      } else {
+        toast.error("Failed to duplicate workflow");
+      }
     }
   };
 
@@ -188,6 +194,8 @@ export default function WorkflowsPage() {
           </div>
         )}
       </div>
+
+      <UpgradeProModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
     </div>
   );
 }
