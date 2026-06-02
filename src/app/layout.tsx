@@ -17,9 +17,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://applyflow.live"),
   title: "ApplyFlow AI - Clean, Good, and Make More Automation",
   description: "Automate your job applications, email generation, and ATS analysis with a clean and good platform to make more progress.",
   keywords: ["clean", "good", "make more", "job application", "automation", "AI", "ApplyFlow"],
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
