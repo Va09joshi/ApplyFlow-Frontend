@@ -42,6 +42,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let refreshPromise: Promise<string> | null = null;
+
 // Response interceptor to handle rate limiting and token refreshing
 api.interceptors.response.use(
   (response) => response,
@@ -66,33 +68,44 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      try {
-        const refreshToken = useAuthStore.getState().refreshToken;
-        if (!refreshToken) {
+      const refreshToken = useAuthStore.getState().refreshToken;
+      if (!refreshToken) {
+        useAuthStore.getState().logout();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+
+      if (!refreshPromise) {
+        refreshPromise = axios.post(`${api.defaults.baseURL}/api/v1/auth/refresh`, {
+          refreshToken,
+        }).then(res => {
+          const newAccessToken = res.data?.data?.accessToken || res.data?.accessToken;
+          const newRefreshToken = res.data?.data?.refreshToken || res.data?.refreshToken;
+          
+          if (newAccessToken) {
+            useAuthStore.getState().setAuth(newAccessToken, newRefreshToken || refreshToken);
+            return newAccessToken;
+          }
+          throw new Error('No access token returned');
+        }).catch(err => {
+          // If refresh fails, log out the user only when token-based auth was in use.
           useAuthStore.getState().logout();
           if (typeof window !== 'undefined') {
             window.location.href = '/login';
           }
-          return Promise.reject(error);
-        }
-
-        // Request a new token
-        const res = await axios.post(`${api.defaults.baseURL}/api/v1/auth/refresh`, {
-          refreshToken,
+          throw err;
+        }).finally(() => {
+          refreshPromise = null;
         });
+      }
 
-        const newAccessToken = res.data?.data?.accessToken || res.data?.accessToken;
-        const newRefreshToken = res.data?.data?.refreshToken || res.data?.refreshToken;
-        
-        if (newAccessToken) {
-          useAuthStore.getState().setAuth(newAccessToken, newRefreshToken || refreshToken);
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return api(originalRequest);
-        }
+      try {
+        const newAccessToken = await refreshPromise;
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, log out the user only when token-based auth was in use.
-        useAuthStore.getState().logout();
-        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

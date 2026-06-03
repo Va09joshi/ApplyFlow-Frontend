@@ -24,12 +24,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+    if (forwardedFor) {
+      headers["x-forwarded-for"] = forwardedFor;
+    }
+
     const backendResponse = await fetch(`${backendBaseUrl.replace(/\/$/, "")}/api/v1/auth/google`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers,
       body: JSON.stringify({
         idToken: credential,
         credential,

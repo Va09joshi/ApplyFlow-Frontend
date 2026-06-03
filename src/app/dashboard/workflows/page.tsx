@@ -62,10 +62,10 @@ export default function WorkflowsPage() {
         toast.success("Workflow duplicated");
       }
     } catch (err: any) {
-      console.error(err);
       if (err.response?.status === 403) {
         setShowUpgradeModal(true);
       } else {
+        console.error(err);
         toast.error("Failed to duplicate workflow");
       }
     }

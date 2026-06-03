@@ -1,12 +1,21 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, RefreshCw, Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Mail, RefreshCw, Plus, ChevronDown } from "lucide-react";
 import { api } from "@/lib/api";
 
-export default function GmailConnect() {
+export default function GmailConnect({ variant = "default" }: { variant?: "default" | "compact" | "minimal" }) {
   const [status, setStatus] = useState<{connected: boolean; accounts: any[]}>({ connected: false, accounts: [] });
   const [loading, setLoading] = useState(true);
 
@@ -57,6 +66,99 @@ export default function GmailConnect() {
       console.error(error);
     }
   };
+
+  if (variant === "minimal") {
+    return (
+      <div className="flex items-center">
+        {loading ? (
+          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground h-9" disabled>
+            <RefreshCw className="w-4 h-4 animate-spin" />
+            <span className="hidden md:inline">Checking Gmail...</span>
+          </Button>
+        ) : status.accounts.length > 0 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 rounded-full h-9 px-4 border-red-500/20 bg-red-500/10 hover:bg-red-500/20 transition-all text-foreground")}>
+              <Mail className="w-4 h-4 text-red-500" />
+              <span className="hidden md:inline truncate max-w-[150px] font-medium">{status.accounts[0].email}</span>
+              <ChevronDown className="w-3 h-3 opacity-50 text-red-500/70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Connected Accounts</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {status.accounts.map(acc => (
+                <DropdownMenuItem key={acc.id} onClick={() => handleSync(acc.email)} className="cursor-pointer flex items-center justify-between">
+                  <div className="flex items-center gap-2 truncate">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    <span className="truncate">{acc.email}</span>
+                  </div>
+                  <RefreshCw className="w-3.5 h-3.5 text-muted-foreground ml-2 shrink-0" />
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleConnect} className="cursor-pointer">
+                <Plus className="w-4 h-4 mr-2 text-muted-foreground" />
+                Add another account
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button variant="default" size="sm" className="gap-2 rounded-full h-9 px-4 bg-gradient-to-r from-red-500 to-rose-600 hover:opacity-90 transition-opacity text-white border-0 shadow-sm" onClick={handleConnect}>
+            <Mail className="w-4 h-4" />
+            <span className="hidden md:inline font-medium tracking-wide">Connect Gmail</span>
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <div className="flex items-center justify-between p-3 border border-border/50 rounded-2xl bg-card/60 backdrop-blur-sm shadow-sm transition-all hover:shadow-md">
+        {loading ? (
+          <div className="text-sm text-muted-foreground flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin" /> Checking Gmail status...
+          </div>
+        ) : status.accounts.length > 0 ? (
+          <div className="flex items-center justify-between w-full gap-4 overflow-hidden">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0 ring-1 ring-emerald-500/20">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="truncate">
+                <p className="font-semibold text-sm truncate">
+                  {status.accounts.map(a => a.email).join(", ")}
+                </p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Gmail Connected</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+               <Button variant="outline" size="sm" onClick={() => handleSync(status.accounts[0].email)}>
+                 <RefreshCw className="w-3.5 h-3.5 mr-2" /> Sync
+               </Button>
+               <Button variant="ghost" size="icon" onClick={handleConnect} title="Add another account">
+                 <Plus className="w-4 h-4" />
+               </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between w-full gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0 ring-1 ring-blue-500/20">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">Connect Gmail</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Sync emails and automations</p>
+              </div>
+            </div>
+            <Button size="sm" onClick={handleConnect} className="shadow-sm">
+              Connect Account
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <Card>

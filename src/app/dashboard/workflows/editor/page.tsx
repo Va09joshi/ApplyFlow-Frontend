@@ -65,10 +65,10 @@ function WorkflowEditor() {
         toast.error("Invalid response from AI");
       }
     } catch (error: any) {
-      console.error("Failed to generate workflow:", error);
       if (error.response?.status === 403) {
         setShowUpgradeModal(true);
       } else {
+        console.error("Failed to generate workflow:", error);
         toast.error(error.response?.data?.message || "Failed to generate workflow");
       }
     } finally {
@@ -185,10 +185,10 @@ function WorkflowEditor() {
         router.replace(`/dashboard/workflows/editor?id=${data.data._id}`);
       }
     } catch (err: any) {
-      console.error(err);
       if (err.response?.status === 403) {
         setShowUpgradeModal(true);
       } else {
+        console.error(err);
         toast.error("Failed to save workflow");
       }
     } finally {

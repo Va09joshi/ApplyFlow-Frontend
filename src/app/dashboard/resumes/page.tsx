@@ -134,86 +134,84 @@ export default function ResumesPage() {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Resume Manager</h1>
           <p className="text-muted-foreground">Upload and manage your tailored resumes.</p>
         </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Add from URL</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Resume via URL</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label>Resume Name</Label>
+                  <Input 
+                    value={newResume.name} 
+                    onChange={e => setNewResume({...newResume, name: e.target.value})} 
+                    placeholder="e.g. Frontend Dev Resume" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>File URL (PDF)</Label>
+                  <Input 
+                    value={newResume.fileUrl} 
+                    onChange={e => setNewResume({...newResume, fileUrl: e.target.value})} 
+                    placeholder="https://example.com/resume.pdf" 
+                  />
+                </div>
+                <Button className="w-full" onClick={handleCreateFromUrl} disabled={isCreating}>
+                  {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  {isCreating ? "Adding..." : "Add Resume"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <div className="relative">
+            <Input 
+              type="file" 
+              accept="application/pdf" 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={handleFileUpload}
+              disabled={isUploading}
+            />
+            <Button disabled={isUploading}>
+              {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />}
+              {isUploading ? "Uploading..." : "Upload Resume"}
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Upload Zone */}
-      <Card className="border-dashed border-2 border-border/60 bg-muted/30">
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <UploadCloud className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-xl font-bold mb-2">Upload new resume</h3>
-          <p className="text-muted-foreground mb-6 max-w-sm">
-            Drag and drop your PDF here, or click to browse. Max file size 5MB.
-          </p>
-          <div className="flex flex-wrap gap-4 items-center justify-center mt-2">
-            <div className="relative">
-              <Input 
-                type="file" 
-                accept="application/pdf" 
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                onChange={handleFileUpload}
-                disabled={isUploading}
-              />
-              <Button disabled={isUploading}>
-                {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                {isUploading ? "Uploading..." : "Browse Files"}
-              </Button>
-            </div>
-
-            <span className="text-muted-foreground text-sm">or</span>
-
-            <Dialog open={isUrlDialogOpen} onOpenChange={setIsUrlDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">Add from URL</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Resume via URL</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label>Resume Name</Label>
-                    <Input 
-                      value={newResume.name} 
-                      onChange={e => setNewResume({...newResume, name: e.target.value})} 
-                      placeholder="e.g. Frontend Dev Resume" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>File URL (PDF)</Label>
-                    <Input 
-                      value={newResume.fileUrl} 
-                      onChange={e => setNewResume({...newResume, fileUrl: e.target.value})} 
-                      placeholder="https://example.com/resume.pdf" 
-                    />
-                  </div>
-                  <Button className="w-full" onClick={handleCreateFromUrl} disabled={isCreating}>
-                    {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    {isCreating ? "Adding..." : "Add Resume"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center justify-between mt-8 mb-4">
+      <div className="flex items-center justify-between mt-6 mb-4">
         <h2 className="text-xl font-semibold">Your Resumes</h2>
         {isLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
       </div>
 
       {!isLoading && resumes.length === 0 ? (
-        <div className="text-center py-10 bg-card rounded-xl border border-border/50">
-          <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-medium">No resumes found</h3>
-          <p className="text-muted-foreground text-sm mt-1">Upload your first resume to get started.</p>
+        <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border/50 flex flex-col items-center justify-center">
+          <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <h3 className="text-xl font-medium mb-2">No resumes found</h3>
+          <p className="text-muted-foreground text-sm mb-6">Upload your first resume to get started.</p>
+          <div className="relative">
+            <Input 
+              type="file" 
+              accept="application/pdf" 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={handleFileUpload}
+              disabled={isUploading}
+            />
+            <Button disabled={isUploading}>
+              {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />}
+              {isUploading ? "Uploading..." : "Upload Resume"}
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

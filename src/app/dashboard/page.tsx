@@ -12,6 +12,7 @@ import {
   Briefcase, Mail, TrendingUp, CalendarDays, 
   Loader2, Plus, Edit2, Trash2, Send, ArrowUpRight, Building2
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Area, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, Legend, ComposedChart, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
@@ -23,7 +24,6 @@ import { atsService, ATSRecord } from "@/services/ats.service";
 import { toast } from "sonner";
 import Link from "next/link";
 import { dashboardService } from "@/services/dashboard.service";
-
 type DashboardPayload = Record<string, unknown> & {
   applicationCounts?: { total?: number; interview?: number; offer?: number; rejected?: number };
   applications?: { total?: number; interview?: number; offer?: number; rejected?: number };
@@ -200,7 +200,7 @@ export default function Dashboard() {
   const payload = (((dashboardData as { data?: DashboardPayload } | null)?.data || dashboardData || {}) as DashboardPayload);
   
   const applicationCounts = payload.applicationCounts || payload.applications || { total: 0, interview: 0, offer: 0, rejected: 0 };
-  const emailAnalytics = (payload.emailAnalytics || payload.emails || { totalSent: 0, totalResponses: 0, totalInterviews: 0, responseRate: "0" }) as { totalSent?: number; sentToday?: number; totalResponses?: number; totalInterviews?: number; responseRate?: string };
+  const emailAnalytics = (payload.emailAnalytics || payload.emails || { totalSent: 0, totalResponses: 0, totalInterviews: 0, responseRate: "0" }) as { totalSent?: number; sent?: number; sentToday?: number; totalResponses?: number; totalInterviews?: number; responseRate?: string };
   const metricList = metricRecords.length > 0 ? metricRecords : (payload.metricRecords || payload.analyticsRecords || payload.metrics || []) as Analytics[];
   const recentApps = recentApplications.length > 0 ? recentApplications : (payload.recentActivity || payload.recentApplications || payload.recentApps || []) as Application[];
   const latestAtsRecord = atsRecords[0] || null;
@@ -240,14 +240,96 @@ export default function Dashboard() {
     { title: "Jobs Tracked", value: Number(payload.jobsCount || 0), icon: Briefcase, color: "text-indigo-600", bg: "bg-indigo-500/15", accent: "from-indigo-500/20 via-violet-500/10 to-transparent" },
     { title: "Companies", value: Number(payload.companiesCount || 0), icon: Building2, color: "text-fuchsia-600", bg: "bg-fuchsia-500/15", accent: "from-fuchsia-500/20 via-pink-500/10 to-transparent" },
     { title: "ATS Match", value: `${latestAtsRecord?.matchPercent || 0}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-500/15", accent: "from-emerald-500/20 via-lime-500/10 to-transparent" },
-    { title: "Total Emails", value: Number(emailAnalytics.totalSent || 0), icon: Send, color: "text-blue-600", bg: "bg-blue-500/15", accent: "from-blue-500/20 via-indigo-500/10 to-transparent" },
+    { title: "Total Emails", value: Number(emailAnalytics.totalSent || emailAnalytics.sent || 0), icon: Send, color: "text-blue-600", bg: "bg-blue-500/15", accent: "from-blue-500/20 via-indigo-500/10 to-transparent" },
     { title: "Sent Today", value: Number(emailAnalytics.sentToday || 0), icon: Mail, color: "text-rose-600", bg: "bg-rose-500/15", accent: "from-rose-500/20 via-orange-500/10 to-transparent" },
   ];
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col gap-8 pb-10 animate-in fade-in duration-500">
+        {/* Header Skeleton */}
+        <div className="flex flex-col sm:flex-row justify-between gap-4">
+          <div>
+            <Skeleton className="h-9 w-48 mb-2" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="border-border/50 bg-card/60 shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-9 w-9 rounded-xl" />
+                </div>
+                <Skeleton className="h-8 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Charts and Recent Activity Skeleton */}
+        <div className="grid gap-8 lg:grid-cols-12">
+          {/* Chart Skeleton */}
+          <div className="lg:col-span-7 space-y-8">
+            <Card className="border-border/50 bg-card/50 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Skeleton className="h-6 w-40 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[320px] w-full mt-2 rounded-xl" />
+              </CardContent>
+            </Card>
+            
+            <Card className="border-border/50 bg-card/50 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Skeleton className="h-6 w-40 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[320px] w-full mt-2 rounded-xl" />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ATS/Recent Activity Skeleton */}
+          <div className="lg:col-span-5 space-y-8">
+            <Card className="border-border/50 bg-card/50 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-48" />
+                  </div>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-3 mt-2">
+                   <Skeleton className="h-[100px] w-full rounded-2xl" />
+                   <Skeleton className="h-[100px] w-full rounded-2xl" />
+                   <Skeleton className="h-[100px] w-full rounded-2xl" />
+                </div>
+                <Skeleton className="h-[150px] w-full rounded-xl" />
+                <Skeleton className="h-[150px] w-full rounded-xl" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
