@@ -12,12 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Mail, RefreshCw, Plus, ChevronDown } from "lucide-react";
+import { Mail, RefreshCw, Plus, ChevronDown, LogOut } from "lucide-react";
 import { api } from "@/lib/api";
 
 export default function GmailConnect({ variant = "default" }: { variant?: "default" | "compact" | "minimal" }) {
   const [status, setStatus] = useState<{connected: boolean; accounts: any[]}>({ connected: false, accounts: [] });
   const [loading, setLoading] = useState(true);
+  const popupRef = React.useRef<Window | null>(null);
 
   useEffect(() => {
     fetchStatus();
@@ -26,6 +27,11 @@ export default function GmailConnect({ variant = "default" }: { variant?: "defau
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'GMAIL_CONNECTED') {
         fetchStatus();
+        try {
+          if (popupRef.current && !popupRef.current.closed) {
+            popupRef.current.close();
+          }
+        } catch(e) {}
       }
     };
     window.addEventListener('message', handleMessage);
@@ -51,7 +57,28 @@ export default function GmailConnect({ variant = "default" }: { variant?: "defau
       const { data } = await api.get("/api/v1/gmail/connect");
       if (data.success && data.data.url) {
         // Open OAuth in popup window
-        window.open(data.data.url, 'Connect Gmail', 'width=500,height=600');
+        popupRef.current = window.open(data.data.url, 'Connect Gmail', 'width=500,height=600');
+        
+        // Polling fallback
+        let resolved = false;
+        const pollInterval = setInterval(async () => {
+          if (resolved) return;
+          if (!popupRef.current || popupRef.current.closed) {
+            resolved = true;
+            clearInterval(pollInterval);
+            fetchStatus();
+            return;
+          }
+          try {
+            const { data: statusData } = await api.get("/api/v1/gmail/status");
+            if (statusData?.success && statusData?.data?.connected) {
+              resolved = true;
+              clearInterval(pollInterval);
+              setStatus(statusData.data);
+              try { popupRef.current?.close(); } catch {}
+            }
+          } catch {}
+        }, 2000);
       }
     } catch (error) {
       console.error("Failed to connect gmail", error);
@@ -64,6 +91,19 @@ export default function GmailConnect({ variant = "default" }: { variant?: "defau
       // Could show a toast here
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      setLoading(true);
+      await api.delete("/api/v1/gmail/disconnect");
+      setStatus({ connected: false, accounts: [] });
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to disconnect", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,6 +138,10 @@ export default function GmailConnect({ variant = "default" }: { variant?: "defau
               <DropdownMenuItem onClick={handleConnect} className="cursor-pointer">
                 <Plus className="w-4 h-4 mr-2 text-muted-foreground" />
                 Add another account
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDisconnect} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
+                <LogOut className="w-4 h-4 mr-2" />
+                Disconnect Gmail
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

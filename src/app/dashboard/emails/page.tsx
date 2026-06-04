@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ export default function EmailAutomationsPage() {
   const [isConnectingGmail, setIsConnectingGmail] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const popupRef = useRef<Window | null>(null);
 
   // New/Edit Template Form
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
@@ -119,6 +120,12 @@ export default function EmailAutomationsPage() {
         toast.success(`Gmail connected as ${payload?.email || 'your account'}`);
         setIsConnectingGmail(false);
         
+        try {
+          if (popupRef.current && !popupRef.current.closed) {
+            popupRef.current.close();
+          }
+        } catch(e) {}
+        
         // Automatically trigger a sync so they don't have to press the button
         toast.info("Automatically checking for new emails...");
         api.get("/api/v1/gmail/sync").catch(e => console.error("Auto sync failed", e));
@@ -144,13 +151,8 @@ export default function EmailAutomationsPage() {
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
 
-        // Open the actual auth URL returned by the backend. Rewriting the
-        // popup origin to a different host (e.g. `backend.applyflow.live`) will
-        // make the browser navigate to that host and can trigger SSL/unsafe
-        // warnings if that domain is not serving valid HTTPS. To avoid those
-        // warnings we open the URL exactly as the backend returned it.
         const authUrl = res.data.url as string;
-        const popup = window.open(
+        popupRef.current = window.open(
           authUrl,
           'Gmail Connect',
           `width=${width},height=${height},left=${left},top=${top}`
@@ -171,7 +173,7 @@ export default function EmailAutomationsPage() {
           if (resolved) return;
 
           // If popup was closed by user, do one final check and stop
-          if (!popup || popup.closed) {
+          if (!popupRef.current || popupRef.current.closed) {
             resolved = true;
             clearInterval(pollInterval);
             const statusRes = await emailService.getStatus();
@@ -197,7 +199,7 @@ export default function EmailAutomationsPage() {
               toast.success(`Gmail connected as ${statusRes.data.email}`);
               setIsConnectingGmail(false);
               // Auto-close the popup since we got the connection
-              try { popup?.close(); } catch { /* cross-origin or already closed */ }
+              try { popupRef.current?.close(); } catch { /* cross-origin or already closed */ }
             }
           } catch {
             // Status check failed, keep polling

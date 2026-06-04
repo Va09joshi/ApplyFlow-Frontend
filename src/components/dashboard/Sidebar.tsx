@@ -61,7 +61,7 @@ export function Sidebar() {
     if (!url) return "";
     if (url.startsWith("http") || url.startsWith("data:")) return url;
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    if (baseUrl.includes("applyflow-backend")) {
+    if (baseUrl.includes("applyflow-backend") || baseUrl.includes("backend.applyflow.live")) {
       return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
     }
     return `http://localhost:5000/${url.replace(/^\//, "")}`;

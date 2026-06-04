@@ -33,16 +33,46 @@ export async function POST(request: Request) {
       headers["x-forwarded-for"] = forwardedFor;
     }
 
-    const backendResponse = await fetch(`${backendBaseUrl.replace(/\/$/, "")}/api/v1/auth/google`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        idToken: credential,
-        credential,
-        token: credential,
-      }),
-      cache: "no-store",
-    });
+    let backendResponse: Response;
+    try {
+      backendResponse = await fetch(`${backendBaseUrl.replace(/\/$/, "")}/api/v1/auth/google`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          idToken: credential,
+          credential,
+          token: credential,
+        }),
+        cache: "no-store",
+      });
+    } catch (err: any) {
+      const fallback = process.env.NEXT_PUBLIC_API_FALLBACK_URL;
+      if (fallback) {
+        console.warn(`Primary backend unreachable; trying fallback ${fallback}`);
+        try {
+          backendResponse = await fetch(`${fallback.replace(/\/$/, "")}/api/v1/auth/google`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              idToken: credential,
+              credential,
+              token: credential,
+            }),
+            cache: "no-store",
+          });
+        } catch (fallbackErr: any) {
+          return NextResponse.json(
+            { message: "Unable to reach backend API (primary and fallback).", error: String(fallbackErr?.message || fallbackErr) },
+            { status: 502 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          { message: "Unable to reach backend API.", error: String(err?.message || err) },
+          { status: 502 }
+        );
+      }
+    }
 
     const responseText = await backendResponse.text();
     const contentType = backendResponse.headers.get("content-type") || "application/json; charset=utf-8";
