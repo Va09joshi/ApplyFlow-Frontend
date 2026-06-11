@@ -90,18 +90,34 @@ const structuredData = {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "How does ApplyFlow bypass ATS scanners?",
+          "name": "Do I need to know how to code?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ApplyFlow uses natural language processing to extract missing structural keywords from job descriptions and seamlessly integrates them into your resume, increasing your ATS match score by up to 40%."
+            "text": "No! Our visual builder and AI generator let you build workflows with plain text."
           }
         },
         {
           "@type": "Question",
-          "name": "Can ApplyFlow generate cold emails automatically?",
+          "name": "What email providers do you support?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, our AI drafter creates hyper-personalized outreach emails based on your background and the specific job requirements."
+            "text": "We natively support Gmail, Outlook, and custom IMAP/SMTP domains for seamless sending."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many workflows can I build?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Free users can build 1 active workflow, while Pro users have unlimited workflows and advanced AI generation capabilities."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data secure?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. We use enterprise-grade encryption and never sell your data to third parties. Your email credentials are fully encrypted."
           }
         }
       ]

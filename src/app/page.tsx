@@ -90,14 +90,14 @@ const MOCK_CATEGORIES: Category[] = [
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="group border-b border-border/40 last:border-0" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+    <div className="group border-b border-border/40 last:border-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-label={question}
         className="w-full flex items-center justify-between py-6 text-left focus:outline-none"
       >
-        <span itemProp="name" className={`font-bold text-lg md:text-xl transition-colors duration-200 ${isOpen ? 'text-primary' : 'text-foreground group-hover:text-primary/80'}`}>
+        <span className={`font-bold text-lg md:text-xl transition-colors duration-200 ${isOpen ? 'text-primary' : 'text-foreground group-hover:text-primary/80'}`}>
           {question}
         </span>
         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 will-change-transform ${isOpen ? 'text-primary rotate-180' : 'text-muted-foreground group-hover:text-primary'}`}>
@@ -112,9 +112,8 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
-            itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer"
           >
-            <div itemProp="text" className="pb-8 text-muted-foreground leading-relaxed md:text-lg pr-8">
+            <div className="pb-8 text-muted-foreground leading-relaxed md:text-lg pr-8">
               {answer}
             </div>
           </motion.div>
@@ -1354,7 +1353,7 @@ export default function Home() {
         </section>
 
         {/* FAQ SECTION */}
-        <section id="faq" className="py-24 bg-muted/10 border-y border-border/40 relative" itemScope itemType="https://schema.org/FAQPage">
+        <section id="faq" className="py-24 bg-muted/10 border-y border-border/40 relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-black mb-4">Frequently Asked Questions</h2>
