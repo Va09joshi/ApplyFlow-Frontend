@@ -10,6 +10,7 @@ import {
   ChevronDown, ChevronUp, GitMerge, Workflow, BarChart3, Maximize2, ChevronLeft
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Types
@@ -92,12 +93,14 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
     <div className="group border-b border-border/40 last:border-0" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-label={question}
         className="w-full flex items-center justify-between py-6 text-left focus:outline-none"
       >
         <span itemProp="name" className={`font-bold text-lg md:text-xl transition-colors duration-200 ${isOpen ? 'text-primary' : 'text-foreground group-hover:text-primary/80'}`}>
           {question}
         </span>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'text-primary rotate-180' : 'text-muted-foreground group-hover:text-primary'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 will-change-transform ${isOpen ? 'text-primary rotate-180' : 'text-muted-foreground group-hover:text-primary'}`}>
           <ChevronDown className="w-5 h-5" />
         </div>
       </button>
@@ -138,6 +141,7 @@ export default function Home() {
   // Auto-cycle the Stacked Cards
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.hidden) return;
       setActiveStackCard((prev) => (prev + 1) % 3);
     }, 4000);
     return () => clearInterval(interval);
@@ -147,6 +151,7 @@ export default function Home() {
   useEffect(() => {
     if (!isCmdAutoCycling) return;
     const progressInterval = setInterval(() => {
+      if (document.hidden) return;
       setActiveCmdTab(current => {
         const idx = CMD_TABS.indexOf(current as typeof CMD_TABS[number]);
         return CMD_TABS[(idx + 1) % CMD_TABS.length];
@@ -178,6 +183,7 @@ export default function Home() {
   useEffect(() => {
     if (isFlowAutoPlay) {
       flowIntervalRef.current = setInterval(() => {
+        if (document.hidden) return;
         setFlowStep(prev => (prev === 4 ? 1 : prev + 1));
       }, 4000);
     } else {
@@ -1260,7 +1266,7 @@ export default function Home() {
                   </div>
                   <p className="text-base text-foreground/90 font-medium leading-relaxed flex-1 z-10">"{t.text}"</p>
                   <div className="flex items-center gap-4 mt-2 z-10">
-                    <img src={t.image} alt={t.name} className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 shadow-sm" />
+                    <Image src={t.image} alt={t.name} width={48} height={48} unoptimized className="w-12 h-12 rounded-full object-cover border-2 border-primary/20 shadow-sm" />
                     <div>
                       <p className="text-sm font-bold text-foreground">{t.name}</p>
                       <p className="text-xs font-semibold text-muted-foreground">{t.role}</p>
