@@ -121,6 +121,21 @@ const structuredData = {
           }
         }
       ]
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": [
+        "Login",
+        "Sign Up",
+        "Privacy Policy",
+        "Terms of Service"
+      ],
+      "url": [
+        "https://applyflow.live/login",
+        "https://applyflow.live/signup",
+        "https://applyflow.live/privacy",
+        "https://applyflow.live/terms"
+      ]
     }
   ]
 };
