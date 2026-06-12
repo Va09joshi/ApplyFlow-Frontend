@@ -324,7 +324,7 @@ export default function Home() {
             >
               <Link
                 href="/signup"
-                className={buttonVariants({ size: "lg" }) + " w-full sm:w-auto rounded-full px-8 font-semibold shadow-[0_4px_20px_rgba(var(--primary),0.35)] hover:shadow-[0_4px_30px_rgba(var(--primary),0.5)] transition-all transform hover:-translate-y-0.5"}
+                className={buttonVariants({ size: "lg" }) + " w-full sm:w-auto rounded-full px-8 font-semibold shadow-[0_4px_20px_rgba(var(--primary),0.35)] hover:shadow-[0_4px_30px_rgba(var(--primary),0.5)] transition-all transform hover:-translate-y-0.5 text-white dark:text-black"}
               >
                 Get Started for Free <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
@@ -612,7 +612,7 @@ export default function Home() {
                           </div>
                           <div>
                             <p className="text-[13px] font-bold text-foreground">{feat.label}</p>
-                            <p className="text-[11px] text-muted-foreground">{feat.sub}</p>
+                            <p className="text-[11px] text-foreground/80">{feat.sub}</p>
                           </div>
                         </div>
                       ))}
@@ -719,7 +719,7 @@ export default function Home() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1.5">
                             <span className="text-[15px] font-bold text-foreground tracking-[-0.02em]">{temp.title}</span>
-                            <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded tracking-[0.04em]">{temp.tag}</span>
+                            <span className="text-[10px] uppercase font-bold text-primary-foreground bg-primary px-2 py-0.5 rounded tracking-[0.04em]">{temp.tag}</span>
                           </div>
                           <p className="text-[13px] text-muted-foreground truncate">{temp.desc}</p>
                         </div>
@@ -865,7 +865,7 @@ export default function Home() {
                           </div>
                         </div>
 
-                        <h4 className="text-2xl font-bold text-foreground mb-2">{card.title}</h4>
+                        <h3 className="text-2xl font-bold text-foreground mb-2">{card.title}</h3>
                         <p className="text-muted-foreground font-medium">{card.company}</p>
                       </div>
 
@@ -934,8 +934,8 @@ export default function Home() {
 
           <div className="container mx-auto px-4 max-w-6xl relative z-10">
             <div className="text-center mb-20">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-5">Workflow</span>
-              <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight drop-shadow-sm" itemProp="name">How It Works</h2>
+              <span className="inline-block py-1.5 px-4 rounded-full bg-primary text-primary-foreground font-semibold text-xs uppercase tracking-widest mb-5 shadow-sm">Workflow</span>
+              <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight drop-shadow-sm text-foreground" itemProp="name">How It Works</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg font-medium leading-relaxed" itemProp="description">
                 Just type in 'Workday' for example and see all the times you have spent manually re-entering your resume. Then type 'Interview Scheduled', realise there's no such emails. Look yourself in the mirror, stop applying manually and let ApplyFlow do it for you.
               </p>
@@ -1010,7 +1010,7 @@ export default function Home() {
                   <div className="w-14 h-14 rounded-2xl bg-slate-800/50 flex items-center justify-center">
                     <Briefcase className="w-6 h-6 text-slate-400" />
                   </div>
-                  <h3 className="text-white font-bold text-sm text-right">Auto-Apply<br /><span className="text-muted-foreground text-xs font-normal">Enabled</span></h3>
+                  <h3 className="text-white font-bold text-sm text-right">Auto-Apply<br /><span className="text-slate-400 text-xs font-normal">Enabled</span></h3>
                 </motion.div>
               </div>
 
@@ -1475,7 +1475,7 @@ export default function Home() {
               <h3 className="text-2xl font-black text-foreground mb-3 tracking-tight">
                 Pro Plan is Coming Soon!
               </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+              <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                 We are putting the final touches on our automated recruiter engine. Be the first to unlock unlimited automated outreach, advanced ATS keyword optimization, and priority seatings.
               </p>
 
