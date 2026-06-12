@@ -1053,9 +1053,7 @@ export default function Home() {
         </section>
 
         {/* SECTION 4: ANALYTICS SHOWCASE */}
-        <section id="analytics-showcase" className="pt-24 pb-0 relative overflow-hidden bg-background border-t border-border/40" itemScope itemType="https://schema.org/SoftwareApplication">
-          <meta itemProp="name" content="ApplyFlow Pipeline Analytics" />
-          <meta itemProp="applicationCategory" content="BusinessApplication" />
+        <section id="analytics-showcase" className="pt-24 pb-0 relative overflow-hidden bg-background border-t border-border/40">
           <div className="container mx-auto px-4 max-w-6xl relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-24 relative w-full">
 
