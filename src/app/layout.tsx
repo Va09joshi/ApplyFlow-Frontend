@@ -55,6 +55,7 @@ const structuredData = {
       "operatingSystem": "Web",
       "offers": {
         "@type": "Offer",
+        "url": "https://applyflow.live",
         "price": "0.00",
         "priceCurrency": "USD"
       },
@@ -124,18 +125,23 @@ const structuredData = {
     },
     {
       "@type": "SiteNavigationElement",
-      "name": [
-        "Login",
-        "Sign Up",
-        "Privacy Policy",
-        "Terms of Service"
-      ],
-      "url": [
-        "https://applyflow.live/login",
-        "https://applyflow.live/signup",
-        "https://applyflow.live/privacy",
-        "https://applyflow.live/terms"
-      ]
+      "name": "Login",
+      "url": "https://applyflow.live/login"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Sign Up",
+      "url": "https://applyflow.live/signup"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Privacy Policy",
+      "url": "https://applyflow.live/privacy"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Terms of Service",
+      "url": "https://applyflow.live/terms"
     }
   ]
 };
