@@ -1,7 +1,7 @@
 import { api } from '@/lib/api';
 
 export interface GmailStatus {
-  _id: string;
+  id: string;
   email: string;
   name: string;
   avatar: string;
@@ -57,9 +57,9 @@ export const emailService = {
       
       if (data?.success && data?.data?.connected && data?.data?.accounts?.length > 0) {
         const account = data.data.accounts[0];
-        // Ensure _id is available since the frontend might expect it
-        if (account.id && !account._id) {
-          account._id = account.id;
+        // Ensure id is available since the frontend might expect it
+        if (account.id) {
+          
         }
         return { success: true, data: account as GmailStatus };
       }

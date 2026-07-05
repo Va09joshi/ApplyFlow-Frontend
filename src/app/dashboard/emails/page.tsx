@@ -294,7 +294,7 @@ export default function EmailAutomationsPage() {
       setResumes(resumesArray);
       if (resumesArray.length > 0) {
         const defaultResume = resumesArray.find(r => r.isDefault) || resumesArray[0];
-        const defaultId = defaultResume._id || defaultResume.id || "";
+        const defaultId = defaultResume.id || defaultResume.id || "";
         setSendForm(prev => ({ ...prev, resumeId: defaultId }));
         setCsvOptions(prev => ({ ...prev, resumeId: defaultId }));
       }
@@ -315,7 +315,7 @@ export default function EmailAutomationsPage() {
       if (pendingStr) {
         const pending = JSON.parse(pendingStr);
         if (pending?.html) {
-          const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
+          const defaultResumeId = resumes.find(r => r.isDefault)?.id || resumes[0]?.id || resumes[0]?.id || "";
           setSendForm(prev => ({
             ...prev,
             subject: pending.subject || "",
@@ -338,7 +338,7 @@ export default function EmailAutomationsPage() {
   }, [resumes]);
 
   const openEditTemplateDialog = (template: Template) => {
-    const id = template._id || template.id;
+    const id = template.id || template.id;
     if (!id) return;
     setEditingTemplateId(id);
     setNewTemplate({ name: template.name, subject: template.subject, body: template.body, plainText: template.plainText || "", linkLabel: template.linkLabel || "", linkUrl: template.linkUrl || "" });
@@ -380,7 +380,7 @@ export default function EmailAutomationsPage() {
     }
     try {
       await templateService.delete(id);
-      setTemplates(prev => prev.filter(t => (t._id || t.id) !== id));
+      setTemplates(prev => prev.filter(t => (t.id || t.id) !== id));
       toast.success("Template deleted successfully.");
     } catch (error) {
       toast.error("Failed to delete template.");
@@ -395,7 +395,7 @@ export default function EmailAutomationsPage() {
     try {
       setIsPreviewLoading(true);
       
-      const r = sendForm.resumeId ? resumes.find(res => (res._id || res.id) === sendForm.resumeId) : null;
+      const r = sendForm.resumeId ? resumes.find(res => (res.id || res.id) === sendForm.resumeId) : null;
       
       let finalHtml = sendForm.html;
       let finalPlain = sendForm.contentType === 'plain' ? sendForm.html : sendForm.html.replace(/<[^>]+>/g, '');
@@ -480,7 +480,7 @@ export default function EmailAutomationsPage() {
         }
       }
 
-      const r = sendForm.resumeId ? resumes.find(res => (res._id || res.id) === sendForm.resumeId) : null;
+      const r = sendForm.resumeId ? resumes.find(res => (res.id || res.id) === sendForm.resumeId) : null;
 
       let finalHtml = sendForm.html;
       let finalPlain = sendForm.contentType === 'plain' ? sendForm.html : sendForm.html.replace(/<[^>]+>/g, '');
@@ -545,7 +545,7 @@ export default function EmailAutomationsPage() {
       toast.success("Bulk emails processed!");
       setCsvResults(res?.data || res); // show summary instead of closing
       
-      const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
+      const defaultResumeId = resumes.find(r => r.isDefault)?.id || resumes[0]?.id || resumes[0]?.id || "";
       setCsvOptions({
         useTemplate: true,
         attachResume: true,
@@ -563,7 +563,7 @@ export default function EmailAutomationsPage() {
   };
 
   const openSendDialog = (template?: Template) => {
-    const defaultResumeId = resumes.find(r => r.isDefault)?._id || resumes[0]?._id || resumes[0]?.id || "";
+    const defaultResumeId = resumes.find(r => r.isDefault)?.id || resumes[0]?.id || resumes[0]?.id || "";
     if (template) {
       setSendForm({
         to: "",
@@ -576,7 +576,7 @@ export default function EmailAutomationsPage() {
         resumeLinkLabel: "View My Resume",
         resumeId: defaultResumeId,
         contentType: "html",
-        templateId: template._id || template.id || "",
+        templateId: template.id || template.id || "",
         linkUrl: template.linkUrl || "",
         linkLabel: template.linkLabel || "",
         attachments: [],
@@ -786,14 +786,14 @@ export default function EmailAutomationsPage() {
                   <DialogHeader className="px-6 py-4 border-b border-border/50 bg-muted/10 shrink-0 flex flex-row items-center justify-between">
                     <DialogTitle className="text-lg">New Message</DialogTitle>
                     <Select onValueChange={(val) => {
-                      const t = templates.find(temp => (temp._id || temp.id) === val);
+                      const t = templates.find(temp => (temp.id || temp.id) === val);
                       if (t) {
                         setSendForm(prev => ({
                           ...prev,
                           subject: t.subject,
                           html: prev.contentType === 'plain' ? (t.plainText || t.body) : t.body,
                           useTemplate: true,
-                          templateId: t._id || t.id || "",
+                          templateId: t.id || t.id || "",
                           linkUrl: t.linkUrl || "",
                           linkLabel: t.linkLabel || "",
                           resumeLinkLabel: t.linkLabel || "View My Resume",
@@ -805,7 +805,7 @@ export default function EmailAutomationsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {templates.map(t => (
-                          <SelectItem key={t._id || t.id} value={t._id || t.id || ""}>{t.name}</SelectItem>
+                          <SelectItem key={t.id || t.id} value={t.id || t.id || ""}>{t.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -970,7 +970,7 @@ export default function EmailAutomationsPage() {
                                     displayName = "Resume Document";
                                   }
                                   return (
-                                    <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
+                                    <SelectItem key={r.id || r.id || i} value={r.id || r.id || ""}>
                                       {displayName} {r.isDefault ? "(Default)" : ""}
                                     </SelectItem>
                                   );
@@ -1335,7 +1335,7 @@ export default function EmailAutomationsPage() {
                           <SelectContent>
                             <SelectItem value="">Default Resume (Fallback)</SelectItem>
                             {resumes.map((r, i) => (
-                              <SelectItem key={r._id || r.id || i} value={r._id || r.id || ""}>
+                              <SelectItem key={r.id || r.id || i} value={r.id || r.id || ""}>
                                 {r.name} {r.isDefault ? "(Default)" : ""}
                               </SelectItem>
                             ))}
@@ -1567,7 +1567,7 @@ export default function EmailAutomationsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {templates.map((template, i) => (
             <motion.div
-              key={template._id || template.id || i}
+              key={template.id || template.id || i}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: i * 0.05, ease: "easeOut" }}
@@ -1616,7 +1616,7 @@ export default function EmailAutomationsPage() {
                       variant="ghost" 
                       size="icon" 
                       className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all" 
-                      onClick={() => handleDeleteTemplate(template._id || template.id || "")}
+                      onClick={() => handleDeleteTemplate(template.id || template.id || "")}
                       title="Delete Template"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -28,11 +28,11 @@ export default function KanbanColumn({ stage, applications }: KanbanColumnProps)
         className="flex-1 overflow-y-auto min-h-[150px] space-y-3 p-1"
       >
         <SortableContext 
-          items={applications.map(app => app._id)} 
+          items={applications.map(app => app.id)} 
           strategy={verticalListSortingStrategy}
         >
           {applications.map(app => (
-            <ApplicationCard key={app._id} application={app} />
+            <ApplicationCard key={app.id} application={app} />
           ))}
         </SortableContext>
       </div>

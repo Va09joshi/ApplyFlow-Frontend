@@ -89,7 +89,7 @@ export default function WorkflowRunsPage() {
       ) : (
         <div className="space-y-4">
           {runs.map(run => (
-            <Card key={run._id || run.id} className="overflow-hidden hover:shadow-md transition-all">
+            <Card key={run.id || run.id} className="overflow-hidden hover:shadow-md transition-all">
               <div className="flex items-center p-5 gap-6">
                 <div className="shrink-0 flex items-center justify-center p-3 rounded-full bg-muted/50">
                   {run.status === 'success' ? (
@@ -127,7 +127,7 @@ export default function WorkflowRunsPage() {
                 <div className="shrink-0">
                   <Button variant="outline" onClick={() => {
                     // Logic to open a modal with run logs, or just show basic details for now
-                    toast.info(`Details for run ${run._id || run.id} coming soon!`);
+                    toast.info(`Details for run ${run.id || run.id} coming soon!`);
                   }}>
                     View Logs
                   </Button>

@@ -21,7 +21,7 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: application._id });
+  } = useSortable({ id: application.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),

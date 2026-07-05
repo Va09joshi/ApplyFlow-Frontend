@@ -183,7 +183,7 @@ export default function CompaniesPage() {
           <div className="flex gap-2">
             {topSkillsList.map((s, i) => (
               <Badge key={i} variant="secondary" className="bg-background text-xs font-normal border border-border/50">
-                {s.skill || s._id || s.name} ({s.count || 0})
+                {s.skill || s.id || s.name} ({s.count || 0})
               </Badge>
             ))}
           </div>
@@ -238,7 +238,7 @@ export default function CompaniesPage() {
              const matchesSkill = !filterSkill || (c.topSkills && c.topSkills.some(s => s.toLowerCase().includes(filterSkill.toLowerCase())));
              return matchesSearch && matchesRole && matchesSkill;
           }).map((company, i) => {
-            const companyId = company.id || company._id;
+            const companyId = company.id || company.id;
             return (
             <motion.div
               key={companyId || i}

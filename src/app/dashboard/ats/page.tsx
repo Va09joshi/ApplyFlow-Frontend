@@ -51,7 +51,7 @@ export default function ATSAnalyzerPage() {
     const missingKeywords = toArr(r.missingKeywords || r.missing_keywords || r.missingSkills);
 
     return {
-      _id: r._id || r.id,
+      id: r.id || r.id,
       resumeId: r.resumeId || "",
       jobDescription: r.jobDescription || jobDescription || "",
       matchPercent,
@@ -96,7 +96,7 @@ export default function ATSAnalyzerPage() {
         
         setResumes(resumesArray);
         if (resumesArray.length > 0) {
-          setSelectedResumeId(resumesArray[0]._id || resumesArray[0].id || "");
+          setSelectedResumeId(resumesArray[0].id || resumesArray[0].id || "");
         }
       } catch (error) {
         toast.error("Failed to load resumes");
@@ -535,7 +535,7 @@ export default function ATSAnalyzerPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {resumes.map(r => (
-                      <SelectItem key={r._id || r.id} value={r._id || r.id || ""} className="cursor-pointer">
+                      <SelectItem key={r.id || r.id} value={r.id || r.id || ""} className="cursor-pointer">
                         <span className="truncate">{r.name || "Unnamed Resume"}</span>
                       </SelectItem>
                     ))}
@@ -628,7 +628,7 @@ export default function ATSAnalyzerPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {pastAnalyses.map((record, i) => {
-              const recordId = record._id || record.id || String(i);
+              const recordId = record.id || record.id || String(i);
               const rColors = getScoreColor(record.matchPercent);
               return (
                 <motion.div

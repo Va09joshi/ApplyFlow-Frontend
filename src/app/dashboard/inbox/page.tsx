@@ -69,7 +69,7 @@ export default function InboxPage() {
   const handleLinkThread = async () => {
     if (!selectedThread) return;
     try {
-      const { data } = await api.patch(`/api/v1/emails/threads/${selectedThread._id}`, linkData);
+      const { data } = await api.patch(`/api/v1/emails/threads/${selectedThread.id}`, linkData);
       if (data.success) {
         setIsLinkOpen(false);
         fetchThreads();
@@ -133,11 +133,11 @@ export default function InboxPage() {
           ) : (
             <div className="flex flex-col">
               {filteredThreads.map((thread) => {
-                const isSelected = selectedThread?._id === thread._id;
+                const isSelected = selectedThread?.id === thread.id;
                 const sender = parseSender(thread.from);
                 return (
                   <button
-                    key={thread._id}
+                    key={thread.id}
                     onClick={() => setSelectedThread(thread)}
                     className={`text-left p-4 border-b last:border-b-0 transition-all duration-200 relative group
                       ${

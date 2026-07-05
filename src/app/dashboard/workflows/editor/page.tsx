@@ -182,7 +182,7 @@ function WorkflowEditor() {
       } else {
         const { data } = await api.post('/api/v1/workflows', payload);
         toast.success("Workflow created");
-        router.replace(`/dashboard/workflows/editor?id=${data.data._id}`);
+        router.replace(`/dashboard/workflows/editor?id=${data.data.id}`);
       }
     } catch (err: any) {
       if (err.response?.status === 403) {

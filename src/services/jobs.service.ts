@@ -2,7 +2,7 @@ import { api } from '@/lib/api';
 
 export interface Job {
   id?: string;
-  _id?: string;
+  id?: string;
   title: string;
   companyName?: string;
   company?: string;

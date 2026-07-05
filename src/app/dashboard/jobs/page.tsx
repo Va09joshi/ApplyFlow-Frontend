@@ -98,7 +98,7 @@ export default function JobsPage() {
       else if (res?.data && Array.isArray(res.data)) suggestions = res.data;
       else if (res?.data?.docs && Array.isArray(res.data.docs)) suggestions = res.data.docs;
       
-      suggestions = suggestions.map((j: Job) => ({...j, _id: undefined, id: undefined }));
+      suggestions = suggestions.map((j: Job) => ({...j, id: undefined, id: undefined }));
       setSuggestions(suggestions);
       setActiveTab("suggestions");
       
@@ -113,7 +113,7 @@ export default function JobsPage() {
 
   const handleUpdate = async () => {
     if (!editingJob) return;
-    const id = editingJob._id || editingJob.id;
+    const id = editingJob.id || editingJob.id;
     if (!id) return;
     try {
       setIsSaving(true);
@@ -349,7 +349,7 @@ export default function JobsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJobs.map((job, i) => {
-            const jobId = job.id || job._id;
+            const jobId = job.id || job.id;
             return (
               <motion.div
                 key={jobId || i}
@@ -376,8 +376,8 @@ export default function JobsPage() {
                           <CheckCircle2 className="w-3 h-3 mr-1" /> Verified
                         </Badge>
                       ) : (
-                        <Badge variant={job.id || job._id ? (job.status === "Applied" ? "default" : job.status === "Interviewing" ? "secondary" : "outline") : "secondary"} className="shadow-none font-medium px-2 py-0.5 border-primary/20 text-primary/80 bg-primary/5 hover:bg-primary/10 whitespace-nowrap">
-                          {job.id || job._id ? (job.status || "Saved") : "AI suggested"}
+                        <Badge variant={job.id || job.id ? (job.status === "Applied" ? "default" : job.status === "Interviewing" ? "secondary" : "outline") : "secondary"} className="shadow-none font-medium px-2 py-0.5 border-primary/20 text-primary/80 bg-primary/5 hover:bg-primary/10 whitespace-nowrap">
+                          {job.id || job.id ? (job.status || "Saved") : "AI suggested"}
                         </Badge>
                       )}
                     </div>
@@ -414,7 +414,7 @@ export default function JobsPage() {
                     <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
                       Added {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Just now"}
                     </div>
-                    {(!job._id && !job.id) ? (
+                    {(!job.id && !job.id) ? (
                       <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-sm transition-all" onClick={() => handleSaveJob(job, i)}>Save Job</Button>
                     ) : (
                       <DropdownMenu>

@@ -2,7 +2,7 @@ import { api } from '@/lib/api';
 
 export interface Template {
   id?: string;
-  _id?: string;
+  id?: string;
   name: string;
   subject: string;
   body: string;

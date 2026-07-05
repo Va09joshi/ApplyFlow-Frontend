@@ -28,12 +28,12 @@ export default function KanbanBoard({ stages, applications, onDragEnd }: KanbanB
     let toStage = String(over.id);
 
     // If over.id is an appId, find the app's currentStage
-    const overApp = applications.find(app => app._id === over.id);
+    const overApp = applications.find(app => app.id === over.id);
     if (overApp) {
       toStage = overApp.currentStage;
     }
 
-    const activeApp = applications.find(app => app._id === appId);
+    const activeApp = applications.find(app => app.id === appId);
     
     if (activeApp && activeApp.currentStage !== toStage) {
       onDragEnd(appId, toStage);

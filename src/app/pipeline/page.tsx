@@ -40,7 +40,7 @@ export default function PipelinePage() {
   const handleDragEnd = async (appId: string, toStage: string) => {
     // Optimistic update
     setApplications(apps => 
-      apps.map(app => app._id === appId ? { ...app, currentStage: toStage } : app)
+      apps.map(app => app.id === appId ? { ...app, currentStage: toStage } : app)
     );
 
     try {
@@ -57,7 +57,7 @@ export default function PipelinePage() {
       if (data.success) {
         // Optionally update history from response
         setApplications(apps => 
-          apps.map(app => app._id === appId ? { ...app, stageHistory: data.data.stageHistory } : app)
+          apps.map(app => app.id === appId ? { ...app, stageHistory: data.data.stageHistory } : app)
         );
       } else {
         // Revert on error

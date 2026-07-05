@@ -7,7 +7,7 @@ export interface StageHistoryEntry {
 }
 
 export interface Application {
-  _id: string;
+  id: string;
   candidateName: string;
   role: string;
   currentStage: string;

@@ -122,7 +122,7 @@ export function Topbar() {
                 const companyName = app.companyName || app.companyTitle || (app.company as any)?.name || 'Company';
 
                 return (
-                  <DropdownMenuItem key={app._id || app.id || index} className="flex items-start gap-3 p-3 cursor-pointer">
+                  <DropdownMenuItem key={app.id || app.id || index} className="flex items-start gap-3 p-3 cursor-pointer">
                     <div className={`${colorClass} rounded-full p-2 mt-0.5 shrink-0`}>
                       {icon}
                     </div>

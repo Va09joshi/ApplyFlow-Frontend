@@ -39,7 +39,7 @@ export default function AutomationsPage() {
   const deleteAutomation = async (id: string) => {
     try {
       await api.delete(`/api/v1/automations/${id}`);
-      setAutomations(prev => prev.filter(a => a._id !== id));
+      setAutomations(prev => prev.filter(a => a.id !== id));
       toast.success("Automation deleted");
     } catch (err) {
       console.error(err);
@@ -50,9 +50,9 @@ export default function AutomationsPage() {
   const importToWorkflow = async (id: string) => {
     try {
       const { data } = await api.post(`/api/v1/workflows/import-automation/${id}`);
-      if (data.success && data.data._id) {
+      if (data.success && data.data.id) {
         toast.success("Successfully imported to workflows");
-        router.push(`/dashboard/workflows/editor?id=${data.data._id}`);
+        router.push(`/dashboard/workflows/editor?id=${data.data.id}`);
       }
     } catch (err) {
       console.error(err);
@@ -85,7 +85,7 @@ export default function AutomationsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {automations.map(auto => (
-          <Card key={auto._id} className="flex flex-col">
+          <Card key={auto.id} className="flex flex-col">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-xl line-clamp-1">{auto.name}</CardTitle>
@@ -101,14 +101,14 @@ export default function AutomationsPage() {
             </CardContent>
             <CardFooter className="pt-3 border-t flex justify-between items-center gap-2">
               <div className="flex gap-2">
-                <Link href={`/dashboard/automations/editor?id=${auto._id}`}>
+                <Link href={`/dashboard/automations/editor?id=${auto.id}`}>
                   <Button variant="link" className="px-0">Edit</Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={() => importToWorkflow(auto._id)}>
+                <Button variant="outline" size="sm" onClick={() => importToWorkflow(auto.id)}>
                   Import to Workflow
                 </Button>
               </div>
-              <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => deleteAutomation(auto._id)}>
+              <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => deleteAutomation(auto.id)}>
                 <Trash2Icon className="w-4 h-4" />
               </Button>
             </CardFooter>

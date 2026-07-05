@@ -56,7 +56,7 @@ export default function AIEmailGeneratorPage() {
 
         setResumes(resumesArray);
         if (resumesArray.length > 0) {
-          setSelectedResumeId(resumesArray[0]._id || resumesArray[0].id || "");
+          setSelectedResumeId(resumesArray[0].id || resumesArray[0].id || "");
         }
       } catch (error) {
         toast.error("Failed to load resumes");
@@ -255,7 +255,7 @@ export default function AIEmailGeneratorPage() {
                           displayName = "Resume Document";
                         }
                         return (
-                          <SelectItem key={r._id || r.id} value={r._id || r.id || ""}>
+                          <SelectItem key={r.id || r.id} value={r.id || r.id || ""}>
                             {displayName}
                           </SelectItem>
                         );

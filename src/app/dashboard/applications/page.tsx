@@ -118,8 +118,8 @@ export default function ApplicationsPage() {
   const getCompanyForApp = (app: Application) => {
     if (app.company) return app.company;
 
-    const companyId = typeof app.companyId === "string" ? app.companyId : (app.companyId as unknown as { _id?: string; id?: string })?._id || (app.companyId as unknown as { _id?: string; id?: string })?.id || "";
-    return companies.find(c => (c._id || c.id) === companyId);
+    const companyId = typeof app.companyId === "string" ? app.companyId : (app.companyId as unknown as { id?: string })?.id || (app.companyId as unknown as { id?: string })?.id || "";
+    return companies.find(c => (c.id || c.id) === companyId);
   };
 
   const getCompanyNameForApp = (app: Application) => {
@@ -221,7 +221,7 @@ export default function ApplicationsPage() {
                       <SelectValue placeholder="Select a company" />
                     </SelectTrigger>
                     <SelectContent>
-                      {companies.map(c => <SelectItem key={c._id || c.id} value={c._id || c.id || ""}>{c.name}</SelectItem>)}
+                      {companies.map(c => <SelectItem key={c.id || c.id} value={c.id || c.id || ""}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -240,7 +240,7 @@ export default function ApplicationsPage() {
                       <SelectValue placeholder="Select a resume" />
                     </SelectTrigger>
                     <SelectContent>
-                      {resumes.map(r => <SelectItem key={r._id || r.id} value={r._id || r.id || ""}>{r.name}</SelectItem>)}
+                      {resumes.map(r => <SelectItem key={r.id || r.id} value={r.id || r.id || ""}>{r.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -303,7 +303,7 @@ export default function ApplicationsPage() {
                   </TableRow>
                 ) : (
                   filteredApps.map((app) => {
-                    const appId = app._id || app.id || "";
+                    const appId = app.id || app.id || "";
                     const statusClass = getStatusStyle(app.status);
                     const companyName = getCompanyNameForApp(app);
                     const companyLogo = getCompanyLogoForApp(app);

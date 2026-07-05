@@ -38,7 +38,7 @@ export default function WorkflowsPage() {
   const deleteWorkflow = async (id: string) => {
     try {
       await api.delete(`/api/v1/workflows/${id}`);
-      setWorkflows(prev => prev.filter(w => w._id !== id));
+      setWorkflows(prev => prev.filter(w => w.id !== id));
       toast.success("Workflow deleted");
     } catch (err) {
       console.error(err);
@@ -74,7 +74,7 @@ export default function WorkflowsPage() {
   const toggleActive = async (id: string, active: boolean) => {
     try {
       await api.patch(`/api/v1/workflows/${id}`, { active });
-      setWorkflows(prev => prev.map(w => w._id === id ? { ...w, active } : w));
+      setWorkflows(prev => prev.map(w => w.id === id ? { ...w, active } : w));
       toast.success(`Workflow ${active ? 'enabled' : 'disabled'}`);
     } catch (err) {
       console.error(err);
@@ -140,7 +140,7 @@ export default function WorkflowsPage() {
 
       <div className="flex flex-col gap-4">
         {workflows.map(workflow => (
-          <Card key={workflow._id} className={`flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border-border/60 shadow-sm bg-card hover:shadow-md transition-shadow p-5 gap-5 border-l-[5px] ${workflow.active ? 'border-l-blue-500' : 'border-l-muted-foreground/30'}`}>
+          <Card key={workflow.id} className={`flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border-border/60 shadow-sm bg-card hover:shadow-md transition-shadow p-5 gap-5 border-l-[5px] ${workflow.active ? 'border-l-blue-500' : 'border-l-muted-foreground/30'}`}>
             <div className="flex flex-col flex-1 gap-2.5">
               <div className="flex flex-wrap items-center gap-3">
                 <CardTitle className="text-[19px] font-bold mr-1">{workflow.name}</CardTitle>
@@ -160,14 +160,14 @@ export default function WorkflowsPage() {
             <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between self-stretch mt-4 sm:mt-0 gap-4 sm:gap-0 border-t sm:border-0 border-border/40 pt-4 sm:pt-0">
               <Switch 
                 checked={workflow.active} 
-                onCheckedChange={(checked) => toggleActive(workflow._id, checked)} 
+                onCheckedChange={(checked) => toggleActive(workflow.id, checked)} 
                 className="data-[state=checked]:bg-blue-600"
               />
               <div className="flex items-center gap-4 mt-auto">
-                <Link href={`/dashboard/workflows/editor?id=${workflow._id}`}>
+                <Link href={`/dashboard/workflows/editor?id=${workflow.id}`}>
                   <button className="text-blue-600 hover:text-blue-700 font-bold text-sm transition-colors">Edit</button>
                 </Link>
-                <Link href={`/dashboard/workflows/${workflow._id}/runs`}>
+                <Link href={`/dashboard/workflows/${workflow.id}/runs`}>
                   <button className="flex items-center text-muted-foreground hover:text-foreground font-semibold text-sm transition-colors">
                     <ListIcon className="w-4 h-4 mr-1.5" />
                     Runs
@@ -177,7 +177,7 @@ export default function WorkflowsPage() {
                 <button className="text-muted-foreground/60 hover:text-foreground transition-colors ml-auto sm:ml-0" onClick={() => duplicateWorkflow(workflow)}>
                   <CopyIcon className="w-[18px] h-[18px]" />
                 </button>
-                <button className="text-red-500/80 hover:text-red-600 transition-colors" onClick={() => deleteWorkflow(workflow._id)}>
+                <button className="text-red-500/80 hover:text-red-600 transition-colors" onClick={() => deleteWorkflow(workflow.id)}>
                   <Trash2Icon className="w-[18px] h-[18px]" />
                 </button>
               </div>

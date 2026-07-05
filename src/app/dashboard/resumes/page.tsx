@@ -109,7 +109,7 @@ export default function ResumesPage() {
     if (!id) return;
     try {
       await resumeService.delete(id);
-      setResumes(prev => prev.filter(r => (r.id || r._id) !== id));
+      setResumes(prev => prev.filter(r => (r.id || r.id) !== id));
       toast.success("Resume deleted successfully");
     } catch (error) {
       toast.error("Failed to delete resume");
@@ -216,7 +216,7 @@ export default function ResumesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {resumes.map((resume, i) => {
-            const resumeId = resume.id || resume._id;
+            const resumeId = resume.id || resume.id;
             return (
             <motion.div
               key={resumeId}

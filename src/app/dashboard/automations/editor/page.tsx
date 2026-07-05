@@ -42,7 +42,7 @@ function AutomationEditorContent() {
   const fetchAutomation = async () => {
     try {
       const { data } = await api.get("/api/v1/automations");
-      const match = data.data?.automations?.find((a: any) => a._id === autoId);
+      const match = data.data?.automations?.find((a: any) => a.id === autoId);
       if (match) setAutomation(match);
     } catch (e) {}
   };
