@@ -30,11 +30,10 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await api.post('/api/v1/auth/logout');
-    } catch {
-    }
+  const handleLogout = () => {
+    // Fire and forget the backend logout
+    api.post('/api/v1/auth/logout').catch(() => {});
+    // Instantly clear local state and redirect for immediate feedback
     logoutState();
     router.push('/login');
   };

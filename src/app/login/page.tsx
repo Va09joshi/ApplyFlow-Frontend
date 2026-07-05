@@ -93,7 +93,7 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true);
-      const response = await axios.post("/api/auth/google", {
+      const response = await api.post("/api/v1/auth/google", {
         idToken: credentialResponse.credential,
         credential: credentialResponse.credential,
         token: credentialResponse.credential,
