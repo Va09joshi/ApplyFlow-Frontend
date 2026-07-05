@@ -240,7 +240,7 @@ export default function ApplicationsPage() {
                       <SelectValue placeholder="Select a resume" />
                     </SelectTrigger>
                     <SelectContent>
-                      {resumes.map(r => <SelectItem key={r.id || r.id} value={r.id || r.id || ""}>{r.name}</SelectItem>)}
+                      {resumes.map(r => <SelectItem key={r.id} value={r.id || ""}>{r.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

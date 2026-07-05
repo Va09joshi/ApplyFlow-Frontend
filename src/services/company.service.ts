@@ -2,7 +2,6 @@ import { api } from '@/lib/api';
 
 export interface Company {
   id?: string;
-  id?: string;
   name: string;
   website?: string;
   hrEmails?: string[];

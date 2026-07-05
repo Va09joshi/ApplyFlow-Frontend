@@ -149,7 +149,7 @@ export default function Dashboard() {
   };
 
   const openEditDialog = (record: Analytics) => {
-    const id = record.id || record.id;
+    const id = record.id;
     if (!id) return;
     setEditingId(id);
     setFormData({
@@ -630,7 +630,7 @@ export default function Dashboard() {
                       status === "offer" ? "border-l-blue-500" :
                       status === "rejected" ? "border-l-rose-500" : "border-l-border";
                     return (
-                      <div key={activity.id || activity.id || i} className={`rounded-2xl border border-border/60 border-l-4 ${statusAccent} bg-background/45 p-4 flex items-center justify-between gap-4 hover:bg-background/70 hover:shadow-sm transition-all`}>
+                      <div key={activity.id || i} className={`rounded-2xl border border-border/60 border-l-4 ${statusAccent} bg-background/45 p-4 flex items-center justify-between gap-4 hover:bg-background/70 hover:shadow-sm transition-all`}>
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 via-cyan-500/10 to-transparent flex items-center justify-center font-bold text-sm border border-border shrink-0 overflow-hidden">
                             {getCompanyLogoForApp(activity) ? (
@@ -694,7 +694,7 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {metricList.map((record: Analytics, i: number) => {
-            const recordId = record.id || record.id || "";
+            const recordId = record.id || "";
             return (
               <motion.div
                 key={recordId}

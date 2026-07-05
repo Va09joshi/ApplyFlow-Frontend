@@ -109,7 +109,7 @@ export default function ResumesPage() {
     if (!id) return;
     try {
       await resumeService.delete(id);
-      setResumes(prev => prev.filter(r => (r.id || r.id) !== id));
+      setResumes(prev => prev.filter(r => (r.id) !== id));
       toast.success("Resume deleted successfully");
     } catch (error) {
       toast.error("Failed to delete resume");

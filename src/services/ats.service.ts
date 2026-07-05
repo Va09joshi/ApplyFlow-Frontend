@@ -2,7 +2,6 @@ import { api } from '@/lib/api';
 
 export interface ATSRecord {
   id?: string;
-  id?: string;
   resumeId: string;
   jobDescription: string;
   matchPercent: number; // Changed from matchScore

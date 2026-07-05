@@ -2,7 +2,6 @@ import { api } from '@/lib/api';
 
 export interface Analytics {
   id?: string;
-  id?: string;
   metricDate: string;
   sentCount: number;
   responsesCount: number;

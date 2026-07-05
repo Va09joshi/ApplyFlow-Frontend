@@ -970,7 +970,7 @@ export default function EmailAutomationsPage() {
                                     displayName = "Resume Document";
                                   }
                                   return (
-                                    <SelectItem key={r.id || r.id || i} value={r.id || r.id || ""}>
+                                    <SelectItem key={r.id || i} value={r.id || ""}>
                                       {displayName} {r.isDefault ? "(Default)" : ""}
                                     </SelectItem>
                                   );
@@ -1335,7 +1335,7 @@ export default function EmailAutomationsPage() {
                           <SelectContent>
                             <SelectItem value="">Default Resume (Fallback)</SelectItem>
                             {resumes.map((r, i) => (
-                              <SelectItem key={r.id || r.id || i} value={r.id || r.id || ""}>
+                              <SelectItem key={r.id || i} value={r.id || ""}>
                                 {r.name} {r.isDefault ? "(Default)" : ""}
                               </SelectItem>
                             ))}

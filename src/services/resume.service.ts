@@ -2,7 +2,6 @@ import { api } from '@/lib/api';
 
 export interface Resume {
   id?: string;
-  id?: string;
   name: string;
   fileUrl?: string;
   createdAt: string;

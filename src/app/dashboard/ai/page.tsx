@@ -255,7 +255,7 @@ export default function AIEmailGeneratorPage() {
                           displayName = "Resume Document";
                         }
                         return (
-                          <SelectItem key={r.id || r.id} value={r.id || r.id || ""}>
+                          <SelectItem key={r.id} value={r.id || ""}>
                             {displayName}
                           </SelectItem>
                         );

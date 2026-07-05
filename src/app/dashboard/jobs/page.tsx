@@ -98,7 +98,7 @@ export default function JobsPage() {
       else if (res?.data && Array.isArray(res.data)) suggestions = res.data;
       else if (res?.data?.docs && Array.isArray(res.data.docs)) suggestions = res.data.docs;
       
-      suggestions = suggestions.map((j: Job) => ({...j, id: undefined, id: undefined }));
+      suggestions = suggestions.map((j: Job) => ({...j, id: undefined }));
       setSuggestions(suggestions);
       setActiveTab("suggestions");
       
@@ -349,7 +349,7 @@ export default function JobsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJobs.map((job, i) => {
-            const jobId = job.id || job.id;
+            const jobId = job.id;
             return (
               <motion.div
                 key={jobId || i}
@@ -376,8 +376,8 @@ export default function JobsPage() {
                           <CheckCircle2 className="w-3 h-3 mr-1" /> Verified
                         </Badge>
                       ) : (
-                        <Badge variant={job.id || job.id ? (job.status === "Applied" ? "default" : job.status === "Interviewing" ? "secondary" : "outline") : "secondary"} className="shadow-none font-medium px-2 py-0.5 border-primary/20 text-primary/80 bg-primary/5 hover:bg-primary/10 whitespace-nowrap">
-                          {job.id || job.id ? (job.status || "Saved") : "AI suggested"}
+                        <Badge variant={job.id ? (job.status === "Applied" ? "default" : job.status === "Interviewing" ? "secondary" : "outline") : "secondary"} className="shadow-none font-medium px-2 py-0.5 border-primary/20 text-primary/80 bg-primary/5 hover:bg-primary/10 whitespace-nowrap">
+                          {job.id ? (job.status || "Saved") : "AI suggested"}
                         </Badge>
                       )}
                     </div>

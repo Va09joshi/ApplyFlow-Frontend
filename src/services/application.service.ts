@@ -4,7 +4,6 @@ import { Resume } from './resume.service';
 
 export interface Application {
   id?: string;
-  id?: string;
   companyId: string;
   companyName?: string;
   companyTitle?: string;
