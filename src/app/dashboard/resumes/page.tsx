@@ -9,6 +9,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { UploadCloud, FileText, MoreVertical, CheckCircle2, Clock, Trash2, Edit2, Loader2, Download, Hammer } from "lucide-react";
 import * as motion from "framer-motion/client";
+import { ATSResumeTemplate } from "@/components/resume/ATSResumeTemplate";
+import { exportToPDF } from "@/utils/export";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -134,6 +136,11 @@ export default function ResumesPage() {
     router.push(`/dashboard/resumes/builder?id=${resumeId}`);
   };
 
+  const handleDownloadBuilt = async (resume: Resume) => {
+    if (!resume.builderData) return;
+    await exportToPDF(`built-resume-preview-${resume.id}`, resume.builderData, `${resume.name}.pdf`);
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -224,6 +231,12 @@ export default function ResumesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {resumes.map((resume, i) => {
             const resumeId = resume.id || resume.id;
+            const builtData = resume.builderData;
+            const builtName = builtData?.personalInfo?.fullName || resume.name;
+            const builtSummary = builtData?.summary || "Builder resume with editable structured sections.";
+            const experienceCount = builtData?.experience?.length ?? 0;
+            const projectCount = builtData?.projects?.length ?? 0;
+            const skillList = builtData?.skills ?? [];
             return (
             <motion.div
               key={resumeId}
@@ -239,7 +252,7 @@ export default function ResumesPage() {
                 )}
                 {resume.isBuilt && (
                   <div className={`absolute ${resume.isDefault ? 'top-8' : 'top-2'} left-2 z-20`}>
-                    <Badge variant="secondary" className="shadow-sm text-[10px] px-2 py-0.5 pointer-events-none gap-1">
+                    <Badge variant="secondary" className="shadow-sm text-[10px] px-2 py-0.5 pointer-events-none gap-1 bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
                       <Hammer className="w-2.5 h-2.5" /> Built
                     </Badge>
                   </div>
@@ -253,6 +266,11 @@ export default function ResumesPage() {
                         {resume.isBuilt && (
                           <DropdownMenuItem onClick={() => handleEditBuilt(resumeId)}>
                             <Edit2 className="w-4 h-4 mr-2" /> Edit in Builder
+                          </DropdownMenuItem>
+                        )}
+                        {resume.isBuilt && builtData && (
+                          <DropdownMenuItem onClick={() => handleDownloadBuilt(resume)}>
+                            <Download className="w-4 h-4 mr-2" /> Download Builder PDF
                           </DropdownMenuItem>
                         )}
                         {!resume.isDefault && (
@@ -277,41 +295,85 @@ export default function ResumesPage() {
                 </div>
                 
                 {/* Document Thumbnail Area */}
-                <div className="h-48 bg-muted/30 relative flex items-center justify-center border-b border-border/50 group-hover:bg-muted/50 transition-colors overflow-hidden">
-                  {/* Miniature Document */}
-                  <div className="w-[130px] h-[175px] bg-white dark:bg-slate-100 rounded-[2px] shadow-md flex flex-col p-3 gap-1.5 overflow-hidden transform group-hover:scale-[1.02] transition-transform duration-500 relative">
-                    {/* Header line */}
-                    <div className="w-full h-1.5 bg-slate-300 rounded-full mb-1" />
-                    {/* Subheader */}
-                    <div className="w-3/4 h-1 bg-slate-200 rounded-full mb-2 mx-auto" />
-                    {/* Paragraphs */}
-                    {Array.from({ length: 6 }).map((_, idx) => (
-                      <div key={idx} className="space-y-1 mt-1">
-                        <div className="w-full h-[2px] bg-slate-200 rounded-full" />
-                        <div className="w-[90%] h-[2px] bg-slate-200 rounded-full" />
-                        <div className="w-[80%] h-[2px] bg-slate-200 rounded-full" />
+                <div className="h-48 bg-gradient-to-br from-muted/30 via-background to-muted/40 relative flex items-center justify-center border-b border-border/50 group-hover:bg-muted/50 transition-colors overflow-hidden px-4">
+                  {resume.isBuilt && builtData ? (
+                    <div className="w-full max-w-[260px] rounded-2xl border border-emerald-500/20 bg-white/90 shadow-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-700 font-semibold">Resume Builder</p>
+                          <p className="text-sm font-semibold truncate">{builtName}</p>
+                        </div>
+                        <Hammer className="w-4 h-4 text-emerald-600 shrink-0" />
                       </div>
-                    ))}
-                    {resume.parsedText && (
-                       <div className="absolute inset-0 p-3 pt-8 overflow-hidden pointer-events-none">
-                         <p className="text-[3.5px] leading-[5px] font-mono text-slate-800/40 text-left line-clamp-[25]">
-                           {resume.parsedText.substring(0, 800)}
-                         </p>
-                       </div>
-                    )}
-                  </div>
+                      <div className="space-y-2 text-[11px] text-muted-foreground">
+                        <p className="line-clamp-2">{builtSummary}</p>
+                        <div className="grid grid-cols-2 gap-2 text-[10px]">
+                          <div className="rounded-lg bg-muted/50 px-2 py-1.5">
+                            <div className="font-medium text-foreground">{experienceCount}</div>
+                            <div>Experience entries</div>
+                          </div>
+                          <div className="rounded-lg bg-muted/50 px-2 py-1.5">
+                            <div className="font-medium text-foreground">{projectCount}</div>
+                            <div>Projects</div>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {skillList.slice(0, 2).map(skill => (
+                            <Badge key={skill.id} variant="secondary" className="text-[9px] px-1.5 py-0 rounded-sm">
+                              {skill.category || "Skill"}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Miniature Document */
+                    <div className="w-[130px] h-[175px] bg-white dark:bg-slate-100 rounded-[2px] shadow-md flex flex-col p-3 gap-1.5 overflow-hidden transform group-hover:scale-[1.02] transition-transform duration-500 relative">
+                      {/* Header line */}
+                      <div className="w-full h-1.5 bg-slate-300 rounded-full mb-1" />
+                      {/* Subheader */}
+                      <div className="w-3/4 h-1 bg-slate-200 rounded-full mb-2 mx-auto" />
+                      {/* Paragraphs */}
+                      {Array.from({ length: 6 }).map((_, idx) => (
+                        <div key={idx} className="space-y-1 mt-1">
+                          <div className="w-full h-[2px] bg-slate-200 rounded-full" />
+                          <div className="w-[90%] h-[2px] bg-slate-200 rounded-full" />
+                          <div className="w-[80%] h-[2px] bg-slate-200 rounded-full" />
+                        </div>
+                      ))}
+                      {resume.parsedText && (
+                         <div className="absolute inset-0 p-3 pt-8 overflow-hidden pointer-events-none">
+                           <p className="text-[3.5px] leading-[5px] font-mono text-slate-800/40 text-left line-clamp-[25]">
+                             {resume.parsedText.substring(0, 800)}
+                           </p>
+                         </div>
+                      )}
+                    </div>
+                  )}
                   
                   {/* Overlay Preview Button */}
                   <div className="absolute inset-0 bg-background/5 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                     {resume.isBuilt ? (
-                      <Button
-                        variant="secondary"
-                        className="shadow-xl rounded-full font-medium"
-                        onClick={() => handleEditBuilt(resumeId)}
-                      >
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        Edit Resume
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          className="shadow-xl rounded-full font-medium"
+                          onClick={() => handleEditBuilt(resumeId)}
+                        >
+                          <Edit2 className="w-4 h-4 mr-2" />
+                          Edit Resume
+                        </Button>
+                        {builtData && (
+                          <Button
+                            variant="default"
+                            className="shadow-xl rounded-full font-medium"
+                            onClick={() => handleDownloadBuilt(resume)}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            PDF
+                          </Button>
+                        )}
+                      </div>
                     ) : (
                       <Dialog>
                         <DialogTrigger asChild>
@@ -343,8 +405,17 @@ export default function ResumesPage() {
                   </div>
                 </div>
 
+                {builtData && (
+                  <div className="fixed left-[-9999px] top-0 opacity-0 pointer-events-none">
+                    <ATSResumeTemplate data={builtData} id={`built-resume-preview-${resumeId}`} />
+                  </div>
+                )}
+
                 <CardContent className="p-4 pb-3 flex-1 flex flex-col justify-end">
                   <CardTitle className="text-sm font-semibold truncate" title={resume.name}>{resume.name}</CardTitle>
+                  {resume.isBuilt && builtData && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{builtName} · {builtSummary}</p>
+                  )}
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
                     <Clock className="w-3 h-3" />
                     {resume.createdAt ? new Date(resume.createdAt).toLocaleDateString() : "Unknown date"}

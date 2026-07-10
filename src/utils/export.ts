@@ -3,23 +3,28 @@ import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, ExternalHyperlink } from "docx";
 import { ResumeBuilderData } from "@/types/resume";
 
+const normalizeUrl = (value: string) => (value.startsWith("http") ? value : `https://${value}`);
+
 export const exportToPDF = async (elementId: string, data: ResumeBuilderData, filename: string = "resume.pdf") => {
   const element = document.getElementById(elementId);
   if (!element) return;
 
-  // Render at 2x scale for better quality
-  const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+  const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
   const imgData = canvas.toDataURL("image/png");
 
-  // A4 dimensions in pt
   const pdf = new jsPDF("p", "pt", "a4");
   const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-  // Add links overlay (rough approximation) since html2canvas doesn't capture links
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+  for (let pageOffset = pdfHeight; pageOffset < imgHeight; pageOffset += pdfHeight) {
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, -pageOffset, pdfWidth, imgHeight);
+  }
+
   if (data.personalInfo.linkedin) {
-    pdf.link(0, 0, pdfWidth, 40, { url: data.personalInfo.linkedin.startsWith('http') ? data.personalInfo.linkedin : `https://${data.personalInfo.linkedin}` });
+    pdf.link(0, 0, pdfWidth, 40, { url: normalizeUrl(data.personalInfo.linkedin) });
   }
 
   pdf.save(filename);
@@ -45,7 +50,7 @@ export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "
             style: "Hyperlink",
           }),
         ],
-        link: data.personalInfo.linkedin.startsWith('http') ? data.personalInfo.linkedin : `https://${data.personalInfo.linkedin}`,
+        link: normalizeUrl(data.personalInfo.linkedin),
       })
     );
   }
@@ -60,7 +65,7 @@ export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "
             style: "Hyperlink",
           }),
         ],
-        link: data.personalInfo.github.startsWith('http') ? data.personalInfo.github : `https://${data.personalInfo.github}`,
+        link: normalizeUrl(data.personalInfo.github),
       })
     );
   }
@@ -75,7 +80,7 @@ export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "
             style: "Hyperlink",
           }),
         ],
-        link: data.personalInfo.portfolio.startsWith('http') ? data.personalInfo.portfolio : `https://${data.personalInfo.portfolio}`,
+        link: normalizeUrl(data.personalInfo.portfolio),
       })
     );
   }
@@ -135,7 +140,7 @@ export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "
                 style: "Hyperlink",
               }),
             ],
-            link: proj.link.startsWith('http') ? proj.link : `https://${proj.link}`,
+            link: normalizeUrl(proj.link),
           })
         );
       }
@@ -196,7 +201,7 @@ export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "
         certChildren.push(
           new ExternalHyperlink({
             children: [new TextRun({ text: "Verify", style: "Hyperlink" })],
-            link: cert.link.startsWith("http") ? cert.link : `https://${cert.link}`,
+            link: normalizeUrl(cert.link),
           })
         );
       }
@@ -259,4 +264,5 @@ export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };

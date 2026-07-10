@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,7 +52,11 @@ const ItemCard = ({ onRemove, children }: { onRemove: () => void; children: Reac
   </div>
 );
 
-export default function ResumeBuilderPage() {
+function ResumeBuilderContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const resumeId = searchParams.get("id");
+
   const [data, setData] = useState<ResumeBuilderData>({
     personalInfo: { fullName: "", email: "", phone: "", location: "", linkedin: "", portfolio: "", github: "" },
     summary: "",
@@ -65,6 +70,34 @@ export default function ResumeBuilderPage() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingResume, setIsLoadingResume] = useState(false);
+  const [editingResumeId, setEditingResumeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadResume = async () => {
+      if (!resumeId) return;
+
+      try {
+        setIsLoadingResume(true);
+        const response = await resumeService.getById(resumeId);
+        const resume = response?.data ?? response;
+        if (resume?.builderData) {
+          setData(resume.builderData);
+          setEditingResumeId(resumeId);
+        } else {
+          toast.error("This resume was not created in the builder.");
+          router.push("/dashboard/resumes");
+        }
+      } catch {
+        toast.error("Failed to load the selected resume.");
+        router.push("/dashboard/resumes");
+      } finally {
+        setIsLoadingResume(false);
+      }
+    };
+
+    loadResume();
+  }, [resumeId, router]);
 
   // --- Personal Info ---
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,14 +196,36 @@ export default function ResumeBuilderPage() {
     }
     try {
       setIsSaving(true);
-      await resumeService.saveBuilderResume(data);
-      toast.success("Resume saved successfully! It's now in your Resume Manager.");
+      if (editingResumeId) {
+        await resumeService.update(editingResumeId, {
+          name: data.personalInfo.fullName ? `${data.personalInfo.fullName} – Resume` : "Untitled Resume",
+          isBuilt: true,
+          builderData: data,
+        });
+        toast.success("Resume updated successfully!");
+      } else {
+        const created = await resumeService.saveBuilderResume(data);
+        const createdId = created?.data?.id ?? created?.id;
+        if (createdId) {
+          setEditingResumeId(createdId);
+          router.replace(`/dashboard/resumes/builder?id=${createdId}`);
+        }
+        toast.success("Resume saved successfully! It's now in your Resume Manager.");
+      }
     } catch {
       toast.error("Failed to save resume. Please try again.");
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (isLoadingResume) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center text-sm text-muted-foreground">
+        Loading resume...
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
@@ -179,12 +234,12 @@ export default function ResumeBuilderPage() {
         {/* Editor Header */}
         <div className="px-6 py-4 border-b border-border bg-background flex items-center justify-between shrink-0">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Resume Builder</h1>
+            <h1 className="text-xl font-bold tracking-tight">{editingResumeId ? "Edit Resume" : "Resume Builder"}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Build and save your ATS-friendly resume</p>
           </div>
           <Button onClick={handleSave} disabled={isSaving} size="sm" className="gap-2 rounded-lg">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {isSaving ? "Saving..." : "Save Resume"}
+            {isSaving ? "Saving..." : editingResumeId ? "Update Resume" : "Save Resume"}
           </Button>
         </div>
 
@@ -375,5 +430,19 @@ export default function ResumeBuilderPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResumeBuilderPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-[calc(100vh-4rem)] items-center justify-center text-sm text-muted-foreground">
+          Loading resume builder...
+        </div>
+      }
+    >
+      <ResumeBuilderContent />
+    </Suspense>
   );
 }
