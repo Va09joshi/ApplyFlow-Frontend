@@ -52,6 +52,33 @@ const ItemCard = ({ onRemove, children }: { onRemove: () => void; children: Reac
   </div>
 );
 
+const emptyResumeData: ResumeBuilderData = {
+  personalInfo: { fullName: "", email: "", phone: "", location: "", linkedin: "", portfolio: "", github: "" },
+  summary: "",
+  experience: [],
+  projects: [],
+  education: [],
+  certifications: [],
+  achievements: [],
+  skills: [],
+  font: "'Times New Roman'",
+};
+
+const normalizeResumeData = (value?: ResumeBuilderData): ResumeBuilderData => ({
+  ...emptyResumeData,
+  ...value,
+  personalInfo: {
+    ...emptyResumeData.personalInfo,
+    ...(value?.personalInfo ?? {}),
+  },
+  experience: value?.experience ?? [],
+  projects: value?.projects ?? [],
+  education: value?.education ?? [],
+  certifications: value?.certifications ?? [],
+  achievements: value?.achievements ?? [],
+  skills: value?.skills ?? [],
+});
+
 function ResumeBuilderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -72,6 +99,7 @@ function ResumeBuilderContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [editingResumeId, setEditingResumeId] = useState<string | null>(null);
+  const safeData = normalizeResumeData(data);
 
   useEffect(() => {
     const loadResume = async () => {
@@ -82,7 +110,7 @@ function ResumeBuilderContent() {
         const response = await resumeService.getById(resumeId);
         const resume = response?.data ?? response;
         if (resume?.builderData) {
-          setData(resume.builderData);
+          setData(normalizeResumeData(resume.builderData));
           setEditingResumeId(resumeId);
         } else {
           toast.error("This resume was not created in the builder.");
@@ -249,13 +277,13 @@ function ResumeBuilderContent() {
           {/* Personal Information */}
           <SectionCard icon={User} title="Personal Information">
             <div className="grid grid-cols-2 gap-3">
-              <Input name="fullName" placeholder="Full Name" value={data.personalInfo.fullName} onChange={handlePersonalChange} />
-              <Input name="email" placeholder="Email" value={data.personalInfo.email} onChange={handlePersonalChange} />
-              <Input name="phone" placeholder="Phone" value={data.personalInfo.phone} onChange={handlePersonalChange} />
-              <Input name="location" placeholder="City, State" value={data.personalInfo.location} onChange={handlePersonalChange} />
-              <Input name="linkedin" placeholder="LinkedIn URL" value={data.personalInfo.linkedin} onChange={handlePersonalChange} />
-              <Input name="github" placeholder="GitHub URL" value={data.personalInfo.github} onChange={handlePersonalChange} />
-              <Input name="portfolio" placeholder="Portfolio URL" value={data.personalInfo.portfolio} onChange={handlePersonalChange} className="col-span-2" />
+              <Input name="fullName" placeholder="Full Name" value={safeData.personalInfo.fullName} onChange={handlePersonalChange} />
+              <Input name="email" placeholder="Email" value={safeData.personalInfo.email} onChange={handlePersonalChange} />
+              <Input name="phone" placeholder="Phone" value={safeData.personalInfo.phone} onChange={handlePersonalChange} />
+              <Input name="location" placeholder="City, State" value={safeData.personalInfo.location} onChange={handlePersonalChange} />
+              <Input name="linkedin" placeholder="LinkedIn URL" value={safeData.personalInfo.linkedin} onChange={handlePersonalChange} />
+              <Input name="github" placeholder="GitHub URL" value={safeData.personalInfo.github} onChange={handlePersonalChange} />
+              <Input name="portfolio" placeholder="Portfolio URL" value={safeData.personalInfo.portfolio} onChange={handlePersonalChange} className="col-span-2" />
             </div>
           </SectionCard>
 
@@ -264,17 +292,17 @@ function ResumeBuilderContent() {
             <Textarea
               placeholder="A brief summary of your professional background..."
               rows={4}
-              value={data.summary}
+              value={safeData.summary}
               onChange={e => setData({ ...data, summary: e.target.value })}
             />
           </SectionCard>
 
           {/* Experience */}
           <SectionCard icon={Briefcase} title="Experience" onAdd={addExperience} addLabel="Add">
-            {data.experience.length === 0 && (
+            {safeData.experience.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">No experience added yet. Click "Add" to get started.</p>
             )}
-            {data.experience.map(exp => (
+            {safeData.experience.map(exp => (
               <ItemCard key={exp.id} onRemove={() => removeExperience(exp.id)}>
                 <div className="grid grid-cols-2 gap-3 pr-8">
                   <Input placeholder="Job Title" value={exp.jobTitle} onChange={e => updateExperience(exp.id, "jobTitle", e.target.value)} />
@@ -294,10 +322,10 @@ function ResumeBuilderContent() {
 
           {/* Projects */}
           <SectionCard icon={FolderGit2} title="Projects" onAdd={addProject} addLabel="Add">
-            {(!data.projects || data.projects.length === 0) && (
+            {safeData.projects.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">No projects added yet.</p>
             )}
-            {data.projects && data.projects.map(proj => (
+            {safeData.projects.map(proj => (
               <ItemCard key={proj.id} onRemove={() => removeProject(proj.id)}>
                 <div className="grid grid-cols-2 gap-3 pr-8">
                   <Input placeholder="Project Name" value={proj.name} onChange={e => updateProject(proj.id, "name", e.target.value)} />
@@ -315,10 +343,10 @@ function ResumeBuilderContent() {
 
           {/* Education */}
           <SectionCard icon={GraduationCap} title="Education" onAdd={addEducation} addLabel="Add">
-            {data.education.length === 0 && (
+            {safeData.education.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">No education added yet.</p>
             )}
-            {data.education.map(edu => (
+            {safeData.education.map(edu => (
               <ItemCard key={edu.id} onRemove={() => removeEducation(edu.id)}>
                 <div className="grid grid-cols-2 gap-3 pr-8">
                   <Input placeholder="Degree" value={edu.degree} onChange={e => updateEducation(edu.id, "degree", e.target.value)} />
@@ -334,10 +362,10 @@ function ResumeBuilderContent() {
 
           {/* Certifications */}
           <SectionCard icon={Award} title="Certifications" onAdd={addCertification} addLabel="Add">
-            {(!data.certifications || data.certifications.length === 0) && (
+            {safeData.certifications.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">No certifications added yet.</p>
             )}
-            {data.certifications && data.certifications.map(cert => (
+            {safeData.certifications.map(cert => (
               <ItemCard key={cert.id} onRemove={() => removeCertification(cert.id)}>
                 <div className="grid grid-cols-2 gap-3 pr-8">
                   <Input placeholder="Certification Name" value={cert.name} onChange={e => updateCertification(cert.id, "name", e.target.value)} />
@@ -351,10 +379,10 @@ function ResumeBuilderContent() {
 
           {/* Achievements */}
           <SectionCard icon={Trophy} title="Achievements" onAdd={addAchievement} addLabel="Add">
-            {(!data.achievements || data.achievements.length === 0) && (
+            {safeData.achievements.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">No achievements added yet.</p>
             )}
-            {data.achievements && data.achievements.map(ach => (
+            {safeData.achievements.map(ach => (
               <ItemCard key={ach.id} onRemove={() => removeAchievement(ach.id)}>
                 <div className="space-y-3 pr-8">
                   <Input placeholder="Achievement Title" value={ach.title} onChange={e => updateAchievement(ach.id, "title", e.target.value)} />
@@ -371,10 +399,10 @@ function ResumeBuilderContent() {
 
           {/* Skills */}
           <SectionCard icon={Wrench} title="Skills" onAdd={addSkill} addLabel="Add Category">
-            {(!data.skills || data.skills.length === 0) && (
+            {safeData.skills.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-4">No skill categories added yet. Click "Add Category" to get started.</p>
             )}
-            {data.skills && data.skills.map(skill => (
+            {safeData.skills.map(skill => (
               <ItemCard key={skill.id} onRemove={() => removeSkill(skill.id)}>
                 <div className="space-y-3 pr-8">
                   <Input
@@ -401,7 +429,7 @@ function ResumeBuilderContent() {
         <div className="p-4 border-b border-border flex justify-between items-center bg-background shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="font-semibold text-sm text-muted-foreground">Live Preview</h2>
-            <Select value={data.font ?? "Arial"} onValueChange={(val: string | null) => setData({ ...data, font: val ?? undefined })}>
+            <Select value={safeData.font ?? "Arial"} onValueChange={(val: string | null) => setData({ ...data, font: val ?? undefined })}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Select Font" />
               </SelectTrigger>
@@ -417,16 +445,16 @@ function ResumeBuilderContent() {
             </Select>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => exportToDOCX(data)} className="rounded-lg">
+            <Button size="sm" variant="secondary" onClick={() => exportToDOCX(safeData)} className="rounded-lg">
               <FileText className="w-4 h-4 mr-2" /> DOCX
             </Button>
-            <Button size="sm" onClick={() => exportToPDF("resume-preview-element", data)} className="rounded-lg">
+            <Button size="sm" onClick={() => exportToPDF("resume-preview-element", safeData)} className="rounded-lg">
               <Download className="w-4 h-4 mr-2" /> PDF
             </Button>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-8">
-          <ATSResumeTemplate data={data} id="resume-preview-element" />
+          <ATSResumeTemplate data={safeData} id="resume-preview-element" />
         </div>
       </div>
     </div>
