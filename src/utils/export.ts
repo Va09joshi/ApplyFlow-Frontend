@@ -5,29 +5,167 @@ import { ResumeBuilderData } from "@/types/resume";
 
 const normalizeUrl = (value: string) => (value.startsWith("http") ? value : `https://${value}`);
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const linkText = (value: string) => escapeHtml(value.startsWith("http") ? value.replace(/^https?:\/\//, "") : value);
+
+const renderListLines = (text: string) =>
+  text
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => `<div style="position:relative; padding-left:12px; margin-bottom:2px;"><span style="position:absolute; left:0; color:#143c78;">•</span><span>${escapeHtml(line.replace(/^[-•*]\s*/, ""))}</span></div>`)
+    .join("");
+
+const buildResumeMarkup = (data: ResumeBuilderData) => {
+  const personalInfo = {
+    fullName: data.personalInfo?.fullName || "Your Name",
+    email: data.personalInfo?.email || "",
+    phone: data.personalInfo?.phone || "",
+    location: data.personalInfo?.location || "",
+    linkedin: data.personalInfo?.linkedin || "",
+    portfolio: data.personalInfo?.portfolio || "",
+    github: data.personalInfo?.github || "",
+  };
+
+  const sectionStyle = "margin-bottom:16px;";
+  const headingStyle = "font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#143c78; border-bottom:1px solid #143c78; padding-bottom:2px; margin:0 0 6px;";
+  const smallMuted = "color:#5a5a5a; font-size:12px;";
+
+  const contacts = [
+    personalInfo.phone ? `<span>${escapeHtml(personalInfo.phone)}</span>` : "",
+    personalInfo.email ? `<a href=\"mailto:${escapeHtml(personalInfo.email)}\" style=\"color:#143c78; text-decoration:none;\">${escapeHtml(personalInfo.email)}</a>` : "",
+    personalInfo.linkedin ? `<a href=\"${normalizeUrl(personalInfo.linkedin)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none;\">LinkedIn</a>` : "",
+    personalInfo.github ? `<a href=\"${normalizeUrl(personalInfo.github)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none;\">GitHub</a>` : "",
+    personalInfo.portfolio ? `<a href=\"${normalizeUrl(personalInfo.portfolio)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none;\">Portfolio</a>` : "",
+    personalInfo.location ? `<span>${escapeHtml(personalInfo.location)}</span>` : "",
+  ].filter(Boolean).join(`<span style=\"color:#143c78;\"> | </span>`);
+
+  const experience = (data.experience || [])
+    .map((exp) => `
+      <div style=\"margin-bottom:10px;\">
+        <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end;\">
+          <strong style=\"font-size:13px;\">${escapeHtml(exp.jobTitle || "")}</strong>
+          <span style=\"${smallMuted} font-style:italic;\">${escapeHtml(exp.startDate || "")} – ${escapeHtml(exp.endDate || "Present")}</span>
+        </div>
+        <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:4px;\">
+          <em style=\"font-size:12px;\">${escapeHtml(exp.company || "")}</em>
+          <em style=\"${smallMuted}\">${escapeHtml(exp.location || "")}</em>
+        </div>
+        <div style=\"font-size:12.5px;\">${renderListLines(exp.description || "")}</div>
+      </div>`)
+    .join("");
+
+  const projects = (data.projects || [])
+    .map((proj) => `
+      <div style=\"margin-bottom:10px;\">
+        <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:4px;\">
+          <strong style=\"font-size:13px;\">${escapeHtml(proj.name || "")}</strong>
+          ${proj.link ? `<a href=\"${normalizeUrl(proj.link)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none; font-size:12px;\">Link</a>` : ""}
+        </div>
+        <div style=\"font-size:12.5px;\">${renderListLines(proj.description || "")}</div>
+      </div>`)
+    .join("");
+
+  const education = (data.education || [])
+    .map((edu) => {
+      const locationText = [edu.score || "", edu.location || ""].filter(Boolean).join(edu.score && edu.location ? " | " : "");
+      return `
+        <div style=\"margin-bottom:8px;\">
+          <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end;\">
+            <strong style=\"font-size:13px;\">${escapeHtml(edu.school || "")}</strong>
+            <span style=\"${smallMuted} font-style:italic;\">${escapeHtml(edu.startDate || "")} – ${escapeHtml(edu.endDate || "Present")}</span>
+          </div>
+          <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end;\">
+            <em style=\"font-size:12px;\">${escapeHtml(edu.degree || "")}</em>
+            <em style=\"${smallMuted}\">${escapeHtml(locationText)}</em>
+          </div>
+        </div>`;
+    })
+    .join("");
+
+  const certifications = (data.certifications || [])
+    .map((cert) => `
+      <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:6px;\">
+        <div>
+          <strong style=\"font-size:13px;\">${escapeHtml(cert.name || "")}</strong>
+          ${cert.issuer ? `<span style=\"font-size:12px;\"> — ${escapeHtml(cert.issuer)}</span>` : ""}
+          ${cert.link ? `<a href=\"${normalizeUrl(cert.link)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none; font-size:11px;\"> [Verify]</a>` : ""}
+        </div>
+        ${cert.date ? `<span style=\"${smallMuted} font-style:italic;\">${escapeHtml(cert.date)}</span>` : ""}
+      </div>`)
+    .join("");
+
+  const achievements = (data.achievements || [])
+    .map((ach) => `
+      <div style=\"font-size:12.5px; margin-bottom:3px; position:relative; padding-left:12px;\">
+        <span style=\"position:absolute; left:0; color:#143c78;\">•</span>
+        <span>${ach.title ? `<strong>${escapeHtml(ach.title)}${ach.description ? ": " : ""}</strong>` : ""}${escapeHtml(ach.description || "")}</span>
+      </div>`)
+    .join("");
+
+  const skills = (data.skills || [])
+    .map((skill) => `<div style=\"font-size:12px; margin-bottom:3px;\"><strong>${escapeHtml(skill.category || "")}: </strong><span>${escapeHtml(skill.items || "")}</span></div>`)
+    .join("");
+
+  return `
+    <div style=\"width:850px; min-height:1056px; background:#ffffff; color:#000000; padding:32px; box-sizing:border-box; font-family:${data.font || "Arial"}; line-height:1.35;\">
+      <div style=\"text-align:center; margin-bottom:16px; border-bottom:1px solid #d1d5db; padding-bottom:16px;\">
+        <h1 style=\"font-size:28px; font-weight:700; margin:0 0 8px;\">${escapeHtml(personalInfo.fullName)}</h1>
+        <div style=\"display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; font-size:12px; color:#5a5a5a;\">${contacts}</div>
+      </div>
+      ${data.summary ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Professional Summary</h2><p style=\"margin:0; white-space:pre-wrap; font-size:12.5px;\">${escapeHtml(data.summary)}</p></div>` : ""}
+      ${experience ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Work Experience</h2>${experience}</div>` : ""}
+      ${projects ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Projects</h2>${projects}</div>` : ""}
+      ${education ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Education</h2>${education}</div>` : ""}
+      ${certifications ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Certifications</h2>${certifications}</div>` : ""}
+      ${achievements ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Achievements</h2>${achievements}</div>` : ""}
+      ${skills ? `<div style=\"${sectionStyle}\"><h2 style=\"${headingStyle}\">Technical Skills</h2>${skills}</div>` : ""}
+    </div>`;
+};
+
 export const exportToPDF = async (elementId: string, data: ResumeBuilderData, filename: string = "resume.pdf") => {
-  const element = document.getElementById(elementId);
-  if (!element) return;
+  if (!document.getElementById(elementId)) return;
 
-  const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-  const imgData = canvas.toDataURL("image/png");
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "fixed";
+  wrapper.style.left = "-10000px";
+  wrapper.style.top = "0";
+  wrapper.style.background = "#ffffff";
+  wrapper.innerHTML = buildResumeMarkup(data);
+  document.body.appendChild(wrapper);
 
-  const pdf = new jsPDF("p", "pt", "a4");
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+  try {
+    const element = wrapper.firstElementChild as HTMLElement | null;
+    if (!element) return;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
-  for (let pageOffset = pdfHeight; pageOffset < imgHeight; pageOffset += pdfHeight) {
-    pdf.addPage();
-    pdf.addImage(imgData, "PNG", 0, -pageOffset, pdfWidth, imgHeight);
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "pt", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+    for (let pageOffset = pdfHeight; pageOffset < imgHeight; pageOffset += pdfHeight) {
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, -pageOffset, pdfWidth, imgHeight);
+    }
+
+    if (data.personalInfo.linkedin) {
+      pdf.link(0, 0, pdfWidth, 40, { url: normalizeUrl(data.personalInfo.linkedin) });
+    }
+
+    pdf.save(filename);
+  } finally {
+    wrapper.remove();
   }
-
-  if (data.personalInfo.linkedin) {
-    pdf.link(0, 0, pdfWidth, 40, { url: normalizeUrl(data.personalInfo.linkedin) });
-  }
-
-  pdf.save(filename);
 };
 
 export const exportToDOCX = async (data: ResumeBuilderData, filename: string = "resume.docx") => {
