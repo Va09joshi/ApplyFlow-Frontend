@@ -8,6 +8,28 @@ type AuthRequestConfig = InternalAxiosRequestConfig & {
   _retryCount?: number;
 };
 
+const waitForAuthHydration = async () => {
+  const persistApi = (useAuthStore as typeof useAuthStore & {
+    persist?: {
+      hasHydrated?: () => boolean;
+      onFinishHydration?: (callback: () => void) => () => void;
+    };
+  }).persist;
+
+  if (!persistApi?.hasHydrated || persistApi.hasHydrated()) return;
+
+  await new Promise<void>((resolve) => {
+    const unsubscribe = persistApi.onFinishHydration?.(() => {
+      unsubscribe?.();
+      resolve();
+    });
+
+    if (!persistApi.onFinishHydration) {
+      resolve();
+    }
+  });
+};
+
 // Use the in-app proxy for client-side calls to avoid CORS during development.
 // On the server (SSR), prefer an explicit environment variable or fallback host.
 const baseURL = typeof window === 'undefined'
@@ -25,8 +47,10 @@ export const api = axios.create({
 
 // Request interceptor to add the access token to headers
 api.interceptors.request.use(
-  (config: AuthRequestConfig) => {
+  async (config: AuthRequestConfig) => {
     const requestConfig = config;
+
+    await waitForAuthHydration();
 
     if (requestConfig.skipAuth) {
       return requestConfig;
