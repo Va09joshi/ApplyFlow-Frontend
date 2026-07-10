@@ -31,6 +31,7 @@ export default function ResumesPage() {
   const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newResume, setNewResume] = useState({ name: "", fileUrl: "" });
+  const [resumeToDelete, setResumeToDelete] = useState<Resume | null>(null);
 
   const fetchResumes = async () => {
     try {
@@ -118,6 +119,12 @@ export default function ResumesPage() {
     } catch (error) {
       toast.error("Failed to delete resume");
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!resumeToDelete?.id) return;
+    await handleDelete(resumeToDelete.id);
+    setResumeToDelete(null);
   };
 
   const handleSetDefault = async (id: string | undefined) => {
@@ -287,7 +294,7 @@ export default function ResumesPage() {
                           </>
                         )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(resumeId)}>
+                        <DropdownMenuItem className="text-destructive" onClick={() => setResumeToDelete(resume)}>
                           <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -426,6 +433,39 @@ export default function ResumesPage() {
                       </>
                     )}
                   </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {resume.isBuilt && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="h-8 rounded-full px-3"
+                        onClick={() => handleEditBuilt(resumeId)}
+                      >
+                        <Edit2 className="w-3.5 h-3.5 mr-1.5" />
+                        Edit
+                      </Button>
+                    )}
+                    {resume.isBuilt && builtData && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-full px-3"
+                        onClick={() => handleDownloadBuilt(resume)}
+                      >
+                        <Download className="w-3.5 h-3.5 mr-1.5" />
+                        PDF
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 rounded-full px-3 text-destructive hover:text-destructive"
+                      onClick={() => setResumeToDelete(resume)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                      Delete
+                    </Button>
+                  </div>
                 </CardContent>
                 <CardFooter className="px-4 pb-4 pt-0">
                   <div className="flex flex-wrap gap-1.5">
@@ -442,6 +482,27 @@ export default function ResumesPage() {
           )})}
         </div>
       )}
+
+      <Dialog open={!!resumeToDelete} onOpenChange={(open) => !open && setResumeToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete resume?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">
+              This will permanently remove {resumeToDelete?.name || "this resume"} from your account.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setResumeToDelete(null)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Delete resume
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
