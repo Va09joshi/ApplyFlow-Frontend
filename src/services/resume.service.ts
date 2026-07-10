@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { ResumeBuilderData } from '@/types/resume';
 
 export interface Resume {
   id?: string;
@@ -6,11 +7,12 @@ export interface Resume {
   fileUrl?: string;
   createdAt: string;
   updatedAt: string;
-  // Extracted data depending on ATS fields
   tags?: string[];
   size?: string;
   isDefault?: boolean;
   parsedText?: string;
+  isBuilt?: boolean;
+  builderData?: ResumeBuilderData;
 }
 
 export const resumeService = {
@@ -38,6 +40,18 @@ export const resumeService = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+    });
+    return response.data;
+  },
+
+  async saveBuilderResume(data: ResumeBuilderData) {
+    const name = data.personalInfo.fullName
+      ? `${data.personalInfo.fullName} – Resume`
+      : "Untitled Resume";
+    const response = await api.post('/api/v1/resumes', {
+      name,
+      isBuilt: true,
+      builderData: data,
     });
     return response.data;
   },

@@ -114,6 +114,8 @@ export default function ATSAnalyzerPage() {
     if (!response) return response;
     // Try common nesting patterns
     const candidates = [
+      response?.data?.record,
+      response?.record,
       response?.data?.analysis,
       response?.data?.result,
       response?.data?.data,

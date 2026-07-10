@@ -40,6 +40,7 @@ const sidebarItems = [
   { name: "Workflows", href: "/dashboard/workflows", icon: Workflow },
   { name: "Email Automations", href: "/dashboard/automations", icon: Mail },
   { name: "Resume Manager", href: "/dashboard/resumes", icon: FileText },
+  { name: "Resume Maker", href: "/dashboard/resumes/builder", icon: FileText },
   { name: "ATS Analyzer", href: "/dashboard/ats", icon: Bot },
   { name: "AI Generator", href: "/dashboard/ai", icon: Sparkles },
 ];

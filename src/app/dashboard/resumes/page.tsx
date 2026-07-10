@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { UploadCloud, FileText, MoreVertical, CheckCircle2, Clock, Trash2, Edit2, Loader2 } from "lucide-react";
+import { UploadCloud, FileText, MoreVertical, CheckCircle2, Clock, Trash2, Edit2, Loader2, Download, Hammer } from "lucide-react";
 import * as motion from "framer-motion/client";
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import { resumeService, Resume } from "@/services/resume.service";
 import { toast } from "sonner";
 
 export default function ResumesPage() {
+  const router = useRouter();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +34,7 @@ export default function ResumesPage() {
     try {
       setIsLoading(true);
       const responseBody = await resumeService.getAll();
-      let resumesArray = [];
+      let resumesArray: Resume[] = [];
       
       if (Array.isArray(responseBody)) {
         resumesArray = responseBody;
@@ -125,6 +127,11 @@ export default function ResumesPage() {
     } catch (error) {
       toast.error("Failed to update resume");
     }
+  };
+
+  const handleEditBuilt = (resumeId: string | undefined) => {
+    if (!resumeId) return;
+    router.push(`/dashboard/resumes/builder?id=${resumeId}`);
   };
 
   return (
@@ -230,17 +237,38 @@ export default function ResumesPage() {
                     <Badge variant="default" className="bg-primary/90 hover:bg-primary shadow-sm text-[10px] px-2 py-0.5 pointer-events-none">Primary</Badge>
                   </div>
                 )}
+                {resume.isBuilt && (
+                  <div className={`absolute ${resume.isDefault ? 'top-8' : 'top-2'} left-2 z-20`}>
+                    <Badge variant="secondary" className="shadow-sm text-[10px] px-2 py-0.5 pointer-events-none gap-1">
+                      <Hammer className="w-2.5 h-2.5" /> Built
+                    </Badge>
+                  </div>
+                )}
                 <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
                       <DropdownMenuTrigger className={buttonVariants({ variant: "secondary", size: "icon" }) + " h-8 w-8 rounded-md shadow-sm bg-background/80 backdrop-blur-sm"}>
                         <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        {resume.isBuilt && (
+                          <DropdownMenuItem onClick={() => handleEditBuilt(resumeId)}>
+                            <Edit2 className="w-4 h-4 mr-2" /> Edit in Builder
+                          </DropdownMenuItem>
+                        )}
                         {!resume.isDefault && (
                           <DropdownMenuItem onClick={() => handleSetDefault(resumeId)}>
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Set as Default
                           </DropdownMenuItem>
                         )}
+                        {resume.fileUrl && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => window.open(resume.fileUrl, '_blank')}>
+                              <Download className="w-4 h-4 mr-2" /> Download PDF
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(resumeId)}>
                           <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </DropdownMenuItem>
@@ -275,32 +303,43 @@ export default function ResumesPage() {
                   
                   {/* Overlay Preview Button */}
                   <div className="absolute inset-0 bg-background/5 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="secondary" className="shadow-xl rounded-full font-medium">
-                          <FileText className="w-4 h-4 mr-2" />
-                          View PDF
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden">
-                        <DialogHeader className="p-4 pb-0 border-b">
-                          <DialogTitle className="text-lg">{resume.name}</DialogTitle>
-                        </DialogHeader>
-                        <div className="flex-1 w-full bg-muted/20 relative">
-                          {resume.fileUrl ? (
-                            <iframe 
-                              src={`https://docs.google.com/viewer?url=${encodeURIComponent(resume.fileUrl)}&embedded=true`} 
-                              className="w-full h-full border-0 absolute inset-0"
-                              title={resume.name}
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center w-full h-full text-muted-foreground">
-                              No PDF file available to preview
-                            </div>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    {resume.isBuilt ? (
+                      <Button
+                        variant="secondary"
+                        className="shadow-xl rounded-full font-medium"
+                        onClick={() => handleEditBuilt(resumeId)}
+                      >
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Edit Resume
+                      </Button>
+                    ) : (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="secondary" className="shadow-xl rounded-full font-medium">
+                            <FileText className="w-4 h-4 mr-2" />
+                            View PDF
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden">
+                          <DialogHeader className="p-4 pb-0 border-b">
+                            <DialogTitle className="text-lg">{resume.name}</DialogTitle>
+                          </DialogHeader>
+                          <div className="flex-1 w-full bg-muted/20 relative">
+                            {resume.fileUrl ? (
+                              <iframe 
+                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(resume.fileUrl)}&embedded=true`} 
+                                className="w-full h-full border-0 absolute inset-0"
+                                title={resume.name}
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                                No PDF file available to preview
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
                   </div>
                 </div>
 
