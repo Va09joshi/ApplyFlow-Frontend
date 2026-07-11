@@ -8,7 +8,7 @@
   <br/><br/>
   
   <!-- Replace href with actual path once PDF is placed in docs/ -->
-  <a href="./docs/ApplyFlow_Documentation.pdf?raw=true" target="_blank">
+  <a href="https://raw.githubusercontent.com/Va09joshi/ApplyFlow-Frontend/main/docs/ApplyFlow_Documentation.pdf" target="_blank">
     <img src="https://img.shields.io/badge/📖_Download_Documentation-PDF-red?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Download Documentation PDF" />
   </a>
 </div>
@@ -205,7 +205,7 @@ npm run cypress:run
 
 For a deep dive into API endpoints, database schemas, and architectural decisions, please refer to our full documentation.
 
-**[📥 Click Here to Download the Full Documentation (PDF)](./docs/ApplyFlow_Documentation.pdf?raw=true)**  
+**[📥 Click Here to Download the Full Documentation (PDF)](https://raw.githubusercontent.com/Va09joshi/ApplyFlow-Frontend/main/docs/ApplyFlow_Documentation.pdf)**  
 *(Ensure you have downloaded the PDF package or find it under the `/docs` folder in the repository.)*
 
 ## 🤝 Contributing
