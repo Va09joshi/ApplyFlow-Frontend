@@ -22,9 +22,34 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://applyflow.live"),
-  title: "ApplyFlow | AI Job Application & Resume Automation",
+  title: {
+    default: "ApplyFlow | AI Job Application & Resume Automation",
+    template: "%s | ApplyFlow",
+  },
   description: "Automate your job search with ApplyFlow. Audit ATS resume keywords, generate bespoke cold emails, and land interviews on autopilot.",
-  keywords: ["AI job application", "ATS resume scanner", "cold email automation", "job search automation", "AI recruiting", "resume optimizer"],
+  keywords: ["AI job application", "ATS resume scanner", "cold email automation", "job search automation", "AI recruiting", "resume optimizer", "ATS friendly resume", "cover letter generator"],
+  authors: [{ name: "ApplyFlow Team", url: "https://applyflow.live" }],
+  creator: "ApplyFlow",
+  publisher: "ApplyFlow Inc.",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: "ApplyFlow | AI Job Application & Resume Automation",
     description: "Automate your job search with ApplyFlow. Audit ATS resume keywords and generate cold emails instantly.",
@@ -32,11 +57,21 @@ export const metadata: Metadata = {
     siteName: "ApplyFlow",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/hero-bg.png",
+        width: 1200,
+        height: 630,
+        alt: "ApplyFlow AI Dashboard",
+      }
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "ApplyFlow | AI Job Search Automation",
     description: "Land interviews on autopilot with our AI-powered ATS auditor and cold email engine.",
+    images: ["/hero-bg.png"],
+    creator: "@applyflow",
   },
   icons: {
     icon: "/icon.svg",
