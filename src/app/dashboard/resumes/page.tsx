@@ -302,34 +302,40 @@ export default function ResumesPage() {
                 </div>
                 
                 {/* Document Thumbnail Area */}
-                <div className="h-48 bg-gradient-to-br from-muted/30 via-background to-muted/40 relative flex items-center justify-center border-b border-border/50 group-hover:bg-muted/50 transition-colors overflow-hidden px-4">
+                <div className="h-48 bg-gradient-to-br from-emerald-50/50 via-background to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 relative flex items-center justify-center border-b border-border/50 group-hover:bg-emerald-50/80 dark:group-hover:bg-emerald-900/20 transition-colors overflow-hidden px-4">
                   {resume.isBuilt && builtData ? (
-                    <div className="w-full max-w-[260px] rounded-2xl border border-emerald-500/20 bg-white/90 shadow-lg p-4 space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-700 font-semibold">Resume Builder</p>
-                          <p className="text-sm font-semibold truncate">{builtName}</p>
+                    <div className="w-[160px] h-[190px] mt-4 bg-white dark:bg-slate-900 rounded-t-md shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.5)] border border-b-0 border-emerald-100 dark:border-emerald-900/50 flex flex-col p-3 overflow-hidden transform group-hover:-translate-y-2 group-hover:scale-[1.02] transition-all duration-500 relative">
+                      {/* Decorative header */}
+                      <div className="w-full h-1 bg-emerald-500/80 rounded-full mb-3" />
+                      
+                      {/* Placeholder content representing structured resume */}
+                      <div className="flex flex-col gap-2 opacity-80">
+                        <div className="flex justify-between items-center">
+                          <div className="w-1/2 h-2 bg-slate-300 dark:bg-slate-700 rounded-full" />
+                          <Hammer className="w-3 h-3 text-emerald-500/50" />
                         </div>
-                        <Hammer className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div className="w-1/3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mb-2" />
+                        
+                        {/* Sections representation */}
+                        {Array.from({ length: 3 }).map((_, idx) => (
+                          <div key={idx} className="space-y-1 mt-1">
+                            <div className="w-1/4 h-1.5 bg-emerald-200 dark:bg-emerald-800 rounded-full" />
+                            <div className="w-full h-1 bg-slate-100 dark:bg-slate-800/50 rounded-full" />
+                            <div className="w-5/6 h-1 bg-slate-100 dark:bg-slate-800/50 rounded-full" />
+                          </div>
+                        ))}
                       </div>
-                      <div className="space-y-2 text-[11px] text-muted-foreground">
-                        <p className="line-clamp-2">{builtSummary}</p>
-                        <div className="grid grid-cols-2 gap-2 text-[10px]">
-                          <div className="rounded-lg bg-muted/50 px-2 py-1.5">
-                            <div className="font-medium text-foreground">{experienceCount}</div>
-                            <div>Experience entries</div>
-                          </div>
-                          <div className="rounded-lg bg-muted/50 px-2 py-1.5">
-                            <div className="font-medium text-foreground">{projectCount}</div>
-                            <div>Projects</div>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {skillList.slice(0, 2).map(skill => (
-                            <Badge key={skill.id} variant="secondary" className="text-[9px] px-1.5 py-0 rounded-sm">
-                              {skill.category || "Skill"}
-                            </Badge>
-                          ))}
+
+                      {/* Floating metrics badge overlay */}
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                        <div className="bg-emerald-500/90 backdrop-blur-sm text-white shadow-lg rounded-full px-3 py-1.5 flex items-center gap-3 text-[9px] font-semibold tracking-wide uppercase">
+                          <span className="flex items-center gap-1">
+                            <span className="bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-white">{experienceCount}</span> Exp
+                          </span>
+                          <div className="w-[1px] h-3 bg-emerald-400/50" />
+                          <span className="flex items-center gap-1">
+                            <span className="bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-white">{projectCount}</span> Proj
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -395,11 +401,19 @@ export default function ResumesPage() {
                           </DialogHeader>
                           <div className="flex-1 w-full bg-muted/20 relative">
                             {resume.fileUrl ? (
-                              <iframe 
-                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(resume.fileUrl)}&embedded=true`} 
+                              <object 
+                                data={resume.fileUrl}
+                                type="application/pdf"
                                 className="w-full h-full border-0 absolute inset-0"
                                 title={resume.name}
-                              />
+                              >
+                                <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-2">
+                                  <p>Your browser doesn't support inline PDF viewing.</p>
+                                  <Button variant="outline" onClick={() => window.open(resume.fileUrl, '_blank')}>
+                                    Download PDF Instead
+                                  </Button>
+                                </div>
+                              </object>
                             ) : (
                               <div className="flex items-center justify-center w-full h-full text-muted-foreground">
                                 No PDF file available to preview
