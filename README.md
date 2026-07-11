@@ -1,7 +1,9 @@
 <div align="center">
   <h1>ApplyFlow</h1>
   <p><strong>The Ultimate Open-Source Career Management & Automation Platform</strong></p>
-  <img src="./public/image.png" alt="ApplyFlow UI Screenshot" width="800" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 20px;"/>
+  <kbd>
+    <img src="./public/image.png" alt="ApplyFlow UI Screenshot" width="800" />
+  </kbd>
   
   <br/><br/>
   
@@ -30,7 +32,13 @@
 
 ApplyFlow consolidates **ATS Resume Building**, **Automated Email Outreach**, **Job Discovery**, and **Pipeline Analytics** into one unified, visual ecosystem. By treating the job search like a modern sales pipeline (CRM), ApplyFlow helps you apply smarter, faster, and more consistently.
 
-![ApplyFlow Dashboard Overview](./public/image%20copy.png)
+<br/>
+<div align="center">
+  <kbd>
+    <img src="./public/image%20copy.png" alt="ApplyFlow Dashboard Overview" />
+  </kbd>
+</div>
+<br/>
 
 ## ✨ Comprehensive Features & Modules
 
@@ -39,25 +47,49 @@ Most modern companies use Applicant Tracking Systems (ATS) to filter resumes. Ap
 * **Smart Templates**: Choose from dozens of industry-standard templates.
 * **One-Click PDF Export**: Download as a high-quality PDF directly to your machine.
 * **Keyword Optimization**: Tailor your resume to match specific job descriptions dynamically.
-![ATS Resume Builder & Templates](./public/image%20copy%204.png)
+<br/>
+<div align="center">
+  <kbd>
+    <img src="./public/image%20copy%204.png" alt="ATS Resume Builder & Templates" />
+  </kbd>
+</div>
+<br/>
 
 ### 2. Job Discovery & Suggestions
 No more endless scrolling on job boards. ApplyFlow's smart suggestion engine brings the jobs to you.
 * **Personalized Feeds**: Job suggestions tailored to your specific skillset and past searches.
 * **One-Click Save**: Push jobs directly into your application pipeline with a single click.
-![Job Suggestions](./public/image%20copy%204.png)
+<br/>
+<div align="center">
+  <kbd>
+    <img src="./public/image%20copy%204.png" alt="Job Suggestions" />
+  </kbd>
+</div>
+<br/>
 
 ### 3. Visual Automation Workflows
 Visualize your job search process using our intuitive drag-and-drop workflow builder.
 * **Custom Pipelines**: Define application stages (e.g., Sourced, Applied, Interviewing, Offer).
 * **Triggers & Actions**: Automatically move applications to different stages based on email replies, dates, or manual updates.
-![Workflow Example](./public/image%20copy%203.png)
+<br/>
+<div align="center">
+  <kbd>
+    <img src="./public/image%20copy%203.png" alt="Workflow Example" />
+  </kbd>
+</div>
+<br/>
 
 ### 4. Automated Email Campaigns
 Stop sending manual follow-ups. ApplyFlow integrates with your email to handle outreach automatically.
 * **Email Sequences**: Create multi-step drip campaigns for recruiters and hiring managers.
 * **Template Variables**: Personalize emails at scale using smart tags (e.g., `{{company_name}}`, `{{role}}`, `{{hiring_manager_name}}`).
-![Send Mail Automation](./public/image%20copy%202.png)
+<br/>
+<div align="center">
+  <kbd>
+    <img src="./public/image%20copy%202.png" alt="Send Mail Automation" />
+  </kbd>
+</div>
+<br/>
 
 ### 5. Advanced Analytics Dashboard
 Take a data-driven approach to job hunting. Know exactly where you stand.
