@@ -1,0 +1,10 @@
+/* TEAM */
+Founder: Vaibhav Joshi
+Role: Creator & Lead Developer
+Site: https://applyflow.live
+
+/* SITE */
+Last update: 2026/07/11
+Standards: HTML5, CSS3, ES6
+Components: Next.js, React, Tailwind CSS
+Software: ApplyFlow AI Job Search Automation
