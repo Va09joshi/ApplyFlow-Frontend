@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeBuilderData } from "@/types/resume";
+import { ExternalLink } from "lucide-react";
 
 const emptyResumeData: ResumeBuilderData = {
   personalInfo: {
@@ -44,8 +45,13 @@ export const ATSResumeTemplate: React.FC<{ data: ResumeBuilderData; id?: string 
 
   const SectionHeading = ({ children }: { children: React.ReactNode }) => (
     <h2 
-      className="text-[14px] font-bold uppercase tracking-wider mb-1" 
-      style={{ color: accent, borderBottom: `1px solid ${accent}`, paddingBottom: '2px' }}
+      className="text-[14px] font-bold uppercase tracking-wider" 
+      style={{ 
+        color: accent, 
+        borderBottom: `1.5px solid ${accent}`, 
+        paddingBottom: '6px',
+        marginBottom: '12px'
+      }}
     >
       {children}
     </h2>
@@ -103,15 +109,15 @@ export const ATSResumeTemplate: React.FC<{ data: ResumeBuilderData; id?: string 
 
       {/* Summary */}
       {safeData.summary && (
-        <div className="mb-3">
+        <div className="mb-5">
           <SectionHeading>Professional Summary</SectionHeading>
-          <p className="mt-1 whitespace-pre-wrap">{safeData.summary}</p>
+          <p className="mt-2 whitespace-pre-wrap">{safeData.summary}</p>
         </div>
       )}
 
       {/* Experience */}
       {safeData.experience.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-5">
           <SectionHeading>Work Experience</SectionHeading>
           {safeData.experience.map(exp => (
             <div key={exp.id} className="mb-2.5 mt-1">
@@ -140,15 +146,15 @@ export const ATSResumeTemplate: React.FC<{ data: ResumeBuilderData; id?: string 
 
       {/* Projects */}
       {safeData.projects.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-5">
           <SectionHeading>Projects</SectionHeading>
           {safeData.projects.map(proj => (
-            <div key={proj.id} className="mb-2.5 mt-1">
+            <div key={proj.id} className="mb-3 mt-1">
               <div className="flex justify-between items-end mb-1">
                 <strong className="text-[13px]">{proj.name}</strong>
                 {proj.link && (
-                  <a href={proj.link.startsWith('http') ? proj.link : `https://${proj.link}`} target="_blank" rel="noopener noreferrer" style={{ color: accent }} className="text-[12px] hover:underline">
-                    Link
+                  <a href={proj.link.startsWith('http') ? proj.link : `https://${proj.link}`} target="_blank" rel="noopener noreferrer" style={{ color: accent }} className="text-[12px] hover:underline flex items-center">
+                    <ExternalLink size={12} className="ml-1" />
                   </a>
                 )}
               </div>
@@ -167,7 +173,7 @@ export const ATSResumeTemplate: React.FC<{ data: ResumeBuilderData; id?: string 
 
       {/* Education */}
       {safeData.education.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-5">
           <SectionHeading>Education</SectionHeading>
           {safeData.education.map(edu => (
             <div key={edu.id} className="mb-2 mt-1">
@@ -191,7 +197,7 @@ export const ATSResumeTemplate: React.FC<{ data: ResumeBuilderData; id?: string 
 
       {/* Certifications */}
       {safeData.certifications.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-5">
           <SectionHeading>Certifications</SectionHeading>
           {safeData.certifications.map(cert => (
             <div key={cert.id} className="mb-1.5 mt-1 flex justify-between items-end">
@@ -225,9 +231,9 @@ export const ATSResumeTemplate: React.FC<{ data: ResumeBuilderData; id?: string 
 
       {/* Achievements */}
       {safeData.achievements.length > 0 && (
-        <div className="mb-3">
+        <div className="mb-5">
           <SectionHeading>Achievements</SectionHeading>
-          <div className="mt-1 ml-4 text-[12.5px]">
+          <div className="mt-2 ml-4 text-[12.5px]">
             {safeData.achievements.map(ach => (
               <div key={ach.id} className="flex relative mb-0.5">
                 <span className="absolute -left-3" style={{ color: accent, fontSize: '10px', top: '1px' }}>•</span>

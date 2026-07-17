@@ -33,9 +33,10 @@ const buildResumeMarkup = (data: ResumeBuilderData) => {
     github: data.personalInfo?.github || "",
   };
 
-  const sectionStyle = "margin-bottom:16px;";
-  const headingStyle = "font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#143c78; border-bottom:1px solid #143c78; padding-bottom:2px; margin:0 0 6px;";
+  const sectionStyle = "margin-bottom:20px;";
+  const headingStyle = "font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#143c78; border-bottom:1.5px solid #143c78; padding-bottom:6px; margin:0 0 12px 0;";
   const smallMuted = "color:#5a5a5a; font-size:12px;";
+  const linkIconSrc = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23143c78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E";
 
   const contacts = [
     personalInfo.phone ? `<span>${escapeHtml(personalInfo.phone)}</span>` : "",
@@ -66,7 +67,7 @@ const buildResumeMarkup = (data: ResumeBuilderData) => {
       <div style=\"margin-bottom:10px;\">
         <div style=\"display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:4px;\">
           <strong style=\"font-size:13px;\">${escapeHtml(proj.name || "")}</strong>
-          ${proj.link ? `<a href=\"${normalizeUrl(proj.link)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none; font-size:12px;\">Link</a>` : ""}
+          ${proj.link ? `<a href=\"${normalizeUrl(proj.link)}\" target=\"_blank\" rel=\"noreferrer\" style=\"color:#143c78; text-decoration:none; font-size:12px; display:inline-flex; align-items:center;\"><img src=\"${linkIconSrc}\" style=\"width:12px; height:12px; margin-left:4px;\" /></a>` : ""}
         </div>
         <div style=\"font-size:12.5px;\">${renderListLines(proj.description || "")}</div>
       </div>`)
@@ -115,7 +116,7 @@ const buildResumeMarkup = (data: ResumeBuilderData) => {
 
   return `
     <div style=\"width:850px; min-height:1056px; background:#ffffff; color:#000000; padding:32px; box-sizing:border-box; font-family:${data.font || "Arial"}; line-height:1.35;\">
-      <div style=\"text-align:center; margin-bottom:16px; border-bottom:1px solid #d1d5db; padding-bottom:16px;\">
+      <div style=\"text-align:center; margin-bottom:16px; border-bottom:1.5px solid #d1d5db; padding-bottom:16px;\">
         <h1 style=\"font-size:28px; font-weight:700; margin:0 0 8px;\">${escapeHtml(personalInfo.fullName)}</h1>
         <div style=\"display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; font-size:12px; color:#5a5a5a;\">${contacts}</div>
       </div>
@@ -144,23 +145,38 @@ export const exportToPDF = async (elementId: string, data: ResumeBuilderData, fi
     const element = wrapper.firstElementChild as HTMLElement | null;
     if (!element) return;
 
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
+    const canvas = await html2canvas(element, { scale: 5, useCORS: true, backgroundColor: "#ffffff", logging: false });
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
     const pdf = new jsPDF("p", "pt", "a4");
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+    pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight, undefined, 'NONE');
     for (let pageOffset = pdfHeight; pageOffset < imgHeight; pageOffset += pdfHeight) {
       pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, -pageOffset, pdfWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", 0, -pageOffset, pdfWidth, imgHeight, undefined, 'NONE');
     }
 
-    if (data.personalInfo.linkedin) {
-      pdf.link(0, 0, pdfWidth, 40, { url: normalizeUrl(data.personalInfo.linkedin) });
-    }
+    const elementRect = element.getBoundingClientRect();
+    const links = element.querySelectorAll("a");
+
+    links.forEach((link) => {
+      const href = link.getAttribute("href");
+      if (!href) return;
+      const rect = link.getBoundingClientRect();
+      const x = ((rect.left - elementRect.left) / elementRect.width) * pdfWidth;
+      const y = ((rect.top - elementRect.top) / elementRect.height) * imgHeight;
+      const w = (rect.width / elementRect.width) * pdfWidth;
+      const h = (rect.height / elementRect.height) * imgHeight;
+
+      const pageNumber = Math.floor(y / pdfHeight) + 1;
+      const yOnPage = y % pdfHeight;
+
+      pdf.setPage(pageNumber);
+      pdf.link(x, yOnPage, w, h, { url: href });
+    });
 
     pdf.save(filename);
   } finally {

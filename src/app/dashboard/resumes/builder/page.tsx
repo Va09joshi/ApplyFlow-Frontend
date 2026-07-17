@@ -441,6 +441,7 @@ function ResumeBuilderContent() {
                 <SelectItem value="Garamond">Garamond</SelectItem>
                 <SelectItem value="'Trebuchet MS'">Trebuchet MS</SelectItem>
                 <SelectItem value="Calibri">Calibri</SelectItem>
+                <SelectItem value="'Mulish', sans-serif">Mulish</SelectItem>
               </SelectContent>
             </Select>
           </div>

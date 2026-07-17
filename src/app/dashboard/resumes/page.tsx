@@ -304,40 +304,26 @@ export default function ResumesPage() {
                 {/* Document Thumbnail Area */}
                 <div className="h-48 bg-gradient-to-br from-emerald-50/50 via-background to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 relative flex items-center justify-center border-b border-border/50 group-hover:bg-emerald-50/80 dark:group-hover:bg-emerald-900/20 transition-colors overflow-hidden px-4">
                   {resume.isBuilt && builtData ? (
-                    <div className="w-[160px] h-[190px] mt-4 bg-white dark:bg-slate-900 rounded-t-md shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.5)] border border-b-0 border-emerald-100 dark:border-emerald-900/50 flex flex-col p-3 overflow-hidden transform group-hover:-translate-y-2 group-hover:scale-[1.02] transition-all duration-500 relative">
-                      {/* Decorative header */}
-                      <div className="w-full h-1 bg-emerald-500/80 rounded-full mb-3" />
-                      
-                      {/* Placeholder content representing structured resume */}
-                      <div className="flex flex-col gap-2 opacity-80">
-                        <div className="flex justify-between items-center">
-                          <div className="w-1/2 h-2 bg-slate-300 dark:bg-slate-700 rounded-full" />
-                          <Hammer className="w-3 h-3 text-emerald-500/50" />
+                    <div className="w-[130px] h-[175px] bg-white dark:bg-slate-100 rounded-[2px] shadow-md flex flex-col p-3 gap-1.5 overflow-hidden transform group-hover:scale-[1.02] transition-transform duration-500 relative">
+                      {/* Header line */}
+                      <div className="w-full h-1.5 bg-slate-300 rounded-full mb-1" />
+                      {/* Subheader */}
+                      <div className="w-3/4 h-1 bg-slate-200 rounded-full mb-2 mx-auto" />
+                      {/* Paragraphs */}
+                      {Array.from({ length: 6 }).map((_, idx) => (
+                        <div key={idx} className="space-y-1 mt-1">
+                          <div className="w-full h-[2px] bg-slate-200 rounded-full" />
+                          <div className="w-[90%] h-[2px] bg-slate-200 rounded-full" />
+                          <div className="w-[80%] h-[2px] bg-slate-200 rounded-full" />
                         </div>
-                        <div className="w-1/3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mb-2" />
-                        
-                        {/* Sections representation */}
-                        {Array.from({ length: 3 }).map((_, idx) => (
-                          <div key={idx} className="space-y-1 mt-1">
-                            <div className="w-1/4 h-1.5 bg-emerald-200 dark:bg-emerald-800 rounded-full" />
-                            <div className="w-full h-1 bg-slate-100 dark:bg-slate-800/50 rounded-full" />
-                            <div className="w-5/6 h-1 bg-slate-100 dark:bg-slate-800/50 rounded-full" />
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Floating metrics badge overlay */}
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                        <div className="bg-emerald-500/90 backdrop-blur-sm text-white shadow-lg rounded-full px-3 py-1.5 flex items-center gap-3 text-[9px] font-semibold tracking-wide uppercase">
-                          <span className="flex items-center gap-1">
-                            <span className="bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-white">{experienceCount}</span> Exp
-                          </span>
-                          <div className="w-[1px] h-3 bg-emerald-400/50" />
-                          <span className="flex items-center gap-1">
-                            <span className="bg-white/20 rounded-full w-4 h-4 flex items-center justify-center text-white">{projectCount}</span> Proj
-                          </span>
-                        </div>
-                      </div>
+                      ))}
+                      {resume.parsedText && (
+                         <div className="absolute inset-0 p-3 pt-8 overflow-hidden pointer-events-none">
+                           <p className="text-[3.5px] leading-[5px] font-mono text-slate-800/40 text-left line-clamp-[25]">
+                             {resume.parsedText.substring(0, 800)}
+                           </p>
+                         </div>
+                      )}
                     </div>
                   ) : (
                     /* Miniature Document */
