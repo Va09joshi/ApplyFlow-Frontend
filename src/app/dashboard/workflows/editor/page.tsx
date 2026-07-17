@@ -173,7 +173,7 @@ function WorkflowEditor() {
         description: workflowDescription,
         nodes,
         edges,
-        trigger: triggerNode ? { type: 'gmail.email.received', config: triggerNode.data } : { type: 'manual' }
+        trigger: triggerNode ? { type: 'gmail_sync', config: triggerNode.data } : { type: 'manual' }
       };
 
       if (workflowId) {
