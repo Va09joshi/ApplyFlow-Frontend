@@ -91,24 +91,16 @@ export const emailService = {
 
   async bulkCsv(
     file: File,
-    options?: {
-      useTemplate?: boolean;
-      attachResume?: boolean;
-      insertResumeLink?: boolean;
-      resumeLinkLabel?: string;
-      resumeId?: string;
-      contentType?: string;
-    }
+    options?: Record<string, any>
   ) {
     const formData = new FormData();
     formData.append('file', file);
     if (options) {
-      if (options.useTemplate !== undefined) formData.append('useTemplate', String(options.useTemplate));
-      if (options.attachResume !== undefined) formData.append('attachResume', String(options.attachResume));
-      if (options.insertResumeLink !== undefined) formData.append('insertResumeLink', String(options.insertResumeLink));
-      if (options.resumeLinkLabel !== undefined) formData.append('resumeLinkLabel', options.resumeLinkLabel);
-      if (options.resumeId !== undefined) formData.append('resumeId', options.resumeId);
-      if (options.contentType !== undefined) formData.append('contentType', options.contentType);
+      Object.keys(options).forEach(key => {
+        if (options[key] !== undefined && options[key] !== null) {
+          formData.append(key, typeof options[key] === 'object' ? JSON.stringify(options[key]) : String(options[key]));
+        }
+      });
     }
     const response = await api.post('/api/v1/emails/bulk-csv', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }

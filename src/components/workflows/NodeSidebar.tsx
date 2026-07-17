@@ -9,8 +9,11 @@ import {
   TargetIcon,
   GlobeIcon,
   ClockIcon,
-  GripVerticalIcon
+  GripVerticalIcon,
+  WebhookIcon
 } from 'lucide-react';
+import { FaWhatsapp, FaSlack, FaDiscord, FaLinkedin, FaMedal } from 'react-icons/fa';
+import { SiGooglesheets } from 'react-icons/si';
 
 const NODE_TYPES = [
   { type: 'trigger', label: 'Trigger', icon: MailIcon, color: 'text-purple-500' },
@@ -22,6 +25,13 @@ const NODE_TYPES = [
   { type: 'score_job', label: 'Score Job', icon: TargetIcon, color: 'text-rose-500' },
   { type: 'http_request', label: 'HTTP Request', icon: GlobeIcon, color: 'text-sky-500' },
   { type: 'delay', label: 'Delay', icon: ClockIcon, color: 'text-amber-500' },
+  { type: 'google_sheets', label: 'Google Sheets', icon: SiGooglesheets, color: 'text-[#0F9D58]' },
+  { type: 'webhook', label: 'Webhook', icon: WebhookIcon, color: 'text-pink-500' },
+  { type: 'whatsapp', label: 'WhatsApp / SMS', icon: FaWhatsapp, color: 'text-[#25D366]' },
+  { type: 'slack', label: 'Slack Message', icon: FaSlack, color: 'text-[#4A154B]' },
+  { type: 'discord', label: 'Discord Message', icon: FaDiscord, color: 'text-[#5865F2]' },
+  { type: 'post_job', label: 'Post to LinkedIn', icon: FaLinkedin, color: 'text-[#0A66C2]' },
+  { type: 'award_badge', label: 'Award Badge', icon: FaMedal, color: 'text-[#FFA116]' },
 ];
 
 export function NodeSidebar() {
@@ -37,7 +47,7 @@ export function NodeSidebar() {
         <h3 className="font-semibold">Node Palette</h3>
         <p className="text-xs text-muted-foreground mt-1">Drag nodes onto the canvas to build your workflow</p>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 pb-24">
         {NODE_TYPES.map((node) => (
           <div
             key={node.type}

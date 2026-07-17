@@ -336,6 +336,19 @@ function WorkflowEditor() {
               >
                 Job Match & Email
               </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-7 text-xs bg-card border shadow-sm"
+                onClick={() => {
+                  const p = "When an email is received, send a Slack message alert and award them the Top 1% Leetcode badge.";
+                  setPrompt(p);
+                  handleAIGenerate(p);
+                }}
+                disabled={isGenerating}
+              >
+                Slack & Gamify
+              </Button>
             </div>
           </div>
 

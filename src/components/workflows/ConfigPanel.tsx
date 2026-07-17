@@ -198,11 +198,272 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
             <Label>Delay (ms)</Label>
             <Input
               type="number"
-              placeholder="5000"
+              placeholder="e.g., 5000"
               value={node.data.delayMs || ''}
-              onChange={(e) => handleUpdate('delayMs', parseInt(e.target.value, 10))}
+              onChange={(e) => handleUpdate('delayMs', parseInt(e.target.value))}
             />
           </div>
+        );
+
+      case 'google_sheets':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Action</Label>
+              <Select value={node.data.action || 'append_row'} onValueChange={(val) => handleUpdate('action', val)}>
+                <SelectTrigger><SelectValue placeholder="Action" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="append_row">Append Row</SelectItem>
+                  <SelectItem value="update_row">Update Row</SelectItem>
+                  <SelectItem value="read_row">Read Row</SelectItem>
+                  <SelectItem value="create_sheet">Create Sheet</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Spreadsheet ID</Label>
+              <Input
+                placeholder="1BxiMVs0XRY..."
+                value={node.data.spreadsheetId || ''}
+                onChange={(e) => handleUpdate('spreadsheetId', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Sheet Name</Label>
+              <Input
+                placeholder="Sheet1"
+                value={node.data.sheetName || ''}
+                onChange={(e) => handleUpdate('sheetName', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Data (JSON)</Label>
+              <Textarea
+                placeholder='{"Name": "{{candidate.name}}", "Status": "Applied"}'
+                value={node.data.dataMapping || ''}
+                onChange={(e) => handleUpdate('dataMapping', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'webhook':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Method</Label>
+              <Select value={node.data.method || 'POST'} onValueChange={(val) => handleUpdate('method', val)}>
+                <SelectTrigger><SelectValue placeholder="Method" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="GET">GET</SelectItem>
+                  <SelectItem value="POST">POST</SelectItem>
+                  <SelectItem value="PUT">PUT</SelectItem>
+                  <SelectItem value="DELETE">DELETE</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input
+                placeholder="https://hooks.zapier.com/..."
+                value={node.data.url || ''}
+                onChange={(e) => handleUpdate('url', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Headers (JSON)</Label>
+              <Textarea
+                placeholder='{"Authorization": "Bearer token"}'
+                value={node.data.headers || ''}
+                onChange={(e) => handleUpdate('headers', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Payload (JSON)</Label>
+              <Textarea
+                placeholder="{}"
+                value={node.data.payload || ''}
+                onChange={(e) => handleUpdate('payload', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'whatsapp':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Provider</Label>
+              <Select value={node.data.provider || 'whatsapp_cloud'} onValueChange={(val) => handleUpdate('provider', val)}>
+                <SelectTrigger><SelectValue placeholder="Provider" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="whatsapp_cloud">WhatsApp Cloud API</SelectItem>
+                  <SelectItem value="twilio">Twilio</SelectItem>
+                  <SelectItem value="messagebird">MessageBird</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>API Key / Token</Label>
+              <Input
+                type="password"
+                placeholder="Enter API Key"
+                value={node.data.apiKey || ''}
+                onChange={(e) => handleUpdate('apiKey', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>From Number (or Sender ID)</Label>
+              <Input
+                placeholder="e.g. +1234567890"
+                value={node.data.fromNumber || ''}
+                onChange={(e) => handleUpdate('fromNumber', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>To Number</Label>
+              <Input
+                placeholder="e.g. {{candidate.phone}}"
+                value={node.data.toNumber || ''}
+                onChange={(e) => handleUpdate('toNumber', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message Body</Label>
+              <Textarea
+                className="min-h-[100px]"
+                placeholder="Hi {{candidate.name}}, your interview is scheduled..."
+                value={node.data.messageBody || ''}
+                onChange={(e) => handleUpdate('messageBody', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'slack':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Webhook URL or Bot Token</Label>
+              <Input
+                type="password"
+                placeholder="https://hooks.slack.com/... or xoxb-..."
+                value={node.data.webhookUrl || ''}
+                onChange={(e) => handleUpdate('webhookUrl', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Channel (Optional)</Label>
+              <Input
+                placeholder="#general"
+                value={node.data.channel || ''}
+                onChange={(e) => handleUpdate('channel', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea
+                className="min-h-[100px]"
+                placeholder="New candidate applied: {{candidate.name}}"
+                value={node.data.message || ''}
+                onChange={(e) => handleUpdate('message', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'discord':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input
+                type="password"
+                placeholder="https://discord.com/api/webhooks/..."
+                value={node.data.webhookUrl || ''}
+                onChange={(e) => handleUpdate('webhookUrl', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message Content</Label>
+              <Textarea
+                className="min-h-[100px]"
+                placeholder="Candidate just passed screening! @recruiter"
+                value={node.data.message || ''}
+                onChange={(e) => handleUpdate('message', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'post_job':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Platform</Label>
+              <Select value={node.data.platform || 'linkedin'} onValueChange={(val) => handleUpdate('platform', val)}>
+                <SelectTrigger><SelectValue placeholder="Platform" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                  <SelectItem value="twitter">Twitter</SelectItem>
+                  <SelectItem value="indeed">Indeed API</SelectItem>
+                  <SelectItem value="custom">Custom Webhook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>API Key / Access Token</Label>
+              <Input
+                type="password"
+                placeholder="Enter API Key"
+                value={node.data.apiKey || ''}
+                onChange={(e) => handleUpdate('apiKey', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Job Title</Label>
+              <Input
+                placeholder="e.g. Senior Frontend Engineer"
+                value={node.data.jobTitle || ''}
+                onChange={(e) => handleUpdate('jobTitle', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Job Description (or Post Text)</Label>
+              <Textarea
+                className="min-h-[120px]"
+                placeholder="We are hiring a Senior Frontend Engineer! Apply here: {{job.link}}"
+                value={node.data.jobDescription || ''}
+                onChange={(e) => handleUpdate('jobDescription', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'award_badge':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Badge Type</Label>
+              <Select value={node.data.badgeType || 'top_1_percent'} onValueChange={(val) => handleUpdate('badgeType', val)}>
+                <SelectTrigger><SelectValue placeholder="Badge Type" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top_1_percent">🏆 Top 1% Candidate</SelectItem>
+                  <SelectItem value="speed_demon">⚡ Speed Demon</SelectItem>
+                  <SelectItem value="problem_solver">🧠 Problem Solver</SelectItem>
+                  <SelectItem value="communication">💬 Master Communicator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Notification Email</Label>
+              <Input
+                placeholder="e.g. {{candidate.email}}"
+                value={node.data.candidateEmail || ''}
+                onChange={(e) => handleUpdate('candidateEmail', e.target.value)}
+              />
+            </div>
+          </>
         );
 
       default:
