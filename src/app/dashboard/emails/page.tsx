@@ -1355,7 +1355,7 @@ export default function EmailAutomationsPage() {
                           <SelectContent>
                             <SelectItem value="">Default Resume (Fallback)</SelectItem>
                             {resumes.map((r, i) => {
-                              const displayName = r.name || r.title || `Resume ${r.id?.substring(0, 8)}...`;
+                              const displayName = r.name || `Resume ${r.id?.substring(0, 8)}...`;
                               return (
                                 <SelectItem key={r.id || i} value={r.id || ""}>
                                   {displayName.length > 22 ? displayName.substring(0, 22) + "..." : displayName} {r.isDefault ? "(Default)" : ""}
