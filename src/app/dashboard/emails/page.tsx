@@ -290,6 +290,10 @@ export default function EmailAutomationsPage() {
         resumesArray = responseBody.data;
       } else if (responseBody?.docs && Array.isArray(responseBody.docs)) {
         resumesArray = responseBody.docs;
+      } else if (responseBody?.data?.resumes && Array.isArray(responseBody.data.resumes)) {
+        resumesArray = responseBody.data.resumes;
+      } else if (responseBody?.resumes && Array.isArray(responseBody.resumes)) {
+        resumesArray = responseBody.resumes;
       }
       setResumes(resumesArray);
       if (resumesArray.length > 0) {
@@ -1199,42 +1203,47 @@ export default function EmailAutomationsPage() {
                   </div>
 
                   {csvColumns.length > 0 && (
-                    <div className="space-y-3 p-3 rounded-lg border border-border/40 bg-muted/5 animate-in fade-in">
-                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Column Mapping</span>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-muted-foreground uppercase">To (Email) *</label>
+                    <div className="space-y-4 p-4 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30 bg-gradient-to-br from-indigo-50/30 to-purple-50/30 dark:from-indigo-950/20 dark:to-purple-950/20 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
+                          <Settings2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">Column Mapping</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5 group">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase transition-colors group-hover:text-indigo-500">To (Email) <span className="text-destructive">*</span></label>
                           <Select value={csvMapping['to'] || ""} onValueChange={(v) => setCsvMapping({...csvMapping, to: v ?? ""})}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select column" /></SelectTrigger>
+                            <SelectTrigger className="h-9 text-xs transition-all duration-200 hover:border-indigo-300 focus:ring-indigo-500/20"><SelectValue placeholder="Select column" /></SelectTrigger>
                             <SelectContent>{csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Subject</label>
+                        <div className="space-y-1.5 group">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase transition-colors group-hover:text-indigo-500">Subject</label>
                           <Select value={csvMapping['subject'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, subject: (v === "none" || v == null) ? "" : v})}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
+                            <SelectTrigger className="h-9 text-xs transition-all duration-200 hover:border-indigo-300 focus:ring-indigo-500/20"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="none">Skip mapping</SelectItem>
+                              <SelectItem value="none" className="text-muted-foreground italic">Skip mapping</SelectItem>
                               {csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Name</label>
+                        <div className="space-y-1.5 group">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase transition-colors group-hover:text-indigo-500">Name</label>
                           <Select value={csvMapping['name'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, name: (v === "none" || v == null) ? "" : v})}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
+                            <SelectTrigger className="h-9 text-xs transition-all duration-200 hover:border-indigo-300 focus:ring-indigo-500/20"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="none">Skip mapping</SelectItem>
+                              <SelectItem value="none" className="text-muted-foreground italic">Skip mapping</SelectItem>
                               {csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-muted-foreground uppercase">Role</label>
+                        <div className="space-y-1.5 group">
+                          <label className="text-[10px] font-bold text-muted-foreground uppercase transition-colors group-hover:text-indigo-500">Role</label>
                           <Select value={csvMapping['role'] || "none"} onValueChange={(v) => setCsvMapping({...csvMapping, role: (v === "none" || v == null) ? "" : v})}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
+                            <SelectTrigger className="h-9 text-xs transition-all duration-200 hover:border-indigo-300 focus:ring-indigo-500/20"><SelectValue placeholder="Skip mapping" /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="none">Skip mapping</SelectItem>
+                              <SelectItem value="none" className="text-muted-foreground italic">Skip mapping</SelectItem>
                               {csvColumns.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                             </SelectContent>
                           </Select>
@@ -1244,24 +1253,28 @@ export default function EmailAutomationsPage() {
                   )}
 
                   {csvPreviewRows.length > 0 && (
-                    <div className="border border-border/40 rounded-lg overflow-hidden bg-background">
-                      <div className="bg-muted/10 px-3 py-2 border-b border-border/30">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase">Preview (First 20 rows)</span>
+                    <div className="rounded-xl border border-border/40 overflow-hidden shadow-sm animate-in fade-in slide-in-from-bottom-3 duration-500">
+                      <div className="bg-gradient-to-r from-muted/30 to-muted/10 px-4 py-2.5 border-b border-border/40 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Data Preview
+                        </span>
+                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 border-border/50">First {Math.min(20, csvPreviewRows.length)} rows</Badge>
                       </div>
-                      <div className="overflow-x-auto max-h-[150px] overflow-y-auto custom-scrollbar">
+                      <div className="overflow-x-auto max-h-[180px] overflow-y-auto custom-scrollbar bg-background">
                         <table className="w-full text-xs text-left whitespace-nowrap">
-                          <thead className="bg-muted/5 sticky top-0">
+                          <thead className="sticky top-0 bg-background/80 backdrop-blur-md z-10 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
                             <tr>
                               {csvColumns.map(c => (
-                                <th key={c} className="px-3 py-1.5 border-b border-border/30 font-medium text-muted-foreground">{c}</th>
+                                <th key={c} className="px-4 py-2 font-semibold text-muted-foreground">{c}</th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody className="divide-y divide-border/20">
                             {csvPreviewRows.map((row, i) => (
-                              <tr key={i} className="border-b border-border/10 hover:bg-muted/5 last:border-0">
+                              <tr key={i} className="hover:bg-muted/30 transition-colors duration-150">
                                 {csvColumns.map(c => (
-                                  <td key={c} className="px-3 py-1.5 text-foreground/80">{row[c] as React.ReactNode}</td>
+                                  <td key={c} className="px-4 py-2 text-foreground/80 font-medium">{row[c] as React.ReactNode}</td>
                                 ))}
                               </tr>
                             ))}
@@ -1272,88 +1285,98 @@ export default function EmailAutomationsPage() {
                   )}
 
                   {/* Global CSV Options */}
-                  <div className="space-y-3 p-3 rounded-lg border border-border/40 bg-muted/10">
-                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                      <Settings2 className="w-3.5 h-3.5 text-primary animate-pulse" />
-                      Global CSV Delivery Settings
-                    </span>
+                  <div className="space-y-4 p-4 rounded-xl border border-blue-100/60 dark:border-blue-900/40 bg-gradient-to-br from-blue-50/40 to-cyan-50/20 dark:from-blue-950/20 dark:to-cyan-950/10 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-md">
+                        <Settings2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin-slow" />
+                      </div>
+                      <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">
+                        Delivery Settings
+                      </span>
+                    </div>
 
-                    <div className="space-y-1 mb-2 border-b border-border/30 pb-3">
-                      <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Sender Email (Optional)</label>
+                    <div className="space-y-1.5 pb-4 border-b border-blue-100/50 dark:border-blue-900/30">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Sender Email <span className="opacity-60">(Optional)</span></label>
                       <Input 
-                        placeholder="e.g. your_custom@domain.com" 
+                        placeholder="e.g. custom_sender@yourdomain.com" 
                         value={csvOptions.fromEmail}
                         onChange={e => setCsvOptions({ ...csvOptions, fromEmail: e.target.value })}
-                        className="h-8 bg-background/50 text-xs border-border/40"
+                        className="h-9 bg-background/70 backdrop-blur-sm text-xs border-blue-100 dark:border-blue-900/50 focus-visible:ring-blue-500/30 transition-all shadow-inner"
                       />
-                      <p className="text-[9px] text-muted-foreground">If left empty, defaults to the connected Gmail account.</p>
+                      <p className="text-[10px] text-muted-foreground/80 italic">If left empty, defaults to your connected Gmail account.</p>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-semibold text-foreground">Wrap in Premium Card</span>
-                          <span className="text-[9px] text-muted-foreground">Apply template wrapper</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                      <div className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-background/60 hover:bg-background/80 transition-all hover:shadow-sm hover:border-blue-200 dark:hover:border-blue-800/50 group">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-semibold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Wrap in Premium Card</span>
+                          <span className="text-[10px] text-muted-foreground">Apply rich HTML template</span>
                         </div>
                         <Switch 
                           checked={csvOptions.useTemplate} 
                           onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, useTemplate: checked })} 
+                          className="data-[state=checked]:bg-blue-600"
                         />
                       </div>
 
-                      <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-semibold text-foreground">Attach Resume PDF</span>
-                          <span className="text-[9px] text-muted-foreground">Attach physical PDF file</span>
+                      <div className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-background/60 hover:bg-background/80 transition-all hover:shadow-sm hover:border-blue-200 dark:hover:border-blue-800/50 group">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-semibold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Attach Resume PDF</span>
+                          <span className="text-[10px] text-muted-foreground">Include physical PDF</span>
                         </div>
                         <Switch 
                           checked={csvOptions.attachResume} 
                           onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, attachResume: checked })} 
+                          className="data-[state=checked]:bg-blue-600"
                         />
                       </div>
 
-                      <div className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-background/50">
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-semibold text-foreground">Insert Resume Link</span>
-                          <span className="text-[9px] text-muted-foreground">Embed a clickable preview button</span>
+                      <div className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-background/60 hover:bg-background/80 transition-all hover:shadow-sm hover:border-blue-200 dark:hover:border-blue-800/50 group">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-semibold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Insert Resume Link</span>
+                          <span className="text-[10px] text-muted-foreground">Add clickable web preview</span>
                         </div>
                         <Switch 
                           checked={csvOptions.insertResumeLink} 
                           onCheckedChange={(checked) => setCsvOptions({ ...csvOptions, insertResumeLink: checked })} 
+                          className="data-[state=checked]:bg-blue-600"
                         />
                       </div>
 
-                      <div className="flex flex-col gap-0.5 justify-center">
-                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
+                      <div className="flex flex-col gap-1.5 justify-center">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Select Resume</label>
                         <Select 
                           value={csvOptions.resumeId} 
                           onValueChange={(val) => setCsvOptions({ ...csvOptions, resumeId: val || "" })}
                         >
-                          <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
+                          <SelectTrigger className="h-9 bg-background/60 hover:bg-background/80 transition-all text-xs border-border/40 focus:ring-blue-500/30">
                             <SelectValue placeholder="Default Resume (Fallback)" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="">Default Resume (Fallback)</SelectItem>
-                            {resumes.map((r, i) => (
-                              <SelectItem key={r.id || i} value={r.id || ""}>
-                                {r.name} {r.isDefault ? "(Default)" : ""}
-                              </SelectItem>
-                            ))}
+                            {resumes.map((r, i) => {
+                              const displayName = r.name || r.title || `Resume ${r.id?.substring(0, 8)}...`;
+                              return (
+                                <SelectItem key={r.id || i} value={r.id || ""}>
+                                  {displayName.length > 22 ? displayName.substring(0, 22) + "..." : displayName} {r.isDefault ? "(Default)" : ""}
+                                </SelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                       </div>
 
-                      <div className="flex flex-col gap-0.5 justify-center">
-                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Content Type</label>
+                      <div className="flex flex-col gap-1.5 justify-center sm:col-span-2">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Content Formatting</label>
                         <Select 
                           value={csvOptions.contentType} 
                           onValueChange={(val) => setCsvOptions({ ...csvOptions, contentType: val || "html", ...(val === "plain" ? { useTemplate: false } : {}) })}
                         >
-                          <SelectTrigger className="h-8 bg-background/50 text-[11px] border-border/40 focus:ring-0">
+                          <SelectTrigger className="h-9 bg-background/60 hover:bg-background/80 transition-all text-xs border-border/40 focus:ring-blue-500/30">
                             <SelectValue placeholder="HTML Formatted" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="html">HTML Formatted</SelectItem>
+                            <SelectItem value="html">HTML Formatted (Recommended)</SelectItem>
                             <SelectItem value="plain">Plain Text</SelectItem>
                             <SelectItem value="auto">Auto Detect</SelectItem>
                           </SelectContent>
@@ -1362,21 +1385,25 @@ export default function EmailAutomationsPage() {
                     </div>
 
                     {csvOptions.insertResumeLink && (
-                      <div className="space-y-1 pt-1 animate-in fade-in duration-200">
-                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
+                      <div className="space-y-1.5 pt-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Button Label Text</label>
                         <Input 
                           value={csvOptions.resumeLinkLabel} 
                           onChange={(e) => setCsvOptions({ ...csvOptions, resumeLinkLabel: e.target.value })}
-                          placeholder="View My Resume"
-                          className="h-8 bg-background/50 text-xs border-border/40"
+                          placeholder="e.g. View My Complete Resume"
+                          className="h-9 bg-background/70 backdrop-blur-sm text-xs border-blue-100 dark:border-blue-900/50 focus-visible:ring-blue-500/30 transition-all shadow-inner"
                         />
                       </div>
                     )}
                   </div>
 
-                  <Button className="w-full" onClick={handleBulkCsvUpload} disabled={isUploadingCsv || !csvFile}>
-                    {isUploadingCsv ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />} 
-                    {isUploadingCsv ? "Uploading..." : "Upload & Send"}
+                  <Button 
+                    className="w-full h-11 text-sm font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-300 hover:scale-[1.01]" 
+                    onClick={handleBulkCsvUpload} 
+                    disabled={isUploadingCsv || !csvFile}
+                  >
+                    {isUploadingCsv ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-5 h-5 mr-2" />} 
+                    {isUploadingCsv ? "Uploading..." : "Upload & Send Bulk Campaign"}
                   </Button>
                 </div>
               )}
