@@ -22,6 +22,69 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { resumeService, Resume } from "@/services/resume.service";
 import { toast } from "sonner";
 
+const PdfBlobViewer = ({ url, name }: { url: string, name: string }) => {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+    const fetchBlob = async () => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        if (active) {
+          objectUrl = URL.createObjectURL(blob);
+          setBlobUrl(objectUrl);
+        }
+      } catch (err) {
+        if (active) setError(true);
+      }
+    };
+    fetchBlob();
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [url]);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-2">
+        <p>Failed to load PDF preview.</p>
+        <Button variant="outline" onClick={() => window.open(url, '_blank')}>
+          Download PDF Instead
+        </Button>
+      </div>
+    );
+  }
+
+  if (!blobUrl) {
+    return (
+      <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-3">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <p>Loading PDF preview...</p>
+      </div>
+    );
+  }
+
+  return (
+    <object 
+      data={blobUrl}
+      type="application/pdf"
+      className="w-full h-full border-0 absolute inset-0"
+      title={name}
+    >
+      <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-2">
+        <p>Your browser doesn't support inline PDF viewing.</p>
+        <Button variant="outline" onClick={() => window.open(url, '_blank')}>
+          Download PDF Instead
+        </Button>
+      </div>
+    </object>
+  );
+};
+
 export default function ResumesPage() {
   const router = useRouter();
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -387,19 +450,7 @@ export default function ResumesPage() {
                           </DialogHeader>
                           <div className="flex-1 w-full bg-muted/20 relative">
                             {resume.fileUrl ? (
-                              <object 
-                                data={`/api/pdf-proxy?url=${encodeURIComponent(resume.fileUrl)}`}
-                                type="application/pdf"
-                                className="w-full h-full border-0 absolute inset-0"
-                                title={resume.name}
-                              >
-                                <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-2">
-                                  <p>Your browser doesn't support inline PDF viewing.</p>
-                                  <Button variant="outline" onClick={() => window.open(resume.fileUrl, '_blank')}>
-                                    Download PDF Instead
-                                  </Button>
-                                </div>
-                              </object>
+                              <PdfBlobViewer url={resume.fileUrl} name={resume.name} />
                             ) : (
                               <div className="flex items-center justify-center w-full h-full text-muted-foreground">
                                 No PDF file available to preview
