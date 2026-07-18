@@ -36,7 +36,11 @@ export const resumeService = {
     formData.append('file', file);
     formData.append('name', name);
     
-    const response = await api.post('/api/v1/resumes/upload', formData, {
+    // Bypass Next.js API proxy specifically for file uploads to avoid boundary/chunked encoding corruption
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const uploadUrl = backendUrl.replace(/\/$/, '') + '/api/v1/resumes/upload';
+    
+    const response = await api.post(uploadUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
