@@ -24,7 +24,6 @@ const proxyRequest = async (request: Request) => {
 
   const headers = new Headers(request.headers);
   headers.delete("host");
-  headers.delete("content-length");
   headers.delete("connection");
   headers.delete("accept-encoding");
 
@@ -33,15 +32,9 @@ const proxyRequest = async (request: Request) => {
   
   let body: any = undefined;
   if (hasBody) {
-    const contentType = request.headers.get("content-type") || "";
-    if (contentType.includes("multipart/form-data")) {
-      // Parse the FormData and let fetch reconstruct it with a new boundary
-      body = await request.formData();
-      headers.delete("content-type");
-    } else {
-      // For JSON and others, forward the raw buffer
-      body = await request.arrayBuffer();
-    }
+    body = await request.arrayBuffer();
+  } else {
+    headers.delete("content-length");
   }
 
   let backendResponse: Response;
