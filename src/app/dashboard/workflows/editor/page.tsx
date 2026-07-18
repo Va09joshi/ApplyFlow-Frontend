@@ -234,6 +234,17 @@ function WorkflowEditor() {
       
       if (data.success) {
         toast.success("Workflow execution finished");
+        
+        // Map execution steps back to node UI states
+        const steps = data.data?.steps || [];
+        setNodes(nds => nds.map(n => {
+          const step = steps.find((s: any) => s.nodeId === n.id);
+          if (step) {
+            return { ...n, data: { ...n.data, runStatus: step.status } };
+          }
+          // Reset status if it didn't run
+          return { ...n, data: { ...n.data, runStatus: undefined } };
+        }));
       }
     } catch (err) {
       console.error(err);
@@ -348,6 +359,19 @@ function WorkflowEditor() {
                 disabled={isGenerating}
               >
                 Slack & Gamify
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="h-7 text-xs bg-indigo-50 text-indigo-700 border-indigo-200 shadow-sm hover:bg-indigo-100"
+                onClick={() => {
+                  const p = "Build the full ApplyFlow process: Search Jobs, Find New Jobs, Check Duplicate, Select Resume, AI Match with Profile, Score Job, Save Job, Find HR, Send Email with Resume, Send LinkedIn Message, and webhook to track status.";
+                  setPrompt(p);
+                  handleAIGenerate(p);
+                }}
+                disabled={isGenerating}
+              >
+                Full ApplyFlow
               </Button>
             </div>
           </div>

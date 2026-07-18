@@ -32,6 +32,13 @@ const NODE_TYPES = [
   { type: 'discord', label: 'Discord Message', icon: FaDiscord, color: 'text-[#5865F2]' },
   { type: 'post_job', label: 'Post to LinkedIn', icon: FaLinkedin, color: 'text-[#0A66C2]' },
   { type: 'award_badge', label: 'Award Badge', icon: FaMedal, color: 'text-[#FFA116]' },
+  { type: 'check_duplicate', label: 'Check Duplicate', icon: FilterIcon, color: 'text-slate-600' },
+  { type: 'job_save', label: 'Save Job', icon: SearchIcon, color: 'text-teal-600' },
+  { type: 'select_resume', label: 'Select Resume', icon: FilterIcon, color: 'text-indigo-400' },
+  { type: 'move_application_stage', label: 'Move App Stage', icon: ArrowRightLeftIcon, color: 'text-orange-500' },
+  { type: 'find_hr', label: 'Find HR', icon: SearchIcon, color: 'text-fuchsia-500' },
+  { type: 'send_linkedin_message', label: 'LinkedIn Message', icon: FaLinkedin, color: 'text-[#0A66C2]' },
+  { type: 'set_context', label: 'Set Context', icon: BrainCircuitIcon, color: 'text-zinc-500' },
 ];
 
 export function NodeSidebar() {

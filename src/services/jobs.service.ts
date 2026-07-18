@@ -17,6 +17,12 @@ export interface Job {
   experienceLevel?: string;
   employmentType?: string;
   level?: string;
+  alreadyApplied?: boolean;
+  timeline?: {
+    status: string;
+    date: string;
+    note?: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 }

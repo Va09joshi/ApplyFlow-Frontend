@@ -1,7 +1,7 @@
 import React from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { cn } from '@/lib/utils';
-import { LucideIcon, Trash2Icon } from 'lucide-react';
+import { LucideIcon, Trash2Icon, CheckCircle2Icon, XCircleIcon } from 'lucide-react';
 
 export interface BaseNodeProps {
   id: string;
@@ -28,11 +28,24 @@ export function BaseNode({ id, data, selected, icon: Icon, title, colorClass = "
         "relative flex flex-col min-w-[260px] bg-card/95 backdrop-blur-md rounded-2xl border transition-all duration-300 group overflow-hidden shadow-sm hover:shadow-xl",
         selected 
           ? "border-primary/60 shadow-[0_8px_30px_rgb(0,0,0,0.12)] shadow-primary/20 ring-1 ring-primary/30 -translate-y-0.5" 
-          : "border-border/40 hover:border-border/80"
+          : "border-border/40 hover:border-border/80",
+        data.runStatus === 'success' && "border-green-500 shadow-[0_0_20px_rgb(34,197,94,0.3)] ring-1 ring-green-500",
+        data.runStatus === 'failed' && "border-red-500 shadow-[0_0_20px_rgb(239,68,68,0.3)] ring-1 ring-red-500"
       )}
     >
       {/* Decorative gradient top bar */}
       <div className={cn("absolute top-0 left-0 right-0 h-1", colorClass)} />
+      
+      {data.runStatus === 'success' && (
+        <div className="absolute top-[-4px] right-[-4px] bg-green-500 text-white p-1 rounded-full shadow-md z-20">
+          <CheckCircle2Icon className="w-3 h-3" />
+        </div>
+      )}
+      {data.runStatus === 'failed' && (
+        <div className="absolute top-[-4px] right-[-4px] bg-red-500 text-white p-1 rounded-full shadow-md z-20">
+          <XCircleIcon className="w-3 h-3" />
+        </div>
+      )}
 
       {/* Top Handle (Input) */}
       {!isTrigger && (

@@ -30,5 +30,12 @@ export const nodeTypes = {
   slack: (props: any) => <BaseNode {...props} icon={FaSlack} title="Slack Message" colorClass="bg-[#4A154B]" />,
   discord: (props: any) => <BaseNode {...props} icon={FaDiscord} title="Discord Message" colorClass="bg-[#5865F2]" />,
   post_job: (props: any) => <BaseNode {...props} icon={FaLinkedin} title="Post to LinkedIn" colorClass="bg-[#0A66C2]" />,
-  award_badge: (props: any) => <BaseNode {...props} icon={FaMedal} title="Award Badge" colorClass="bg-[#FFA116]" />
+  award_badge: (props: any) => <BaseNode {...props} icon={FaMedal} title="Award Badge" colorClass="bg-[#FFA116]" />,
+  check_duplicate: (props: any) => <BaseNode {...props} icon={FilterIcon} title="Check Duplicate" colorClass="bg-slate-600" />,
+  job_save: (props: any) => <BaseNode {...props} icon={SearchIcon} title="Save Job" colorClass="bg-teal-600" />,
+  select_resume: (props: any) => <BaseNode {...props} icon={FilterIcon} title="Select Resume" colorClass="bg-indigo-400" />,
+  move_application_stage: (props: any) => <BaseNode {...props} icon={ArrowRightLeftIcon} title="Move App Stage" colorClass="bg-orange-500" />,
+  find_hr: (props: any) => <BaseNode {...props} icon={SearchIcon} title="Find HR" colorClass="bg-fuchsia-500" />,
+  send_linkedin_message: (props: any) => <BaseNode {...props} icon={FaLinkedin} title="LinkedIn Message" colorClass="bg-[#0A66C2]" />,
+  set_context: (props: any) => <BaseNode {...props} icon={BrainCircuitIcon} title="Set Context" colorClass="bg-zinc-500" />
 };

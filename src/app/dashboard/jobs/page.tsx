@@ -148,6 +148,11 @@ export default function JobsPage() {
       console.log("[SaveJob] Payload:", payload);
       const res = await jobsService.save(payload);
       const savedJob = res?.data || res;
+      if (savedJob.alreadyApplied) {
+        toast.error("⚠️ Already Applied: You applied to this job before.");
+        setSuggestions(prev => prev.map((j, idx) => idx === index ? { ...j, alreadyApplied: true } : j));
+        return;
+      }
       toast.success("Job saved successfully!");
       // Remove from suggestions
       setSuggestions(prev => prev.filter((_, idx) => idx !== index));
@@ -415,7 +420,13 @@ export default function JobsPage() {
                       Added {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Just now"}
                     </div>
                     {(!job.id && !job.id) ? (
-                      <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-sm transition-all" onClick={() => handleSaveJob(job, i)}>Save Job</Button>
+                      job.alreadyApplied ? (
+                        <div className="text-destructive font-medium text-xs flex items-center bg-destructive/10 px-2 py-1 rounded-md">
+                          <CheckCircle2 className="w-3 h-3 mr-1" /> Already Applied
+                        </div>
+                      ) : (
+                        <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-sm transition-all" onClick={() => handleSaveJob(job, i)}>Save Job</Button>
+                      )
                     ) : (
                       <DropdownMenu>
                         <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "icon" }) + " h-8 w-8 rounded-full data-[state=open]:bg-muted"}>
@@ -444,35 +455,67 @@ export default function JobsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Update Job Tracking</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select value={editForm.status} onValueChange={v => setEditForm({...editForm, status: v || "suggested"})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="suggested">Suggested</SelectItem>
-                  <SelectItem value="Saved">Saved</SelectItem>
-                  <SelectItem value="Applied">Applied</SelectItem>
-                  <SelectItem value="Interviewing">Interviewing</SelectItem>
-                  <SelectItem value="Offer">Offer</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea 
-                value={editForm.notes} 
-                onChange={e => setEditForm({...editForm, notes: e.target.value})} 
-                placeholder="Interview details, tasks..." 
-                className="h-32"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={editForm.status} onValueChange={v => setEditForm({...editForm, status: v || "saved"})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="viewed">Viewed</SelectItem>
+                      <SelectItem value="saved">Saved</SelectItem>
+                      <SelectItem value="ready_to_apply">Ready to Apply</SelectItem>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="hr_contacted">HR Contacted</SelectItem>
+                      <SelectItem value="interview">Interview</SelectItem>
+                      <SelectItem value="offer">Offer</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="no_response">No Response</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Textarea 
+                    value={editForm.notes} 
+                    onChange={e => setEditForm({...editForm, notes: e.target.value})} 
+                    placeholder="Interview details, tasks..." 
+                    className="h-32"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Application Timeline</Label>
+                <div className="border border-border/40 rounded-xl p-4 bg-muted/20 h-[240px] overflow-y-auto space-y-4">
+                  {editingJob?.timeline && editingJob.timeline.length > 0 ? (
+                    editingJob.timeline.map((event, i) => (
+                      <div key={i} className="flex gap-3 relative">
+                        {i !== editingJob.timeline!.length - 1 && (
+                          <div className="absolute left-[11px] top-6 bottom-[-20px] w-px bg-border/60"></div>
+                        )}
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20 z-10 mt-0.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium capitalize">{event.status.replace(/_/g, ' ')}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(event.date).toLocaleString()}</p>
+                          {event.note && <p className="text-xs mt-1 text-foreground/80">{event.note}</p>}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center mt-10">No timeline events yet.</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>
