@@ -37,6 +37,70 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
   const renderFields = () => {
     switch (node.type) {
       case 'trigger':
+        return (
+          <>
+            <div className="space-y-2 mb-4">
+              <Label>Trigger Type</Label>
+              <Select value={node.data.triggerType || 'email'} onValueChange={(val) => handleUpdate('triggerType', val)}>
+                <SelectTrigger><SelectValue placeholder="Email Event" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">Email Received</SelectItem>
+                  <SelectItem value="scheduled">Scheduled (Timer)</SelectItem>
+                  <SelectItem value="manual">Manual Click</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(!node.data.triggerType || node.data.triggerType === 'email') && (
+              <>
+                <div className="space-y-2 mb-2">
+                  <Label>From Contains</Label>
+                  <Input
+                    placeholder="e.g., recruiter@acme.com"
+                    value={node.data.fromContains || ''}
+                    onChange={(e) => handleUpdate('fromContains', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2 mb-2">
+                  <Label>Subject Contains</Label>
+                  <Input
+                    placeholder="e.g., Interview"
+                    value={node.data.subjectContains || ''}
+                    onChange={(e) => handleUpdate('subjectContains', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2 mb-2">
+                  <Label>Text Contains</Label>
+                  <Input
+                    placeholder="e.g., Reject, Offer"
+                    value={node.data.textContains || ''}
+                    onChange={(e) => handleUpdate('textContains', e.target.value)}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Workflow runs automatically when an email matches these conditions.</p>
+              </>
+            )}
+
+            {node.data.triggerType === 'scheduled' && (
+              <>
+                <div className="space-y-2">
+                  <Label>Schedule Expression (Cron)</Label>
+                  <Input
+                    placeholder="e.g., 0 9 * * *"
+                    value={node.data.cron || ''}
+                    onChange={(e) => handleUpdate('cron', e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Standard cron expression for when this workflow should run automatically (e.g. daily at 9am).</p>
+                </div>
+              </>
+            )}
+
+            {node.data.triggerType === 'manual' && (
+              <p className="text-sm text-muted-foreground">This workflow will only run when you manually click 'Preview Run' or trigger it via API. No automatic events will trigger it.</p>
+            )}
+          </>
+        );
+
       case 'filter':
         return (
           <>

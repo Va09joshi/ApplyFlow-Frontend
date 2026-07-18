@@ -30,7 +30,9 @@ const proxyRequest = async (request: Request) => {
 
   const method = request.method.toUpperCase();
   const hasBody = !["GET", "HEAD"].includes(method);
-  const body = hasBody ? await request.arrayBuffer() : undefined;
+  // Instead of arrayBuffer, we pass the raw stream directly to avoid corrupting multipart boundaries
+  // We must clone the request because reading the stream directly consumes it if we do it multiple times
+  const body = hasBody ? request.body : undefined;
 
   let backendResponse: Response;
   try {
@@ -39,6 +41,8 @@ const proxyRequest = async (request: Request) => {
       headers,
       body,
       cache: "no-store",
+      // @ts-ignore - Required for undici to allow streaming bodies
+      duplex: 'half'
     });
   } catch (err: any) {
     // If primary backend is unreachable, optionally try a fallback URL.

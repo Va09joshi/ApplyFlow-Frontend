@@ -339,13 +339,13 @@ function WorkflowEditor() {
                 size="sm" 
                 className="h-7 text-xs bg-card border shadow-sm"
                 onClick={() => {
-                  const p = "When I receive an email, use AI to classify it, and if it's a job match, search for a job and send an email.";
+                  const p = "Set up a scheduled timer workflow that selects my resume, searches for jobs based on my resume skills, and sends me an email with the job links.";
                   setPrompt(p);
                   handleAIGenerate(p);
                 }}
                 disabled={isGenerating}
               >
-                Job Match & Email
+                Auto Job Search
               </Button>
               <Button 
                 variant="secondary" 
