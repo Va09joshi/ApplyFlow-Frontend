@@ -33,6 +33,7 @@ const PdfBlobViewer = ({ url, name }: { url: string, name: string }) => {
       try {
         const response = await fetch(url);
         const blob = await response.blob();
+        if (blob.size === 0) throw new Error("Empty blob (CORS block)");
         if (active) {
           objectUrl = URL.createObjectURL(blob);
           setBlobUrl(objectUrl);
