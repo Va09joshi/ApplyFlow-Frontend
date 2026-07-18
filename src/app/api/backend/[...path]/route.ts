@@ -32,7 +32,16 @@ const proxyRequest = async (request: Request) => {
   
   let body: any = undefined;
   if (hasBody) {
-    body = await request.arrayBuffer();
+    const contentType = headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data")) {
+      body = await request.formData();
+      // Delete conflicting headers so fetch can recreate them properly for the new FormData
+      headers.delete("content-type");
+      headers.delete("content-length");
+    } else {
+      body = await request.arrayBuffer();
+      // Do not delete content-length for arrayBuffer as it maintains exact match
+    }
   } else {
     headers.delete("content-length");
   }
