@@ -9,7 +9,8 @@ import {
   TargetIcon,
   GlobeIcon,
   ClockIcon,
-  WebhookIcon
+  WebhookIcon,
+  SparklesIcon
 } from 'lucide-react';
 import { FaWhatsapp, FaSlack, FaDiscord, FaLinkedin, FaMedal } from 'react-icons/fa';
 import { SiGooglesheets } from 'react-icons/si';
@@ -34,6 +35,7 @@ export const nodeTypes = {
   check_duplicate: (props: any) => <BaseNode {...props} icon={FilterIcon} title="Check Duplicate" colorClass="bg-slate-600" />,
   job_save: (props: any) => <BaseNode {...props} icon={SearchIcon} title="Save Job" colorClass="bg-teal-600" />,
   select_resume: (props: any) => <BaseNode {...props} icon={FilterIcon} title="Select Resume" colorClass="bg-indigo-400" />,
+  ai_generate_email: (props: any) => <BaseNode {...props} icon={SparklesIcon} title="AI Generate Email" colorClass="bg-gradient-to-r from-purple-500 to-indigo-500" />,
   move_application_stage: (props: any) => <BaseNode {...props} icon={ArrowRightLeftIcon} title="Move App Stage" colorClass="bg-orange-500" />,
   find_hr: (props: any) => <BaseNode {...props} icon={SearchIcon} title="Find HR" colorClass="bg-fuchsia-500" />,
   send_linkedin_message: (props: any) => <BaseNode {...props} icon={FaLinkedin} title="LinkedIn Message" colorClass="bg-[#0A66C2]" />,

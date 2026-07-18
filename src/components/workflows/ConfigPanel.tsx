@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Trash2Icon, XIcon } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface ConfigPanelProps {
   node: any | null;
@@ -15,6 +16,18 @@ interface ConfigPanelProps {
 }
 
 export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelProps) {
+  const [resumes, setResumes] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (node && ['select_resume', 'score_job'].includes(node.type)) {
+      api.get('/api/v1/resumes').then(res => {
+        if (res.data.success) {
+          setResumes(res.data.data.resumes || []);
+        }
+      }).catch(console.error);
+    }
+  }, [node?.type]);
+
   if (!node) return null;
 
   const handleUpdate = (key: string, value: any) => {
@@ -51,6 +64,15 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
                 onChange={(e) => handleUpdate('companyId', e.target.value)}
               />
             </div>
+            <div className="space-y-2">
+              <Label>Text Contains</Label>
+              <Input
+                placeholder="e.g. Reject, Offer"
+                value={node.data.textContains || ''}
+                onChange={(e) => handleUpdate('textContains', e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Generic text search across context body/text.</p>
+            </div>
           </>
         );
 
@@ -65,6 +87,35 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
             />
             <p className="text-xs text-muted-foreground mt-1">AI will classify the email into interview, offer, reply, or other.</p>
           </div>
+        );
+
+      case 'ai_generate_email':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Tone</Label>
+              <Select value={node.data.tone || 'professional'} onValueChange={(val) => handleUpdate('tone', val)}>
+                <SelectTrigger><SelectValue placeholder="Tone" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Custom Instructions</Label>
+              <Textarea
+                className="min-h-[100px]"
+                placeholder="e.g. Focus on my React experience and keep it under 3 paragraphs."
+                value={node.data.prompt || ''}
+                onChange={(e) => handleUpdate('prompt', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground mt-1">This node calls the LLM to write an email body based on the context and saves it to <code>{`{{generatedEmail}}`}</code> for the next nodes to use.</p>
+            </div>
+          </>
         );
 
       case 'send_email':
@@ -101,6 +152,14 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
               />
             </div>
             <div className="space-y-2">
+              <Label>Attachments (Comma separated URLs)</Label>
+              <Input
+                placeholder="e.g. {{resume.url}}"
+                value={node.data.attachments ? (Array.isArray(node.data.attachments) ? node.data.attachments.join(',') : node.data.attachments) : ''}
+                onChange={(e) => handleUpdate('attachments', e.target.value.split(',').map(s => s.trim()))}
+              />
+            </div>
+            <div className="space-y-2">
               <Label>Body</Label>
               <Textarea
                 className="min-h-[150px]"
@@ -110,6 +169,27 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
               />
             </div>
           </>
+        );
+
+      case 'set_context':
+        return (
+          <div className="space-y-2">
+            <Label>Values to Set (JSON)</Label>
+            <Textarea
+              className="min-h-[150px]"
+              placeholder='{"myKey": "myValue", "status": "active"}'
+              value={node.data.values ? JSON.stringify(node.data.values, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value);
+                  handleUpdate('values', parsed);
+                } catch {
+                  // If invalid JSON, just skip update or handle string
+                }
+              }}
+            />
+            <p className="text-xs text-muted-foreground mt-1">Inject variables into the flow context (must be valid JSON).</p>
+          </div>
         );
 
       case 'move_stage':
@@ -257,25 +337,15 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
                 <SelectContent>
                   <SelectItem value="GET">GET</SelectItem>
                   <SelectItem value="POST">POST</SelectItem>
-                  <SelectItem value="PUT">PUT</SelectItem>
-                  <SelectItem value="DELETE">DELETE</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Webhook URL</Label>
               <Input
-                placeholder="https://hooks.zapier.com/..."
+                placeholder="https://hook.example.com"
                 value={node.data.url || ''}
                 onChange={(e) => handleUpdate('url', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Headers (JSON)</Label>
-              <Textarea
-                placeholder='{"Authorization": "Bearer token"}'
-                value={node.data.headers || ''}
-                onChange={(e) => handleUpdate('headers', e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -287,6 +357,104 @@ export function ConfigPanel({ node, onUpdate, onDelete, onClose }: ConfigPanelPr
               />
             </div>
           </>
+        );
+
+      case 'select_resume':
+        return (
+          <div className="space-y-2">
+            <Label>Select Resume (Optional)</Label>
+            <Select value={node.data.resumeId || 'default'} onValueChange={(val) => handleUpdate('resumeId', val === 'default' ? '' : val)}>
+              <SelectTrigger><SelectValue placeholder="Default Resume" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default Resume (Fallback)</SelectItem>
+                {resumes.map(r => (
+                  <SelectItem key={r.id} value={r.id}>{r.title || r.id}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">Selects a specific resume to use in the workflow. Leaving this as default uses your primary resume.</p>
+          </div>
+        );
+
+      case 'find_hr':
+        return (
+          <div className="space-y-2">
+            <Label>Target Company</Label>
+            <Input
+              placeholder="{{job.company}}"
+              value={node.data.company || ''}
+              onChange={(e) => handleUpdate('company', e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground mt-1">The company name to search for HR/Recruiter contacts.</p>
+          </div>
+        );
+
+      case 'send_linkedin_message':
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Target Profile (URL or Name)</Label>
+              <Input
+                placeholder="{{hr.linkedinUrl}} or Recruiter Name"
+                value={node.data.to || ''}
+                onChange={(e) => handleUpdate('to', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 flex items-center justify-between">
+              <Label>Send as Connection Request</Label>
+              <Switch
+                checked={node.data.isConnectionRequest || false}
+                onCheckedChange={(checked) => handleUpdate('isConnectionRequest', checked)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message / Note</Label>
+              <Textarea
+                className="min-h-[100px]"
+                placeholder="Hi, I just applied to your opening..."
+                value={node.data.message || ''}
+                onChange={(e) => handleUpdate('message', e.target.value)}
+              />
+            </div>
+          </>
+        );
+
+      case 'check_duplicate':
+        return (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">This filter automatically halts the workflow if a duplicate job is found in the current context.</p>
+          </div>
+        );
+
+      case 'job_save':
+        return (
+          <div className="space-y-2">
+            <Label>Limit</Label>
+            <Input
+              type="number"
+              placeholder="e.g. 5"
+              value={node.data.limit || ''}
+              onChange={(e) => handleUpdate('limit', parseInt(e.target.value))}
+            />
+            <p className="text-xs text-muted-foreground mt-1">Maximum number of jobs to save from the search results.</p>
+          </div>
+        );
+
+      case 'score_job':
+        return (
+          <div className="space-y-2">
+            <Label>Resume Context</Label>
+            <Select value={node.data.resumeId || 'default'} onValueChange={(val) => handleUpdate('resumeId', val === 'default' ? '' : val)}>
+              <SelectTrigger><SelectValue placeholder="Globally Selected Resume" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Globally Selected Resume</SelectItem>
+                {resumes.map(r => (
+                  <SelectItem key={r.id} value={r.id}>{r.title || r.id}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">Matches the job against this specific resume. If empty, uses the globally selected resume.</p>
+          </div>
         );
 
       case 'whatsapp':

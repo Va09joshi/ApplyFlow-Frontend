@@ -10,7 +10,8 @@ import {
   GlobeIcon,
   ClockIcon,
   GripVerticalIcon,
-  WebhookIcon
+  WebhookIcon,
+  SparklesIcon
 } from 'lucide-react';
 import { FaWhatsapp, FaSlack, FaDiscord, FaLinkedin, FaMedal } from 'react-icons/fa';
 import { SiGooglesheets } from 'react-icons/si';
@@ -35,6 +36,7 @@ const NODE_TYPES = [
   { type: 'check_duplicate', label: 'Check Duplicate', icon: FilterIcon, color: 'text-slate-600' },
   { type: 'job_save', label: 'Save Job', icon: SearchIcon, color: 'text-teal-600' },
   { type: 'select_resume', label: 'Select Resume', icon: FilterIcon, color: 'text-indigo-400' },
+  { type: 'ai_generate_email', label: 'AI Generate Email', icon: SparklesIcon, color: 'text-purple-500' },
   { type: 'move_application_stage', label: 'Move App Stage', icon: ArrowRightLeftIcon, color: 'text-orange-500' },
   { type: 'find_hr', label: 'Find HR', icon: SearchIcon, color: 'text-fuchsia-500' },
   { type: 'send_linkedin_message', label: 'LinkedIn Message', icon: FaLinkedin, color: 'text-[#0A66C2]' },

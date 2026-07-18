@@ -85,8 +85,8 @@ export function BaseNode({ id, data, selected, icon: Icon, title, colorClass = "
 
       {/* Body / Preview */}
       <div className="px-4 py-3.5 text-xs text-muted-foreground flex flex-col gap-2 min-h-[48px] bg-background/50 rounded-b-2xl">
-        {Object.entries(data).filter(([k]) => k !== 'label').length > 0 ? (
-          Object.entries(data).slice(0, 3).map(([key, value]) => {
+        {Object.entries(data).filter(([k]) => k !== 'label' && k !== 'runStatus').length > 0 ? (
+          Object.entries(data).filter(([k]) => k !== 'label' && k !== 'runStatus').slice(0, 3).map(([key, value]) => {
             if (key === 'label') return null;
             return (
               <div key={key} className="flex justify-between items-center overflow-hidden gap-3">
