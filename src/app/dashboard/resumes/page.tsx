@@ -387,8 +387,9 @@ export default function ResumesPage() {
                           </DialogHeader>
                           <div className="flex-1 w-full bg-muted/20 relative">
                             {resume.fileUrl ? (
-                              <iframe 
-                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(resume.fileUrl)}&embedded=true`}
+                              <object 
+                                data={resume.fileUrl.replace('/raw/upload/', '/image/upload/')} // Attempt to gracefully fallback if URL is manipulated, though new uploads will be correct
+                                type="application/pdf"
                                 className="w-full h-full border-0 absolute inset-0"
                                 title={resume.name}
                               >
@@ -398,7 +399,7 @@ export default function ResumesPage() {
                                     Download PDF Instead
                                   </Button>
                                 </div>
-                              </iframe>
+                              </object>
                             ) : (
                               <div className="flex items-center justify-center w-full h-full text-muted-foreground">
                                 No PDF file available to preview
