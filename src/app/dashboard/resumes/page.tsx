@@ -23,67 +23,12 @@ import { resumeService, Resume } from "@/services/resume.service";
 import { toast } from "sonner";
 
 const PdfBlobViewer = ({ url, name }: { url: string, name: string }) => {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    let objectUrl: string | null = null;
-    const fetchBlob = async () => {
-      try {
-        const response = await fetch(url);
-        const rawBlob = await response.blob();
-        if (rawBlob.size === 0) throw new Error("Empty blob (CORS block)");
-        const blob = new Blob([rawBlob], { type: "application/pdf" });
-        if (active) {
-          objectUrl = URL.createObjectURL(blob);
-          setBlobUrl(objectUrl);
-        }
-      } catch (err) {
-        if (active) setError(true);
-      }
-    };
-    fetchBlob();
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [url]);
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-2">
-        <p>Failed to load PDF preview.</p>
-        <Button variant="outline" onClick={() => window.open(url, '_blank')}>
-          Download PDF Instead
-        </Button>
-      </div>
-    );
-  }
-
-  if (!blobUrl) {
-    return (
-      <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-3">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        <p>Loading PDF preview...</p>
-      </div>
-    );
-  }
-
   return (
-    <object 
-      data={blobUrl}
-      type="application/pdf"
+    <iframe 
+      src={url}
       className="w-full h-full border-0 absolute inset-0"
       title={name}
-    >
-      <div className="flex items-center justify-center w-full h-full text-muted-foreground flex-col gap-2">
-        <p>Your browser doesn't support inline PDF viewing.</p>
-        <Button variant="outline" onClick={() => window.open(url, '_blank')}>
-          Download PDF Instead
-        </Button>
-      </div>
-    </object>
+    />
   );
 };
 
