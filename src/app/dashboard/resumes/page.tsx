@@ -391,7 +391,7 @@ export default function ResumesPage() {
                             View PDF
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden">
+                        <DialogContent className="max-w-[90vw] w-full h-[90vh] flex flex-col p-0 overflow-hidden">
                           <DialogHeader className="p-4 pb-0 border-b">
                             <DialogTitle className="text-lg">{resume.name}</DialogTitle>
                           </DialogHeader>
