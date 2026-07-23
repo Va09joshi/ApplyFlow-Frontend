@@ -7,7 +7,8 @@ import {
   ArrowRight, Bot, Sparkles, ChevronRight, CheckCircle2, Briefcase,
   Send, MessageSquare, Terminal, FileText, Check, Search, User, RefreshCw, Star, X,
   Play, Pause, Paperclip, SendHorizontal, Mail, UploadCloud, Layers, Database, Code, Copy, Layout,
-  ChevronDown, ChevronUp, GitMerge, Workflow, BarChart3, Maximize2, ChevronLeft
+  ChevronDown, ChevronUp, GitMerge, Workflow, BarChart3, Maximize2, ChevronLeft,
+  Zap, Target, MailCheck, FastForward
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -283,7 +284,6 @@ export default function Home() {
     handleSendMessage(actionText);
   };
 
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/20">
       <Navbar />
@@ -291,50 +291,100 @@ export default function Home() {
       <main className="flex-1">
 
         {/* HERO SECTION */}
-        <section className="relative pt-28 pb-48 md:pt-36 md:pb-64 overflow-hidden bg-gradient-to-b from-background via-primary/5 to-primary/10">
+        <section className="relative pt-28 pb-32 md:pt-36 md:pb-40 overflow-hidden bg-gradient-to-b from-background via-primary/5 to-primary/10">
 
+          <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
           <div className="absolute top-1/4 right-0 -z-10 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-screen animate-pulse"></div>
           <div className="absolute bottom-10 left-0 -z-10 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] opacity-70"></div>
 
-          <div className="container mx-auto px-4 text-center z-10 relative">
+          <div className="container mx-auto px-4 z-10 relative">
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 max-w-5xl mx-auto leading-tight"
-            >
-              Land Interviews on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-400 to-blue-500 font-extrabold">Autopilot.</span>
-            </motion.h1>
+              {/* Left Side: Text */}
+              <div className="w-full lg:w-[45%] flex-shrink-0 text-center lg:text-left pt-10 lg:pt-0">
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 leading-tight"
+                >
+                  Land Interviews <br className="hidden sm:block" /> on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-400 to-blue-500 font-extrabold">Autopilot.</span>
+                </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed"
-            >
-              Audit resume keyword scores, generate bespoke outreach drafts, and queue deliverable cold emails directly into recruiters' inboxes in under 1 minute.
-            </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="text-base md:text-xl text-muted-foreground mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+                >
+                  Audit resume keyword scores, generate bespoke outreach drafts, and queue deliverable cold emails directly into recruiters' inboxes in under 1 minute.
+                </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
-              <Link
-                href="/signup"
-                className={buttonVariants({ size: "lg" }) + " w-full sm:w-auto rounded-full px-8 font-semibold shadow-[0_4px_20px_rgba(var(--primary),0.35)] hover:shadow-[0_4px_30px_rgba(var(--primary),0.5)] transition-all transform hover:-translate-y-0.5 text-white dark:text-black"}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="flex flex-col gap-6 w-full max-w-lg mx-auto lg:mx-0"
+                >
+                  <Link href="/signup" className="group relative w-full flex items-center bg-background border border-border/50 text-foreground rounded-[2rem] px-6 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.12)] transition-all transform hover:-translate-y-1">
+                    <span className="flex-1 text-left text-[17px] font-medium opacity-90 group-hover:opacity-100 transition-opacity flex items-center">
+                      <span className="animate-pulse mr-2 font-light text-primary">|</span> Score resume vs job description...
+                    </span>
+                    <div className="bg-primary/10 text-primary p-2 rounded-full transition-colors group-hover:bg-primary/20">
+                      <svg className="w-5 h-5 animate-[spin_4s_linear_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </div>
+                  </Link>
+
+
+                </motion.div>
+
+                {/* Social Proof Avatars */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
+                >
+                  <div className="flex -space-x-3">
+                    {[
+                      'https://randomuser.me/api/portraits/women/44.jpg',
+                      'https://randomuser.me/api/portraits/men/32.jpg',
+                      'https://randomuser.me/api/portraits/women/68.jpg',
+                      'https://randomuser.me/api/portraits/men/46.jpg'
+                    ].map((url, i) => (
+                      <div key={i} className="w-10 h-10 rounded-full border-2 border-background overflow-hidden shadow-sm">
+                        <img src={url} alt={`User ${i + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm text-muted-foreground font-medium">
+                    <span className="text-foreground font-bold">2,000+</span> professionals already joined
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Right Side: Image (Breaking out of container) */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex-1 w-full relative lg:-mr-32 xl:-mr-48 z-10 flex justify-center lg:justify-end"
               >
-                Get Started for Free <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-              <Link
-                href="/#pricing"
-                className={buttonVariants({ size: "lg", variant: "outline" }) + " w-full sm:w-auto rounded-full px-8 font-semibold bg-background hover:bg-muted/50 transition-all transform hover:-translate-y-0.5"}
-              >
-                View Pricing
-              </Link>
-            </motion.div>
+                <img
+                  src="/hero-dashboard.png"
+                  alt="Applyflow Dashboard Preview"
+                  className="w-full h-auto max-w-[120%] lg:max-w-none object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.05)] dark:hidden"
+                />
+                <img
+                  src="/hero-dashboard-dark.png"
+                  alt="Applyflow Dashboard Preview Dark Mode"
+                  className="hidden dark:block w-full h-auto max-w-[120%] lg:max-w-none object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.2)]"
+                />
+              </motion.div>
+
+            </div>
           </div>
 
           {/* Organic, Realistic SVG Wave Divider - Themed for Light/Dark */}
@@ -356,40 +406,30 @@ export default function Home() {
             <p className="text-sm font-semibold text-muted-foreground mb-8 uppercase tracking-widest">
               Trusted By
             </p>
-            <div className="relative flex overflow-hidden w-full max-w-5xl mx-auto mb-12 select-none">
-              {/* Fade masks for smooth edges */}
-              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-muted/20 to-transparent z-10 pointer-events-none"></div>
-              <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-muted/20 to-transparent z-10 pointer-events-none"></div>
+            <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 max-w-4xl mx-auto mb-12 select-none">
+              <span className="sr-only">Trusted by Google, LinkedIn, Gmail, and Microsoft</span>
 
-              <motion.div
-                className="flex w-max items-center"
-                animate={{ x: ["0%", "-50%"] }}
-                transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
-              >
-                {/* We map twice to create the seamless infinite scroll effect */}
-                {[0, 1].map((setIndex) => (
-                  <div key={setIndex} className="flex items-center gap-16 md:gap-24 px-8 md:px-12" aria-hidden={setIndex === 1 ? "true" : undefined}>
-                    {setIndex === 0 && <span className="sr-only">Trusted by Google, LinkedIn, Gmail, and Microsoft</span>}
-
-                    <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
-                      <svg className="w-8 h-8 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.187 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" /></svg>
-                      Google
-                    </div>
-                    <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
-                      <svg className="w-8 h-8 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
-                      LinkedIn
-                    </div>
-                    <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
-                      <svg className="w-8 h-8 text-[#EA4335]" viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" /></svg>
-                      Gmail
-                    </div>
-                    <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
-                      <svg className="w-7 h-7 text-[#00A4EF]" viewBox="0 0 24 24" fill="currentColor"><path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z" /></svg>
-                      Microsoft
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
+                <svg className="w-8 h-8 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                LinkedIn
+              </div>
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" className="w-8 h-8" />
+                Gmail
+              </div>
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
+                <svg className="w-7 h-7" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                  <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                  <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                  <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+                </svg>
+                Microsoft
+              </div>
+              <div className="flex items-center gap-2 text-2xl font-bold font-sans text-foreground/80 hover:text-foreground transition-colors cursor-default">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" className="w-8 h-8" />
+                Google
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
               <div className="bg-background rounded-2xl p-4 shadow-sm border border-border/50">
@@ -409,6 +449,12 @@ export default function Home() {
         {/* SECTION 1: INTERACTIVE AUTOMATION COMMAND CENTER — Theme Styled */}
         <section id="automation-center" className="py-24 md:py-36 bg-background relative overflow-hidden">
 
+          {/* Colorful Overlays */}
+          <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+          <div className="absolute top-0 right-0 -z-10 w-[600px] h-[600px] bg-blue-500/15 rounded-full blur-[120px] mix-blend-normal"></div>
+          <div className="absolute bottom-0 left-0 -z-10 w-[600px] h-[600px] bg-purple-500/15 rounded-full blur-[120px] mix-blend-normal"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/10 rounded-full blur-[100px] -z-10 animate-pulse"></div>
+
           <div className="container mx-auto px-4 max-w-[1100px] relative z-10">
 
             {/* Massive headline — overlapping composition */}
@@ -421,12 +467,13 @@ export default function Home() {
             >
               {/* Icon above headline */}
               <div className="flex justify-center mb-5">
-                <div className="w-14 h-14 rounded-[14px] bg-card border border-border/50 flex items-center justify-center shadow-sm">
+                <div className="w-14 h-14 rounded-[14px] bg-card border border-border/50 flex items-center justify-center shadow-sm relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-[14px] blur-sm -z-10"></div>
                   <Bot className="w-7 h-7 text-primary" />
                 </div>
               </div>
 
-              <h2 className="text-[56px] md:text-[80px] lg:text-[100px] font-bold text-foreground tracking-[-0.10em] leading-[0.88] relative z-20 flex flex-col items-center justify-center">
+              <h2 className="text-[56px] md:text-[80px] lg:text-[100px] font-bold text-foreground tracking-[-0.10em] leading-[0.88] relative z-20 flex flex-col items-center justify-center drop-shadow-sm">
                 <span className="flex gap-4 md:gap-6">
                   <motion.span
                     initial={{ opacity: 0, y: 40 }}
@@ -446,21 +493,21 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.5 }}
-                  className="relative z-10 text-primary mt-2"
+                  className="relative z-10 text-foreground mt-2 filter drop-shadow-lg"
                 >Automate.</motion.span>
               </h2>
             </motion.div>
 
-            {/* Dark floating search bar */}
+            {/* Dark floating search bar -> Now Clean White/Light Search Bar */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.7 }}
-              className="relative z-30 flex justify-center mt-6 md:mt-10 mb-8"
+              className="relative z-30 flex justify-center mt-10 md:mt-12 mb-10"
             >
-              <div className="bg-primary text-primary-foreground rounded-[12px] px-6 py-4 flex items-center gap-4 w-full max-w-[520px] shadow-xl">
-                <div className="w-px h-5 bg-primary-foreground/30"></div>
+              <div className="bg-white/95 dark:bg-card/95 backdrop-blur-xl text-foreground border border-border/60 rounded-full px-8 py-5 flex items-center gap-5 w-full max-w-[600px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+                <div className="w-px h-6 bg-border"></div>
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={activeCmdTab}
@@ -468,7 +515,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.3 }}
-                    className="text-primary-foreground text-base md:text-lg font-medium tracking-[-0.02em] flex-1"
+                    className="text-foreground/90 font-medium tracking-[-0.02em] flex-1 text-[16px]"
                   >
                     {activeCmdTab === "workflow" && "Build outreach pipeline..."}
                     {activeCmdTab === "single" && "Draft cold email for Stripe..."}
@@ -476,7 +523,7 @@ export default function Home() {
                     {activeCmdTab === "ats" && "Score resume vs job description..."}
                   </motion.span>
                 </AnimatePresence>
-                <RefreshCw className="w-5 h-5 text-primary-foreground/60 animate-spin" style={{ animationDuration: '3s' }} />
+                <RefreshCw className="w-5 h-5 text-muted-foreground animate-spin" style={{ animationDuration: '3s' }} />
               </div>
             </motion.div>
 
@@ -528,94 +575,42 @@ export default function Home() {
 
               <AnimatePresence mode="wait">
 
-                {/* Visual Workflow — Layered card composition */}
+                {/* Visual Workflow — 3D Image composition */}
                 {activeCmdTab === "workflow" && (
                   <motion.div
                     key="cmd-workflow"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -15 }}
-                    transition={{ duration: 0.45, ease: "easeOut" }}
-                    className="w-full max-w-4xl flex flex-col items-center relative"
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    className="w-full max-w-4xl flex flex-col items-center relative perspective-[2000px]"
+                    style={{ perspective: '2000px' }}
                   >
-                    {/* Main white card */}
-                    <div className="bg-card border border-border/50 rounded-[12px] w-full max-w-[620px] overflow-hidden relative shadow-lg">
-                      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--foreground-rgb),0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--foreground-rgb),0.03)_1px,transparent_1px)] bg-[size:28px_28px] dark:opacity-20"></div>
-
-                      <div className="relative p-8 flex flex-col items-center gap-3">
-                        {/* Workflow nodes */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1 }}
-                          className="bg-background border-[1.5px] border-border rounded-[12px] p-4 w-full max-w-[360px] flex items-center gap-4 hover:border-primary transition-colors cursor-pointer group shadow-sm"
-                        >
-                          <div className="w-10 h-10 rounded-[10px] bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <Search className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.04em]">Trigger</p>
-                            <p className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">Job Match Found</p>
-                          </div>
-                        </motion.div>
-
-                        <div className="h-6 w-px bg-border"></div>
-
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.25 }}
-                          className="bg-background border-[1.5px] border-primary rounded-[12px] p-4 w-full max-w-[360px] flex items-center gap-4 cursor-pointer group ring-[3px] ring-primary/10 shadow-sm"
-                        >
-                          <div className="w-10 h-10 rounded-[10px] bg-foreground/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <Bot className="w-5 h-5 text-foreground" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.04em]">AI Action</p>
-                            <p className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">Draft Cold Email</p>
-                          </div>
-                        </motion.div>
-
-                        <div className="h-6 w-px bg-border"></div>
-
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 }}
-                          className="bg-background border-[1.5px] border-border rounded-[12px] p-4 w-full max-w-[360px] flex items-center gap-4 hover:border-emerald-500 transition-colors cursor-pointer group shadow-sm"
-                        >
-                          <div className="w-10 h-10 rounded-[10px] bg-emerald-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <Send className="w-5 h-5 text-emerald-500" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.04em]">Action</p>
-                            <p className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">Send via Gmail</p>
-                          </div>
-                        </motion.div>
-                      </div>
-                    </div>
-
-                    {/* Side floating feature pills */}
                     <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="absolute -right-2 md:right-4 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-3"
+                      className="relative w-full max-w-[800px] transform-gpu transition-transform duration-500 hover:scale-[1.02]"
+                      animate={{
+                        rotateX: [15, 12, 15],
+                        rotateY: [-10, -8, -10],
+                        y: [0, -10, 0]
+                      }}
+                      transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      style={{ transformStyle: 'preserve-3d', rotateX: '15deg', rotateY: '-10deg', rotateZ: '2deg' }}
                     >
-                      {[
-                        { icon: <Sparkles className="w-4 h-4 text-primary" />, label: "AI Integration", sub: "Native LLM nodes" },
-                        { icon: <GitMerge className="w-4 h-4 text-indigo-500" />, label: "Conditional Logic", sub: "Split by fit score" }
-                      ].map((feat, i) => (
-                        <div key={i} className="bg-card border border-border/50 rounded-[12px] px-4 py-3 flex items-center gap-3 w-[200px] shadow-md">
-                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                            {feat.icon}
-                          </div>
-                          <div>
-                            <p className="text-[13px] font-bold text-foreground">{feat.label}</p>
-                            <p className="text-[11px] text-foreground/80">{feat.sub}</p>
-                          </div>
-                        </div>
-                      ))}
+                      {/* Glow behind image */}
+                      <div className="absolute inset-0 bg-blue-500/20 blur-[80px] rounded-xl -z-10 translate-y-10 scale-95"></div>
+
+                      <img
+                        src="/image%20copy%206.png"
+                        alt="Automation Pipelines"
+                        className="w-full h-auto rounded-[24px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] border-[4px] border-card bg-card"
+                      />
+
+                      {/* Glossy glare effect */}
+                      <div className="absolute inset-0 rounded-[24px] bg-gradient-to-tr from-white/10 via-white/5 to-transparent mix-blend-overlay pointer-events-none"></div>
                     </motion.div>
                   </motion.div>
                 )}
@@ -797,8 +792,8 @@ export default function Home() {
         </section>
 
 
-        {/* SECTION 2.5: AI AGENT SHOWCASE */}
-        <section className="pt-40 pb-28 relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background">
+        {/* SECTION 2.5: AI Agent Showcase */}
+        <section className="pt-40 pb-20 relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background">
           {/* Top Simple Wave Divider */}
           <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-0 rotate-180 -translate-y-px">
             <svg className="relative block w-full h-[60px] md:h-[120px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
@@ -928,132 +923,9 @@ export default function Home() {
         </section>
 
 
-        {/* SECTION 3: SIMPLE WORKFLOW EXPLAINER */}
-        <section id="explainer-section" className="py-24 relative overflow-hidden bg-background" itemScope itemType="https://schema.org/HowTo">
-          <div className="absolute -top-40 right-10 -z-10 w-[450px] h-[450px] bg-primary/5 rounded-full blur-[120px]"></div>
-
-          <div className="container mx-auto px-4 max-w-6xl relative z-10">
-            <div className="text-center mb-20">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-primary text-primary-foreground font-semibold text-xs uppercase tracking-widest mb-5 shadow-sm">Workflow</span>
-              <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight drop-shadow-sm text-foreground" itemProp="name">How It Works</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg font-medium leading-relaxed" itemProp="description">
-                Just type in 'Workday' for example and see all the times you have spent manually re-entering your resume. Then type 'Interview Scheduled', realise there's no such emails. Look yourself in the mirror, stop applying manually and let ApplyFlow do it for you.
-              </p>
-            </div>
-
-            {/* Structured CSS Grid Bento Box */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mx-auto mt-12 p-6 md:p-8 bg-[#0a0f1c] rounded-[2.5rem] border border-slate-800 shadow-2xl">
-
-              {/* Left Column (Span 4) */}
-              <div className="col-span-1 md:col-span-4 flex flex-col gap-6">
-                {/* Top Left Widget: ATS Scanner */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className="flex-1 p-6 rounded-3xl bg-[#111827] border border-slate-800 shadow-xl flex flex-col items-start justify-center gap-4"
-                >
-                  <h3 className="text-white font-bold text-sm">ATS Scanner</h3>
-                  <div className="px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="text-slate-300 text-xs font-semibold">Keyword Found</span>
-                  </div>
-                </motion.div>
-
-                {/* Bottom Left Widget: Company Stripe */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="flex-1 p-6 rounded-3xl bg-[#111827] border border-slate-800 shadow-xl flex items-center justify-between gap-6"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Company</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-bold text-xl">Stripe</span>
-                      <span className="text-emerald-500 font-bold text-lg">98%</span>
-                    </div>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                    <Layers className="w-5 h-5 text-emerald-500" />
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Center Main Widget: Automation Pipelines (Span 8) */}
-              <div className="col-span-1 md:col-span-8 flex flex-col gap-6">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="h-[280px] md:h-full p-8 rounded-3xl bg-gradient-to-br from-[#111827] to-[#0d131f] border border-slate-800 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center"
-                >
-                  <h3 className="text-white font-bold text-2xl mb-10 text-center">Automation Pipelines</h3>
-                  <div className="flex items-center justify-center gap-4 md:gap-8 w-full max-w-lg">
-                    <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-2xl bg-slate-800/40 flex items-center justify-center border border-slate-700/50"><FileText className="w-8 h-8 text-slate-400" /></div>
-                    <div className="h-[2px] flex-1 bg-slate-800 relative min-w-[20px] max-w-[80px]"><div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-600"></div></div>
-                    <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-2xl bg-slate-800/40 flex items-center justify-center border border-slate-700/50"><Bot className="w-8 h-8 text-slate-400" /></div>
-                    <div className="h-[2px] flex-1 bg-slate-800 relative min-w-[20px] max-w-[80px]"><div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div></div>
-                    <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-[1.5rem] bg-blue-600/10 border-2 border-blue-500/30 flex items-center justify-center shadow-[0_0_25px_rgba(59,130,246,0.15)]"><Send className="w-10 h-10 text-blue-500" /></div>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Bottom Row (Span 12 split into 3x4) */}
-              <div className="col-span-1 md:col-span-4">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="h-full p-6 rounded-3xl bg-[#111827] border border-slate-800 shadow-xl flex items-center justify-between gap-4"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-slate-800/50 flex items-center justify-center">
-                    <Briefcase className="w-6 h-6 text-slate-400" />
-                  </div>
-                  <h3 className="text-white font-bold text-sm text-right">Auto-Apply<br /><span className="text-slate-400 text-xs font-normal">Enabled</span></h3>
-                </motion.div>
-              </div>
-
-              <div className="col-span-1 md:col-span-4">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="h-full p-6 rounded-3xl bg-[#111827] border border-slate-800 shadow-xl flex items-center justify-between gap-4"
-                >
-                  <h3 className="text-white font-bold text-sm">Email Drafter<br /><span className="text-blue-400 text-xs font-normal">AI Powered</span></h3>
-                  <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-blue-500" />
-                  </div>
-                </motion.div>
-              </div>
-
-              <div className="col-span-1 md:col-span-4">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  className="h-full p-6 rounded-3xl bg-[#111827] border border-slate-800 shadow-xl flex flex-col justify-center gap-4"
-                >
-                  <h3 className="text-white font-bold text-sm mb-1">Track Progress</h3>
-                  <div className="w-full mt-auto">
-                    <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden mb-2">
-                      <div className="h-full w-[65%] bg-blue-600 rounded-full"></div>
-                    </div>
-                    <div className="flex justify-between text-[10px] font-bold uppercase">
-                      <span className="text-slate-500">Applied</span>
-                      <span className="text-blue-500">Interviewing</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-
-            </div>
-          </div>
-        </section>
 
         {/* SECTION 4: ANALYTICS SHOWCASE */}
-        <section id="analytics-showcase" className="pt-24 pb-0 relative overflow-hidden bg-background border-t border-border/40">
+        <section id="analytics-showcase" className="pt-20 pb-0 relative overflow-hidden bg-background border-t border-border/40">
           <div className="container mx-auto px-4 max-w-6xl relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-24 relative w-full">
 
@@ -1065,81 +937,12 @@ export default function Home() {
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="flex-none relative z-10 w-full max-w-[500px] md:ml-12 flex justify-center"
               >
-                <div className="bg-card rounded-t-[3rem] border-[10px] border-b-0 border-border shadow-2xl overflow-hidden h-[650px] w-full relative flex flex-col">
-                  {/* Dashboard Header */}
-                  <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
-                    <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-                    <h3 className="text-foreground font-bold tracking-wide text-sm">Pipeline Health</h3>
-                    <Maximize2 className="w-4 h-4 text-muted-foreground" />
-                  </div>
-
-                  {/* Dashboard Content */}
-                  <div className="p-8 flex-1 flex flex-col relative">
-                    <h4 className="text-foreground text-2xl font-bold mb-1">Momentum High</h4>
-                    <p className="text-muted-foreground text-base mb-8">You are converting 12% above average this month.</p>
-
-                    {/* Chart lines simulation */}
-                    <div className="absolute left-6 bottom-10 right-6 top-32">
-                      <motion.svg
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        whileInView={{ pathLength: 1, opacity: 1 }}
-                        transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
-                        className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"
-                      >
-                        <motion.path initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.5 }} d="M0,80 Q25,20 50,50 T100,10" fill="none" stroke="#10b981" strokeWidth="2.5" />
-                        <motion.path initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.7 }} d="M0,60 Q25,80 50,40 T100,30" fill="none" stroke="#ef4444" strokeWidth="2.5" />
-                        <motion.path initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 0.9 }} d="M0,90 Q25,95 50,85 T100,70" fill="none" stroke="#3b82f6" strokeWidth="2.5" />
-                      </motion.svg>
-
-                      {/* Vertical line marker */}
-                      <motion.div
-                        initial={{ height: 0 }}
-                        whileInView={{ height: "100%" }}
-                        transition={{ duration: 0.8, delay: 1.0 }}
-                        className="absolute right-[35%] top-0 w-px bg-border z-0"
-                      ></motion.div>
-
-                      {/* Tooltips */}
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, delay: 1.2 }}
-                        className="absolute right-[20%] top-[10%] z-10"
-                      >
-                        <div className="bg-emerald-500 text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-t-lg text-center uppercase tracking-wider">Interviews</div>
-                        <div className="bg-background border border-emerald-500 text-emerald-500 font-black px-3 py-1.5 rounded-b-lg text-base text-center shadow-md">+ 12</div>
-                      </motion.div>
-
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, delay: 1.4 }}
-                        className="absolute right-[20%] top-[40%] z-10"
-                      >
-                        <div className="bg-red-500 text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-t-lg text-center uppercase tracking-wider">Rejections</div>
-                        <div className="bg-background border border-red-500 text-red-500 font-black px-3 py-1.5 rounded-b-lg text-base text-center shadow-md">- 3</div>
-                      </motion.div>
-
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, delay: 1.6 }}
-                        className="absolute right-[20%] bottom-[10%] z-10"
-                      >
-                        <div className="bg-blue-500 text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-t-lg text-center uppercase tracking-wider">Applied</div>
-                        <div className="bg-background border border-blue-500 text-blue-500 font-black px-3 py-1.5 rounded-b-lg text-base text-center shadow-md">145</div>
-                      </motion.div>
-                    </div>
-
-                    {/* Bottom Nav Simulation */}
-                    <div className="mt-auto flex justify-between text-muted-foreground text-sm font-semibold px-4 pb-4">
-                      <span>Mar</span>
-                      <span>Apr</span>
-                      <span className="text-foreground">May</span>
-                      <span>Jun</span>
-                      <span>Jul</span>
-                    </div>
-                  </div>
+                <div className="w-full max-w-[500px] relative flex flex-col drop-shadow-2xl">
+                  <img
+                    src="/ChatGPT%20Image%20Jul%2023,%202026,%2002_03_50%20PM.png"
+                    alt="Pipeline Health Dashboard"
+                    className="w-full h-auto object-contain"
+                  />
                 </div>
               </motion.div>
 
@@ -1185,40 +988,67 @@ export default function Home() {
               </p>
             </div>
 
-            {/* 3-Column Grid Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Vertical Connected Timeline Layout */}
+            <div className="flex flex-col gap-10 max-w-4xl mx-auto relative">
 
-              {/* Feature Card 1 */}
-              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 flex flex-col items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 group shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 border border-slate-100/50">
-                  <Sparkles className="w-7 h-7 text-blue-500 group-hover:scale-110 transition-transform" />
+              {/* Connecting Timeline Line */}
+              <div className="hidden md:block absolute top-[80px] bottom-[80px] left-[88px] w-0.5 border-l-[3px] border-dotted border-slate-200 z-0"></div>
+
+              {/* Feature 1 */}
+              <div className="group relative bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12 transition-all duration-500 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 z-10">
+                <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[80px] -z-10 transition-colors duration-700"></div>
+                <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-[1.5rem] bg-slate-50 flex items-center justify-center border-2 border-white ring-1 ring-blue-100 relative shadow-sm transition-all duration-500 z-10">
+                  <div className="absolute inset-0 rounded-[1.5rem] bg-blue-500 opacity-10 transition-all duration-500"></div>
+                  <Zap className="w-8 h-8 md:w-10 md:h-10 text-blue-600 relative z-10 transition-transform duration-500" />
+                  {/* Decorative sub-icon */}
+                  <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-sm border border-slate-200">
+                    <Workflow className="w-3.5 h-3.5 text-blue-600" />
+                  </div>
                 </div>
-                <h3 className="text-slate-900 text-[22px] font-bold mb-4 tracking-tight">AI-Powered Workflows</h3>
-                <p className="text-slate-500 leading-relaxed font-medium mb-2 flex-1">
-                  Generate complex automation pipelines just by typing a prompt. Our engine instantly maps out triggers and actions.
-                </p>
+                <div>
+                  <h3 className="text-blue-600 text-3xl font-black mb-3 tracking-tight transition-colors duration-300">Visual Automation</h3>
+                  <p className="text-slate-500 leading-relaxed text-lg font-medium">
+                    Stop doing things manually. Build powerful, multi-step job application pipelines in seconds and let our engine handle the heavy lifting.
+                  </p>
+                </div>
               </div>
 
-              {/* Feature Card 2 */}
-              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 flex flex-col items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 group shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 border border-slate-100/50">
-                  <FileText className="w-7 h-7 text-emerald-500 group-hover:scale-110 transition-transform" />
+              {/* Feature 2 */}
+              <div className="group relative bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12 transition-all duration-500 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 z-10">
+                <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[80px] -z-10 transition-colors duration-700"></div>
+                <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-[1.5rem] bg-slate-50 flex items-center justify-center border-2 border-white ring-1 ring-emerald-100 relative shadow-sm transition-all duration-500 z-10">
+                  <div className="absolute inset-0 rounded-[1.5rem] bg-emerald-500 opacity-10 transition-all duration-500"></div>
+                  <Target className="w-8 h-8 md:w-10 md:h-10 text-emerald-600 relative z-10 transition-transform duration-500" />
+                  {/* Decorative sub-icon */}
+                  <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-sm border border-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  </div>
                 </div>
-                <h3 className="text-slate-900 text-[22px] font-bold mb-4 tracking-tight">Smart ATS Matching</h3>
-                <p className="text-slate-500 leading-relaxed font-medium mb-2 flex-1">
-                  Scan your resume against live requirements in real-time. Instantly spot missing structural keywords to rank higher.
-                </p>
+                <div>
+                  <h3 className="text-emerald-600 text-3xl font-black mb-3 tracking-tight transition-colors duration-300">Beat the ATS</h3>
+                  <p className="text-slate-500 leading-relaxed text-lg font-medium">
+                    Know your match score before you even apply. We scan your resume against the job description and tell you exactly which keywords you're missing.
+                  </p>
+                </div>
               </div>
 
-              {/* Feature Card 3 */}
-              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 flex flex-col items-start hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 group shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 border border-slate-100/50">
-                  <Send className="w-7 h-7 text-orange-500 group-hover:scale-110 transition-transform" />
+              {/* Feature 3 */}
+              <div className="group relative bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12 transition-all duration-500 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 z-10">
+                <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] bg-orange-500/10 rounded-full blur-[80px] -z-10 transition-colors duration-700"></div>
+                <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-[1.5rem] bg-slate-50 flex items-center justify-center border-2 border-white ring-1 ring-orange-100 relative shadow-sm transition-all duration-500 z-10">
+                  <div className="absolute inset-0 rounded-[1.5rem] bg-orange-500 opacity-10 transition-all duration-500"></div>
+                  <MailCheck className="w-8 h-8 md:w-10 md:h-10 text-orange-600 relative z-10 transition-transform duration-500" />
+                  {/* Decorative sub-icon */}
+                  <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-sm border border-slate-200">
+                    <FastForward className="w-3.5 h-3.5 text-orange-600" />
+                  </div>
                 </div>
-                <h3 className="text-slate-900 text-[22px] font-bold mb-4 tracking-tight">Autopilot Outreach</h3>
-                <p className="text-slate-500 leading-relaxed font-medium mb-2 flex-1">
-                  Select individual job contacts or drop standard spreadsheets to automatically deliver contextual email pitches.
-                </p>
+                <div>
+                  <h3 className="text-orange-600 text-3xl font-black mb-3 tracking-tight transition-colors duration-300">Cold Email on Autopilot</h3>
+                  <p className="text-slate-500 leading-relaxed text-lg font-medium">
+                    Reach hiring managers directly. Drop in a list of contacts, and ApplyFlow sends highly personalized pitch emails while you sleep.
+                  </p>
+                </div>
               </div>
 
             </div>
@@ -1410,28 +1240,70 @@ export default function Home() {
 
 
 
-      {/* FOOTER */}
-      <footer className="relative pt-24 pb-10 bg-muted/40 dark:bg-card mt-10">
-        {/* Top Simple Wave Divider */}
-        <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-0 rotate-180 -translate-y-px">
-          <svg className="relative block w-full h-[40px] md:h-[80px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="currentColor" className="text-background" d="M0,192L48,208C96,224,192,256,288,256C384,256,480,224,576,202.7C672,181,768,171,864,181.3C960,192,1056,224,1152,229.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-          </svg>
-        </div>
+      {/* PREMIUM FOOTER */}
+      <footer className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 py-20 border-t border-slate-200 dark:border-slate-800 relative overflow-hidden mt-20 transition-colors duration-300">
+        {/* Glow Effects */}
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/10 dark:bg-primary/20 rounded-full blur-[120px] pointer-events-none opacity-50"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none opacity-50"></div>
 
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-inner">
-              <Bot className="w-4.5 h-4.5 text-primary-foreground" />
+        <div className="container mx-auto px-4 max-w-7xl relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 md:gap-8 mb-16">
+            {/* Brand Column */}
+            <div className="col-span-2 lg:col-span-2">
+              <div className="flex items-center mb-6">
+                <span className="font-extrabold tracking-tight text-2xl text-slate-900 dark:text-white transition-colors duration-300">
+                  ApplyFlow <span className="text-blue-600 dark:text-blue-500 font-black">AI</span>
+                </span>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-xs mb-8 transition-colors duration-300">
+                Your 24/7 autonomous recruiter. Stop wasting hours on manual applications and let our AI engine secure your next role while you sleep.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-white dark:bg-slate-800/50 flex items-center justify-center text-slate-400 dark:text-slate-300 hover:bg-primary dark:hover:bg-primary hover:text-white border border-slate-200 dark:border-slate-800 transition-all duration-300 shadow-sm">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white dark:bg-slate-800/50 flex items-center justify-center text-slate-400 dark:text-slate-300 hover:bg-primary dark:hover:bg-primary hover:text-white border border-slate-200 dark:border-slate-800 transition-all duration-300 shadow-sm">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
+                </a>
+              </div>
             </div>
-            <span className="font-extrabold tracking-tight text-sm text-foreground">ApplyFlow <span className="text-primary font-black">AI</span></span>
+
+            {/* Links Columns */}
+            <div>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 transition-colors duration-300">Product</h4>
+              <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                <li><Link href="#" className="hover:text-primary transition-colors">Visual Automation</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">ATS Matching</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Autopilot Outreach</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Pricing</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 transition-colors duration-300">Company</h4>
+              <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                <li><Link href="#" className="hover:text-primary transition-colors">About Us</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Careers</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Blog</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-slate-900 dark:text-white font-bold mb-6 transition-colors duration-300">Legal</h4>
+              <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link href="#" className="hover:text-primary transition-colors">Cookie Policy</Link></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-muted-foreground text-xs font-medium">
-            © {new Date().getFullYear()} ApplyFlow AI Inc. All rights reserved.
-          </p>
-          <div className="flex gap-6 text-xs font-semibold text-muted-foreground">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+
+          {/* Bottom Divider */}
+          <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-center gap-4 text-center transition-colors duration-300">
+            <p className="text-slate-500 text-sm">
+              © {new Date().getFullYear()} ApplyFlow AI Inc. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
