@@ -1194,7 +1194,11 @@ export default function Home() {
                 { q: "Do I need to know how to code?", a: "No! Our visual builder and AI generator let you build workflows with plain text." },
                 { q: "What email providers do you support?", a: "We natively support Gmail, Outlook, and custom IMAP/SMTP domains for seamless sending." },
                 { q: "How many workflows can I build?", a: "Free users can build 1 active workflow, while Pro users have unlimited workflows and advanced AI generation capabilities." },
-                { q: "Is my data secure?", a: "Absolutely. We use enterprise-grade encryption and never sell your data to third parties. Your email credentials are fully encrypted." }
+                { q: "Is my data secure?", a: "Absolutely. We use enterprise-grade encryption and never sell your data to third parties. Your email credentials are fully encrypted." },
+                { q: "Can ApplyFlow generate customized cover letters?", a: "Yes! Our AI can automatically generate tailored cover letters based on your resume and the specific job description you're applying for." },
+                { q: "How does the ATS keyword optimization work?", a: "ApplyFlow scans the target job description and compares it against your profile, suggesting high-impact keywords to ensure your resume passes Applicant Tracking Systems (ATS)." },
+                { q: "Can I export my resume to PDF or Word?", a: "Absolutely. All resumes built on ApplyFlow can be exported instantly to beautifully formatted, ATS-friendly PDF and DOCX formats." },
+                { q: "Can I track my job applications?", a: "Yes. Our dashboard includes a built-in Kanban board to help you track application statuses, upcoming interviews, and follow-ups in one place." }
               ].map((faq, i) => (
                 <FAQItem key={i} question={faq.q} answer={faq.a} />
               ))}
